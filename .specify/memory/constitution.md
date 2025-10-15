@@ -1,17 +1,18 @@
 <!--
 Sync Impact Report:
-Version change: 1.0.0 → 1.1.0
-Modified principles:
-- Added Testing Standards principle with Jest/TypeScript requirements
+Version change: 1.1.0 → 1.2.0
+Modified principles: None
 Added sections:
-- Testing Architecture (Test structure and tooling standards)
+- VI. TypeScript Code Standards (string conventions, UUID generation, early returns)
+- VII. Input Validation Strategy (Zod validation patterns at UI and Infrastructure layers)
+- TypeScript Development section in Development Workflow
 Templates requiring updates:
-- ✅ Updated .specify/templates/plan-template.md 
+- ✅ Updated .specify/templates/plan-template.md
 - ✅ Updated .specify/templates/spec-template.md
 - ✅ Updated .specify/templates/tasks-template.md
-- ⚠ No command files found to update
-- ⚠ No runtime guidance docs found
-Follow-up TODOs: None - all testing principles fully specified
+- ✅ No command-specific files requiring updates (no agent-specific names found)
+- ✅ No runtime guidance docs requiring updates (none found)
+Follow-up TODOs: None - all TypeScript principles fully specified
 -->
 
 # SpecKit-Demo Constitution
@@ -48,6 +49,18 @@ All TypeScript projects MUST use Jest as the testing framework. Tests MUST be or
 
 **Rationale**: Standardizes testing approach across TypeScript projects, ensures clear test organization, and provides consistent mocking patterns for reliable test isolation.
 
+### VI. TypeScript Code Standards
+
+All TypeScript code MUST use single quotes for strings. UUID generation MUST use the internal `crypto.randomUUID()` function, not external libraries. Functions MUST prefer early returns to reduce nesting and improve readability. Avoid deep nesting with if-else chains; instead use guard clauses that return early for error conditions or edge cases.
+
+**Rationale**: Ensures consistent code style across the codebase, reduces complexity through flatter control flow, and eliminates external dependencies for common operations like UUID generation.
+
+### VII. Input Validation Strategy
+
+Input validation MUST use Zod for schema definition and validation. Validation MUST occur at the UI layer (HTTP handlers, CLI input) and at the Infrastructure layer when receiving data from external services. Request schemas MUST be defined using `z.object()` with appropriate field validators. Type inference MUST use `z.infer<typeof Schema>` to derive TypeScript types from Zod schemas. Validation MUST use `safeParse()` for runtime validation with explicit error handling.
+
+**Rationale**: Provides type-safe runtime validation at system boundaries, ensures data integrity before it enters the domain layer, and maintains a single source of truth for data structure through schema-to-type inference.
+
 ## Architecture Constraints
 
 All code MUST follow these DDD implementation patterns:
@@ -75,6 +88,34 @@ Mock implementations MUST follow these patterns:
 - Interface mocking: `const mockInstance = mock<InterfaceName>()` with type parameter
 - All mocks MUST be properly typed and verified with `toHaveBeenCalled()` assertions
 
+### TypeScript Coding Patterns
+
+TypeScript code MUST follow these conventions:
+
+- **String Literals**: Single quotes MUST be used for all string literals (e.g., `'hello'` not `"hello"`)
+- **UUID Generation**: Use `crypto.randomUUID()` for generating UUIDs, no external UUID libraries
+- **Early Returns**: Prefer guard clauses and early returns over nested if-else structures
+- **Zod Validation**: Define request schemas using Zod, infer types with `z.infer<typeof Schema>`
+
+Validation pattern example:
+
+```typescript
+import { z } from 'zod';
+
+const RequestSchema = z.object({
+  // schema definition
+});
+
+type RequestType = z.infer<typeof RequestSchema>;
+
+// In handler logic
+const result = RequestSchema.safeParse(ctx.request.body);
+if (!result.success) {
+  // handle validation error
+}
+const validatedData = result.data;
+```
+
 ## Development Workflow
 
 ### Test-Driven Development
@@ -91,4 +132,4 @@ This constitution supersedes all other development practices. All code reviews M
 
 Use project-specific guidance files for runtime development details while maintaining these core architectural principles.
 
-**Version**: 1.1.0 | **Ratified**: 2025-10-14 | **Last Amended**: 2025-10-14
+**Version**: 1.2.0 | **Ratified**: 2025-10-14 | **Last Amended**: 2025-10-14

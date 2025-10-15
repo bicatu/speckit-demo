@@ -74,6 +74,21 @@
 - [ ] Single assertion/expect per `it` test maintained
 - [ ] `ts-jest-mocker` used for consistent mocking patterns
 
+**TypeScript Code Standards Check** (if TypeScript project):
+
+- [ ] Single quotes used for all string literals
+- [ ] `crypto.randomUUID()` used for UUID generation (no external libraries)
+- [ ] Early returns and guard clauses preferred over nested if-else
+- [ ] Code follows flat control flow patterns for better readability
+
+**Input Validation Check** (if TypeScript project):
+
+- [ ] Zod schemas defined for all UI layer inputs (HTTP requests, CLI parameters)
+- [ ] Zod schemas defined for Infrastructure layer external service responses
+- [ ] Types inferred from schemas using `z.infer<typeof Schema>`
+- [ ] Runtime validation uses `safeParse()` with explicit error handling
+- [ ] Validation occurs at system boundaries before data enters domain layer
+
 ## Project Structure
 
 ### Documentation (this feature)

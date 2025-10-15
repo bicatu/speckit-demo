@@ -9,6 +9,8 @@ description: "Task list template for feature implementation"
 
 **Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification. For TypeScript projects, follow constitution testing standards: Jest framework, namespace structure under `/tests`, `describe`/`it('should ...')` pattern, single assertion per test, and `ts-jest-mocker` for mocking.
 
+**TypeScript Code Standards**: For TypeScript projects, all code MUST follow constitution standards: single quotes for strings, `crypto.randomUUID()` for UUIDs, early returns preferred, and Zod validation at UI/Infrastructure boundaries using `safeParse()` with proper error handling.
+
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
 ## Format: `[ID] [P?] [Story] Description`
