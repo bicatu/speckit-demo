@@ -5,6 +5,16 @@
 **Status**: Draft  
 **Input**: User description: "multi-user movie series tracking application"
 
+## Clarifications
+
+### Session 2025-10-15
+
+- Q: Which OAuth2 provider should be used for user authentication in production and local development? → A: WorkOS for production with a local (docker) option
+- Q: How should the system handle concurrent edits to the same entry by multiple users? → A: Last-write-wins (simpler, most recent save overwrites previous changes)
+- Q: Which database technology should be used for storing users, entries, ratings, platforms, and tags? → A: PostgreSQL (Relational, strong ACID guarantees, excellent Docker support, mature TypeScript ecosystem)
+- Q: What happens to a user's entries and ratings when their account is deleted? → A: Anonymize user data (keep entries/ratings, replace user reference with "Deleted User")
+- Q: Should ratings allow decimal values (e.g., 7.5 stars) or only whole numbers? → A: Whole numbers only (1-10 integers, simpler UI and user experience)
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Browse and Discover Content (Priority: P1)
@@ -35,7 +45,7 @@ As a user, I want to rate movies and series that others have added so I can shar
 
 **Acceptance Scenarios**:
 
-1. **Given** I'm viewing a movie/series entry, **When** I add a rating (1-10 stars), **Then** my rating is saved and appears in the ratings list
+1. **Given** I'm viewing a movie/series entry, **When** I add a rating (1-10 whole number stars), **Then** my rating is saved and appears in the ratings list
 2. **Given** I have previously rated an entry, **When** I update my rating, **Then** the new rating replaces my previous rating
 3. **Given** multiple users have rated an entry, **When** I view the entry details, **Then** I see the updated average rating
 
@@ -105,21 +115,21 @@ As an admin user, I want to manage streaming platforms and available tags to mai
 
 ### Edge Cases
 
-- What happens when a user tries to add a rating outside the 1-10 range?
-- How does the system handle concurrent edits to the same entry?
+- Ratings must be whole numbers (1-10 integers); decimal values are rejected with validation error
+- Concurrent edits to the same entry use last-write-wins strategy (most recent save overwrites previous changes without conflict detection)
 - What happens when the last admin user is deleted or deactivated?
 - How does pagination behave when entries are added/removed while browsing?
-- What happens when a user's account is deleted but they have ratings and entries?
+- When a user's account is deleted, their entries and ratings are preserved with user reference anonymized to "Deleted User"
 - How does the system display results when a tag filter returns 0 entries?
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: System MUST allow users to create and authenticate user accounts
+- **FR-001**: System MUST allow users to create and authenticate user accounts using OAuth2 via WorkOS in production (with local Docker-based OAuth mock for development)
 - **FR-002**: System MUST allow users to add new movie/series entries with mandatory title and up to 3 genre tags
 - **FR-003**: System MUST enforce unique titles across all entries
-- **FR-004**: System MUST allow users to add personal ratings (1-10 stars) to any entry
+- **FR-004**: System MUST allow users to add personal ratings as whole numbers (1-10 integer stars) to any entry
 - **FR-005**: System MUST allow users to update their existing ratings
 - **FR-006**: System MUST display entries in a paginated list (10 entries per page) ordered by creation date (newest first)
 - **FR-007**: System MUST provide filtering by genre tags
@@ -135,12 +145,13 @@ As an admin user, I want to manage streaming platforms and available tags to mai
 - **FR-016**: System MUST prevent deletion of streaming platforms that are in use
 - **FR-017**: System MUST prevent deletion of genre tags that are in use
 - **FR-018**: System MUST distinguish between admin and regular user accounts
+- **FR-019**: System MUST anonymize user data when account is deleted (preserve entries and ratings with user reference replaced by "Deleted User")
 
 ### Key Entities
 
 - **User**: Represents platform users with authentication credentials, last login timestamp, and admin status
 - **Entry**: Represents a movie or series with unique title, genre tags (1-3), optional streaming platform, creator reference, and creation/update timestamps
-- **Rating**: Represents a user's personal rating (1-10 stars) for a specific entry, with user and entry references
+- **Rating**: Represents a user's personal rating (whole number 1-10 integer stars) for a specific entry, with user and entry references
 - **Streaming Platform**: Represents available streaming services that can be assigned to entries
 - **Genre Tag**: Represents available genre categories that can be assigned to entries (maximum 3 per entry)
 
@@ -170,8 +181,8 @@ As an admin user, I want to manage streaming platforms and available tags to mai
 
 ## Dependencies *(mandatory)*
 
-- Requires user authentication and session management capability
-- Requires database storage for users, entries, ratings, platforms, and tags
+- Requires OAuth2 authentication via WorkOS (production) with Docker-based mock OAuth service (local development)
+- Requires PostgreSQL database (Docker-based for local development) for storing users, entries, ratings, platforms, and tags
 - Requires web interface for user interactions
 - Requires administrative interface for platform/tag management
 - May require integration with external movie/series databases for data validation (future enhancement)
