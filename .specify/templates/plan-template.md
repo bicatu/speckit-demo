@@ -66,6 +66,14 @@
 - [ ] Integration tests cover Repository implementations
 - [ ] End-to-end tests cover Command/Query flows
 
+**Testing Standards Check**:
+
+- [ ] Jest configured as testing framework for TypeScript projects
+- [ ] Tests organized under `/tests` with namespace structure (`/tests/unit/`, `/tests/integration/`)
+- [ ] Test structure uses `describe` blocks for grouping and `it('should ...')` for individual tests
+- [ ] Single assertion/expect per `it` test maintained
+- [ ] `ts-jest-mocker` used for consistent mocking patterns
+
 ## Project Structure
 
 ### Documentation (this feature)

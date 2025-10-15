@@ -7,7 +7,7 @@ description: "Task list template for feature implementation"
 **Input**: Design documents from `/specs/[###-feature-name]/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
-**Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification.
+**Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification. For TypeScript projects, follow constitution testing standards: Jest framework, namespace structure under `/tests`, `describe`/`it('should ...')` pattern, single assertion per test, and `ts-jest-mocker` for mocking.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
@@ -91,8 +91,8 @@ Examples of DDD foundational tasks (adjust based on your project):
 
 NOTE: Write these tests FIRST, ensure they FAIL before implementation
 
-- [ ] T010 [P] [US1] Contract test for [repository] in tests/contract/test_[name]_repository.py
-- [ ] T011 [P] [US1] Integration test for [command/query handler] in tests/integration/test_[name]_handler.py
+- [ ] T010 [P] [US1] Unit test for [repository] in tests/unit/[ClassName].spec.ts (TypeScript) or tests/unit/test_[name]_repository.py (Python)
+- [ ] T011 [P] [US1] Integration test for [command/query handler] in tests/integration/[ClassName].spec.ts (TypeScript) or tests/integration/test_[name]_handler.py (Python)
 
 ### Implementation for User Story 1 (DDD Pattern)
 
@@ -130,8 +130,8 @@ NOTE: Write these tests FIRST, ensure they FAIL before implementation
 
 ### Tests for User Story 2 (OPTIONAL - only if tests requested) ⚠️
 
-- [ ] T018 [P] [US2] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T019 [P] [US2] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T018 [P] [US2] Unit test for [endpoint] in tests/unit/[ClassName].spec.ts (TypeScript) or tests/unit/test_[name].py (Python)
+- [ ] T019 [P] [US2] Integration test for [user journey] in tests/integration/[ClassName].spec.ts (TypeScript) or tests/integration/test_[name].py (Python)
 
 ### Implementation for User Story 2
 
@@ -152,8 +152,8 @@ NOTE: Write these tests FIRST, ensure they FAIL before implementation
 
 ### Tests for User Story 3 (OPTIONAL - only if tests requested) ⚠️
 
-- [ ] T024 [P] [US3] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T025 [P] [US3] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T024 [P] [US3] Unit test for [endpoint] in tests/unit/[ClassName].spec.ts (TypeScript) or tests/unit/test_[name].py (Python)
+- [ ] T025 [P] [US3] Integration test for [user journey] in tests/integration/[ClassName].spec.ts (TypeScript) or tests/integration/test_[name].py (Python)
 
 ### Implementation for User Story 3
 
@@ -222,8 +222,8 @@ NOTE: Write these tests FIRST, ensure they FAIL before implementation
 
 ```bash
 # Launch all tests for User Story 1 together (if tests requested):
-Task: "Contract test for [endpoint] in tests/contract/test_[name].py"
-Task: "Integration test for [user journey] in tests/integration/test_[name].py"
+Task: "Unit test for [endpoint] in tests/unit/[ClassName].spec.ts (TypeScript) or tests/unit/test_[name].py (Python)"
+Task: "Integration test for [user journey] in tests/integration/[ClassName].spec.ts (TypeScript) or tests/integration/test_[name].py (Python)"
 
 # Launch all models for User Story 1 together:
 Task: "Create [Entity1] model in src/models/[entity1].py"

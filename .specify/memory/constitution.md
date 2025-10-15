@@ -70,6 +70,7 @@ All TypeScript projects MUST follow these testing standards:
 - **Mocking Strategy**: Use `ts-jest-mocker` library with consistent `mock<T>()` and `Mock<T>` patterns for classes and interfaces
 
 Mock implementations MUST follow these patterns:
+
 - Class mocking: `const mockInstance = mock(ClassName)` with beforeEach setup
 - Interface mocking: `const mockInstance = mock<InterfaceName>()` with type parameter
 - All mocks MUST be properly typed and verified with `toHaveBeenCalled()` assertions
@@ -90,4 +91,4 @@ This constitution supersedes all other development practices. All code reviews M
 
 Use project-specific guidance files for runtime development details while maintaining these core architectural principles.
 
-**Version**: 1.0.0 | **Ratified**: 2025-10-14 | **Last Amended**: 2025-10-14
+**Version**: 1.1.0 | **Ratified**: 2025-10-14 | **Last Amended**: 2025-10-14
