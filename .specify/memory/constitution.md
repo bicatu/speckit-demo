@@ -1,17 +1,17 @@
 <!--
 Sync Impact Report:
-Version change: 1.2.0 → 1.3.0
+Version change: 1.3.0 → 1.4.0
 Modified principles: None
 Added sections:
-- VIII. Web API Architecture with Koa (framework setup, routing patterns, action file structure, validation integration)
+- IX. Local Development with Docker (Docker Compose for services, dependency management)
+- X. OAuth2 Authentication (authentication standard, implementation requirements)
 Templates requiring updates:
-- ✅ Updated .specify/templates/plan-template.md - added Koa Web API architecture check
-- ⚠ .specify/templates/spec-template.md - may need web API endpoint examples (deferred - not critical)
-- ✅ Updated .specify/templates/tasks-template.md - added Koa-specific UI layer task examples
+- ✅ Updated .specify/templates/plan-template.md - added Docker and OAuth2 checks
+- ⚠ .specify/templates/spec-template.md - no updates required (technology-agnostic by design)
+- ✅ Updated .specify/templates/tasks-template.md - added Docker setup and OAuth2 integration task examples
 - ✅ No command-specific files requiring updates (no agent-specific names found)
 - ✅ No runtime guidance docs requiring updates (none found)
-Follow-up TODOs:
-- Consider adding API endpoint documentation section to spec template (low priority)
+Follow-up TODOs: None
 -->
 
 # SpecKit-Demo Constitution
@@ -69,6 +69,22 @@ Action files MUST follow this structure: (1) Define Zod schema for request valid
 POST/PUT actions MUST validate `ctx.request.body`, GET actions MUST validate `ctx.params`. Error responses MUST include `message` and `errors` (formatted Zod errors). Success responses for POST MUST return 201 status with created resource ID. GET responses MUST return 200 status with resource data or 404 if not found. Server MUST be startable as standalone module using `if (require.main === module)` guard.
 
 **Rationale**: Standardizes web API implementation with Koa framework, ensures consistent request validation and error handling patterns, maintains separation between HTTP concerns (UI layer) and business logic (Application layer), and provides clear action-based organization for HTTP endpoints.
+
+### IX. Local Development with Docker
+
+External service dependencies (databases, message queues, caches, etc.) MUST use Docker images for local development when available. Docker Compose MUST be used to orchestrate multi-service local environments. The `docker-compose.yml` file MUST be placed at repository root and define all required services with appropriate version pinning. Service configuration MUST use environment variables for connection strings and credentials. Local development setup MUST NOT require manual installation of databases or message brokers.
+
+Each service definition MUST include: image with specific version tag, exposed ports for local access, environment variables for configuration, and volume mappings for data persistence (when appropriate). Services MUST use health checks to ensure readiness before dependent services start.
+
+**Rationale**: Enables consistent local development environments across all team members, eliminates manual service installation and configuration, ensures version consistency between development and production environments, and simplifies onboarding for new developers.
+
+### X. OAuth2 Authentication
+
+User authentication MUST use OAuth2 standard for authorization flows. Applications MUST NOT implement custom authentication mechanisms or store user passwords directly. OAuth2 implementation MUST support standard authorization grant types (Authorization Code, Client Credentials) appropriate to the application type. Access tokens MUST be validated on every authenticated request.
+
+Token validation MUST occur at the UI layer (HTTP middleware, API gateway) before requests reach the Application layer. Authentication concerns MUST NOT leak into Domain layer. Application layer handlers MAY receive user identity as part of Command/Query context but MUST NOT perform authentication. Infrastructure layer MUST provide OAuth2 client implementation for external service authentication.
+
+**Rationale**: Ensures secure authentication using industry-standard protocols, delegates password management and user credential storage to specialized identity providers, provides consistent authentication patterns across services, and maintains separation of security concerns from business logic.
 
 ## Architecture Constraints
 
@@ -141,4 +157,4 @@ This constitution supersedes all other development practices. All code reviews M
 
 Use project-specific guidance files for runtime development details while maintaining these core architectural principles.
 
-**Version**: 1.3.0 | **Ratified**: 2025-10-14 | **Last Amended**: 2025-10-14
+**Version**: 1.4.0 | **Ratified**: 2025-10-14 | **Last Amended**: 2025-10-15

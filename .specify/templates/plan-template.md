@@ -101,6 +101,27 @@
 - [ ] Success responses use appropriate status codes (201 for POST, 200 for GET, 404 for not found)
 - [ ] Server startable as standalone module with `require.main === module` guard
 
+**Local Development with Docker Check** (if external services required):
+
+- [ ] Docker Compose file (`docker-compose.yml`) present at repository root
+- [ ] All external services (databases, message queues, caches) defined with specific version tags
+- [ ] Service ports exposed for local access
+- [ ] Environment variables used for service configuration and credentials
+- [ ] Volume mappings defined for data persistence where appropriate
+- [ ] Health checks configured for service readiness
+- [ ] No manual installation of databases or message brokers required
+
+**OAuth2 Authentication Check** (if user authentication required):
+
+- [ ] OAuth2 standard used for user authentication (no custom auth mechanisms)
+- [ ] Application does NOT store user passwords directly
+- [ ] Appropriate OAuth2 grant type implemented (Authorization Code, Client Credentials)
+- [ ] Token validation occurs at UI layer (middleware/API gateway)
+- [ ] Access tokens validated on every authenticated request
+- [ ] Authentication concerns isolated from Domain layer
+- [ ] User identity passed as Command/Query context (not authentication logic in handlers)
+- [ ] OAuth2 client implementation provided in Infrastructure layer for external services
+
 ## Project Structure
 
 ### Documentation (this feature)

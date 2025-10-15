@@ -58,6 +58,8 @@ description: "Task list template for feature implementation"
 - [ ] T001 Create project structure per implementation plan
 - [ ] T002 Initialize [language] project with [framework] dependencies
 - [ ] T003 [P] Configure linting and formatting tools
+- [ ] T004 [P] Setup Docker Compose for local development services (databases, message queues, caches)
+- [ ] T005 [P] Configure OAuth2 authentication provider integration
 
 ---
 
@@ -78,6 +80,9 @@ Examples of DDD foundational tasks (adjust based on your project):
 - [ ] T010 [P] Setup handler registration and command/query dispatching
 - [ ] T011 Configure error handling and logging infrastructure
 - [ ] T012 Setup environment configuration management
+- [ ] T013 [P] Configure Docker services (database, message queue, cache) with health checks and volume mappings
+- [ ] T014 [P] Setup OAuth2 middleware for token validation at UI layer
+- [ ] T015 [P] Implement OAuth2 client in Infrastructure layer for external service authentication
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
