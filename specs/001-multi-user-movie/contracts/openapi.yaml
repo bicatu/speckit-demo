@@ -1,0 +1,683 @@
+openapi: 3.0.3
+info:
+  title: Multi-User Movie & Series Tracking API
+  description: |
+    REST API for tracking movies and series with community ratings.
+    
+    Features:
+    - OAuth2 authentication via WorkOS
+    - Browse and filter content by genre tags
+    - Personal ratings (1-10 stars)
+    - Admin management of platforms and tags
+    - Pagination support (10 items per page)
+  version: 1.0.0
+  contact:
+    name: API Support
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development server
+  - url: https://api.movietrack.example.com/v1
+    description: Production server
+
+tags:
+  - name: entries
+    description: Movie and series entries
+  - name: ratings
+    description: User ratings for entries
+  - name: platforms
+    description: Streaming platform management (admin only)
+  - name: tags
+    description: Genre tag management (admin only)
+  - name: users
+    description: User account management
+
+security:
+  - OAuth2: []
+
+paths:
+  /entries:
+    get:
+      tags: [entries]
+      summary: Get paginated list of entries
+      description: Returns entries with optional filtering by genre tags or "new to me"
+      operationId: getEntries
+      parameters:
+        - name: tagIds
+          in: query
+          description: Filter by genre tag IDs (comma-separated UUIDs)
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+          style: form
+          explode: false
+        - name: mediaType
+          in: query
+          description: Filter by media type (film or series)
+          schema:
+            type: string
+            enum: [film, series]
+        - name: newToMe
+          in: query
+          description: Filter entries created/updated since last login
+          schema:
+            type: boolean
+            default: false
+        - name: page
+          in: query
+          description: Page number (1-indexed)
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          description: Items per page (fixed at 10)
+          schema:
+            type: integer
+            enum: [10]
+            default: 10
+      responses:
+        '200':
+          description: Successful response with paginated entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  entries:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Entry'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [entries]
+      summary: Create a new entry
+      description: Add a new movie or series entry
+      operationId: createEntry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEntryRequest'
+      responses:
+        '201':
+          description: Entry created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    description: ID of the created entry
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Conflict - title already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /entries/{entryId}:
+    get:
+      tags: [entries]
+      summary: Get entry details
+      description: Returns detailed information about a specific entry including all ratings
+      operationId: getEntryDetails
+      parameters:
+        - name: entryId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Entry details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntryDetails'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    put:
+      tags: [entries]
+      summary: Update entry
+      description: Update entry title, tags, or platform
+      operationId: updateEntry
+      parameters:
+        - name: entryId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEntryRequest'
+      responses:
+        '200':
+          description: Entry updated successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Conflict - title already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /entries/{entryId}/ratings:
+    post:
+      tags: [ratings]
+      summary: Add or update rating
+      description: Add a new rating or update existing rating for an entry
+      operationId: addOrUpdateRating
+      parameters:
+        - name: entryId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RatingRequest'
+      responses:
+        '201':
+          description: Rating created successfully
+        '200':
+          description: Rating updated successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /platforms:
+    get:
+      tags: [platforms]
+      summary: Get all streaming platforms
+      description: Returns list of all available streaming platforms
+      operationId: getPlatforms
+      responses:
+        '200':
+          description: List of streaming platforms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StreamingPlatform'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [platforms]
+      summary: Create streaming platform (admin only)
+      description: Add a new streaming platform
+      operationId: createPlatform
+      security:
+        - OAuth2: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePlatformRequest'
+      responses:
+        '201':
+          description: Platform created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /platforms/{platformId}:
+    delete:
+      tags: [platforms]
+      summary: Delete streaming platform (admin only)
+      description: Delete a streaming platform if not in use
+      operationId: deletePlatform
+      security:
+        - OAuth2: [admin]
+      parameters:
+        - name: platformId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Platform deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Conflict - platform is in use
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tags:
+    get:
+      tags: [tags]
+      summary: Get all genre tags
+      description: Returns list of all available genre tags
+      operationId: getTags
+      responses:
+        '200':
+          description: List of genre tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GenreTag'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [tags]
+      summary: Create genre tag (admin only)
+      description: Add a new genre tag
+      operationId: createTag
+      security:
+        - OAuth2: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTagRequest'
+      responses:
+        '201':
+          description: Tag created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tags/{tagId}:
+    delete:
+      tags: [tags]
+      summary: Delete genre tag (admin only)
+      description: Delete a genre tag if not in use
+      operationId: deleteTag
+      security:
+        - OAuth2: [admin]
+      parameters:
+        - name: tagId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Tag deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Conflict - tag is in use
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/me:
+    delete:
+      tags: [users]
+      summary: Delete current user account
+      description: Delete the authenticated user's account (anonymizes data)
+      operationId: deleteUser
+      responses:
+        '204':
+          description: User account deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      description: OAuth2 authentication via WorkOS
+      flows:
+        authorizationCode:
+          authorizationUrl: https://api.workos.com/sso/authorize
+          tokenUrl: https://api.workos.com/sso/token
+          scopes:
+            admin: Admin access for platform and tag management
+
+  schemas:
+    Entry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        mediaType:
+          type: string
+          enum: [film, series]
+          description: Type of media - film or series
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenreTag'
+          minItems: 1
+          maxItems: 3
+        platform:
+          allOf:
+            - $ref: '#/components/schemas/StreamingPlatform'
+          nullable: true
+        creator:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            name:
+              type: string
+          nullable: true
+          description: Creator info (null if user deleted)
+        averageRating:
+          type: number
+          format: float
+          minimum: 1
+          maximum: 10
+          nullable: true
+          description: Average rating (null if no ratings)
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - mediaType
+        - tags
+        - createdAt
+        - updatedAt
+
+    EntryDetails:
+      allOf:
+        - $ref: '#/components/schemas/Entry'
+        - type: object
+          properties:
+            ratings:
+              type: array
+              items:
+                $ref: '#/components/schemas/Rating'
+
+    Rating:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        userName:
+          type: string
+          description: User name ("Deleted User" if account deleted)
+        stars:
+          type: integer
+          minimum: 1
+          maximum: 10
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - userId
+        - userName
+        - stars
+        - createdAt
+        - updatedAt
+
+    StreamingPlatform:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+      required:
+        - id
+        - name
+
+    GenreTag:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          maxLength: 30
+      required:
+        - id
+        - name
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          enum: [10]
+        totalPages:
+          type: integer
+          minimum: 0
+        totalItems:
+          type: integer
+          minimum: 0
+      required:
+        - page
+        - pageSize
+        - totalPages
+        - totalItems
+
+    CreateEntryRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        tagIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          minItems: 1
+          maxItems: 3
+        platformId:
+          type: string
+          format: uuid
+          nullable: true
+        personalRating:
+          type: integer
+          minimum: 1
+          maximum: 10
+          description: Optional initial rating by creator
+      required:
+        - title
+        - tagIds
+
+    UpdateEntryRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        mediaType:
+          type: string
+          enum: [film, series]
+          description: Type of media - film or series
+        tagIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          minItems: 1
+          maxItems: 3
+        platformId:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+        - title
+        - mediaType
+        - tagIds
+
+    RatingRequest:
+      type: object
+      properties:
+        stars:
+          type: integer
+          minimum: 1
+          maximum: 10
+      required:
+        - stars
+
+    CreatePlatformRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+      required:
+        - name
+
+    CreateTagRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 30
+      required:
+        - name
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Human-readable error message
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              path:
+                type: array
+                items:
+                  type: string
+                description: Field path that caused the error
+              message:
+                type: string
+                description: Detailed error message for the field
+          description: Validation errors (from Zod)
+      required:
+        - message
+
+  responses:
+    BadRequest:
+      description: Bad request - validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized - missing or invalid authentication
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Forbidden:
+      description: Forbidden - user lacks required permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
