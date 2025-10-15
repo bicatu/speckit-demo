@@ -17,10 +17,18 @@ description: "Task list template for feature implementation"
 - Include exact file paths in descriptions
 
 ## Path Conventions
-- **Single project**: `src/`, `tests/` at repository root
-- **Web app**: `backend/src/`, `frontend/src/`
-- **Mobile**: `api/src/`, `ios/src/` or `android/src/`
-- Paths shown below assume single project - adjust based on plan.md structure
+
+- **Single project (DDD)**: `src/domain/`, `src/application/`, `src/infrastructure/`, `src/ui/`, `tests/` at repository root
+- **Web app (DDD)**: `backend/src/domain/`, `backend/src/application/`, `backend/src/infrastructure/`, `frontend/src/`
+- **Mobile (DDD)**: `api/src/domain/`, `api/src/application/`, `api/src/infrastructure/`, `ios/src/` or `android/src/`
+- Paths shown below assume single DDD project - adjust based on plan.md structure
+
+## DDD Task Categories
+
+- **Domain Tasks**: Create entities, value objects, domain services in `src/domain/`
+- **Application Tasks**: Create commands, queries, handlers in `src/application/`
+- **Infrastructure Tasks**: Implement repositories, external services in `src/infrastructure/`
+- **UI Tasks**: Create controllers, CLI commands, web interfaces in `src/ui/`
 
 <!-- 
   ============================================================================
@@ -53,18 +61,21 @@ description: "Task list template for feature implementation"
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-**Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
+**Purpose**: Core DDD infrastructure that MUST be complete before ANY user story can be implemented
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-Examples of foundational tasks (adjust based on your project):
+Examples of DDD foundational tasks (adjust based on your project):
 
-- [ ] T004 Setup database schema and migrations framework
-- [ ] T005 [P] Implement authentication/authorization framework
-- [ ] T006 [P] Setup API routing and middleware structure
-- [ ] T007 Create base models/entities that all stories depend on
-- [ ] T008 Configure error handling and logging infrastructure
-- [ ] T009 Setup environment configuration management
+- [ ] T004 Setup DDD project structure (domain/, application/, infrastructure/, ui/ folders)
+- [ ] T005 [P] Configure dependency injection container for DDD layers
+- [ ] T006 [P] Setup base Command/Query interfaces in src/application/
+- [ ] T007 [P] Create base Repository interfaces in src/domain/repositories/
+- [ ] T008 [P] Setup base domain entity patterns in src/domain/entities/
+- [ ] T009 Configure persistence layer and database migrations in src/infrastructure/
+- [ ] T010 [P] Setup handler registration and command/query dispatching
+- [ ] T011 Configure error handling and logging infrastructure
+- [ ] T012 Setup environment configuration management
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -78,19 +89,34 @@ Examples of foundational tasks (adjust based on your project):
 
 ### Tests for User Story 1 (OPTIONAL - only if tests requested) ⚠️
 
-**NOTE: Write these tests FIRST, ensure they FAIL before implementation**
+NOTE: Write these tests FIRST, ensure they FAIL before implementation
 
-- [ ] T010 [P] [US1] Contract test for [endpoint] in tests/contract/test_[name].py
-- [ ] T011 [P] [US1] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T010 [P] [US1] Contract test for [repository] in tests/contract/test_[name]_repository.py
+- [ ] T011 [P] [US1] Integration test for [command/query handler] in tests/integration/test_[name]_handler.py
 
-### Implementation for User Story 1
+### Implementation for User Story 1 (DDD Pattern)
 
-- [ ] T012 [P] [US1] Create [Entity1] model in src/models/[entity1].py
-- [ ] T013 [P] [US1] Create [Entity2] model in src/models/[entity2].py
-- [ ] T014 [US1] Implement [Service] in src/services/[service].py (depends on T012, T013)
-- [ ] T015 [US1] Implement [endpoint/feature] in src/[location]/[file].py
-- [ ] T016 [US1] Add validation and error handling
-- [ ] T017 [US1] Add logging for user story 1 operations
+**Domain Layer Tasks**:
+
+- [ ] T012 [P] [US1] Create [Entity1] domain entity in src/domain/entities/[entity1].py
+- [ ] T013 [P] [US1] Create [Entity2] domain entity in src/domain/entities/[entity2].py  
+- [ ] T014 [P] [US1] Create [Repository] interface in src/domain/repositories/[repository].py
+
+**Application Layer Tasks**:
+
+- [ ] T015 [US1] Create [CreateEntity]Command in src/application/commands/[create_entity]_command.py
+- [ ] T016 [US1] Create [CreateEntity]Handler in src/application/commands/[create_entity]_handler.py (depends on T012, T014)
+- [ ] T017 [US1] Create [GetEntity]Query in src/application/queries/[get_entity]_query.py
+- [ ] T018 [US1] Create [GetEntity]QueryHandler in src/application/queries/[get_entity]_query_handler.py (depends on T013, T014)
+
+**Infrastructure Layer Tasks**:
+
+- [ ] T019 [US1] Implement [Repository] in src/infrastructure/domain/[repository]_impl.py (depends on T014)
+- [ ] T020 [US1] Configure dependency injection for repositories
+
+**UI Layer Tasks**:
+
+- [ ] T021 [US1] Create [endpoint/CLI command] in src/ui/[interface]/[endpoint].py (depends on T015, T017)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 

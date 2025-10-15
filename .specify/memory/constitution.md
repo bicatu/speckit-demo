@@ -1,50 +1,93 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report:
+Version change: 1.0.0 → 1.1.0
+Modified principles:
+- Added Testing Standards principle with Jest/TypeScript requirements
+Added sections:
+- Testing Architecture (Test structure and tooling standards)
+Templates requiring updates:
+- ✅ Updated .specify/templates/plan-template.md 
+- ✅ Updated .specify/templates/spec-template.md
+- ✅ Updated .specify/templates/tasks-template.md
+- ⚠ No command files found to update
+- ⚠ No runtime guidance docs found
+Follow-up TODOs: None - all testing principles fully specified
+-->
+
+# SpecKit-Demo Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Layered Architecture (NON-NEGOTIABLE)
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+MUST maintain strict separation between UI, Application, Domain, and Infrastructure layers. Domain layer MUST contain only business logic and domain entities without dependencies on external frameworks. Application layer MUST orchestrate domain operations through Commands and Queries. Infrastructure layer MUST implement domain interfaces defined in the Domain layer. UI layer MUST only interact with the Application layer.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+**Rationale**: Ensures clean separation of concerns, testability, and maintainability by preventing business logic from leaking into infrastructure or presentation concerns.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### II. Domain-Driven Design
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+Domain Objects MUST be defined as types or classes within `src/domain` folder, focused on core business concepts and essential domain logic only. Repository interfaces MUST be defined in Domain layer to abstract data access. All implementations MUST reside in Infrastructure layer. Domain entities MUST represent real business concepts like `User`, `Wallet`, not technical constructs.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+**Rationale**: Keeps business logic isolated from technical implementation details, enabling the domain model to evolve independently of infrastructure concerns.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### III. Command/Query Separation
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+Application layer MUST implement Command/Query pattern for all business operations. Commands MUST represent state-changing actions (e.g., `CreateUserCommand`) with dedicated handlers. Queries MUST represent data retrieval requests (e.g., `GetWalletQuery`) with dedicated handlers. Command and Query types MUST be defined alongside their handlers.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+**Rationale**: Provides clear separation between read and write operations, enabling different optimization strategies and clearer intent in the codebase.
+
+### IV. Dependency Inversion
+
+Application and Domain layers MUST depend only on abstractions (interfaces) defined in the Domain layer, never on concrete implementations from Infrastructure layer. Dependencies (repositories, external services) MUST be injected into Application layer handlers via constructor injection. When handlers return data, it MUST be read-only.
+
+**Rationale**: Enables testability through dependency injection and prevents coupling between business logic and infrastructure implementation details.
+
+### V. Testing Standards
+
+All TypeScript projects MUST use Jest as the testing framework. Tests MUST be organized under `/tests` directory with namespace structure: unit tests in `/tests/unit/[ClassName].spec.ts` and integration tests in `/tests/integration/[ClassName].spec.ts`. Test structure MUST use `describe` to group tests by function and `it('should ...')` for individual test cases. Each `it` test MUST contain a single assertion/expect statement. Mocking MUST use `ts-jest-mocker` with `mock` and `Mock` imports for consistent mock creation.
+
+**Rationale**: Standardizes testing approach across TypeScript projects, ensures clear test organization, and provides consistent mocking patterns for reliable test isolation.
+
+## Architecture Constraints
+
+All code MUST follow these DDD implementation patterns:
+
+- **Repository Pattern**: Data access MUST be abstracted through Repository interfaces defined in Domain layer and implemented in Infrastructure layer (`src/infrastructure/domain`)
+- **Handler Pattern**: All business operations MUST be implemented as Command/Query handlers with constructor-injected dependencies
+- **Immutable Responses**: Handler return values MUST be read-only to prevent unintended state modifications
+- **Domain Purity**: Domain entities MUST contain no framework dependencies or infrastructure concerns
+
+Violations require explicit architectural justification in plan documentation.
+
+## Testing Architecture
+
+All TypeScript projects MUST follow these testing standards:
+
+- **Test Structure**: Tests located under `/tests` with namespace organization (`/tests/unit/[ClassName].spec.ts`, `/tests/integration/[ClassName].spec.ts`)
+- **Test Framework**: Jest MUST be used for all TypeScript-based projects
+- **Test Organization**: Use `describe` blocks to group tests by function, `it('should ...')` for individual test cases
+- **Assertion Strategy**: Single assertion/expect per `it` test for clear failure identification
+- **Mocking Strategy**: Use `ts-jest-mocker` library with consistent `mock<T>()` and `Mock<T>` patterns for classes and interfaces
+
+Mock implementations MUST follow these patterns:
+- Class mocking: `const mockInstance = mock(ClassName)` with beforeEach setup
+- Interface mocking: `const mockInstance = mock<InterfaceName>()` with type parameter
+- All mocks MUST be properly typed and verified with `toHaveBeenCalled()` assertions
+
+## Development Workflow
+
+### Test-Driven Development
+
+TDD MUST be followed for all Command/Query handlers. Tests MUST be written first, verified to fail, then implementation written to make tests pass. Red-Green-Refactor cycle MUST be enforced. Integration tests MUST cover Repository implementations and end-to-end Command/Query flows.
+
+### Domain Model Evolution
+
+Changes to domain entities MUST be reviewed for impact on existing Commands/Queries. New domain concepts MUST be introduced through proper DDD aggregates and value objects. Repository interfaces MUST evolve through versioning when breaking changes are required.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution supersedes all other development practices. All code reviews MUST verify DDD principle compliance. Architecture decisions contradicting these principles require explicit documentation and technical lead approval. Constitution amendments require team consensus and version increment.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+Use project-specific guidance files for runtime development details while maintaining these core architectural principles.
+
+**Version**: 1.0.0 | **Ratified**: 2025-10-14 | **Last Amended**: 2025-10-14

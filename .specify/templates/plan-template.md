@@ -31,7 +31,40 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+**DDD Layered Architecture Check**:
+
+- [ ] Domain layer contains only business logic without external framework dependencies
+- [ ] Application layer orchestrates domain operations through Commands/Queries  
+- [ ] Infrastructure layer implements domain-defined interfaces only
+- [ ] UI layer interacts solely with Application layer
+
+**Domain-Driven Design Check**:
+
+- [ ] Domain objects represent core business concepts (User, Wallet, etc.)
+- [ ] Repository interfaces defined in Domain layer
+- [ ] All implementations reside in Infrastructure layer
+- [ ] No technical constructs leak into domain model
+
+**Command/Query Separation Check**:
+
+- [ ] State-changing operations implemented as Commands with handlers
+- [ ] Data retrieval operations implemented as Queries with handlers
+- [ ] Command/Query types defined alongside their handlers
+- [ ] Clear separation between read and write operations
+
+**Dependency Inversion Check**:
+
+- [ ] Application/Domain layers depend only on Domain-defined abstractions
+- [ ] Infrastructure dependencies injected via constructor injection
+- [ ] Handler return values are read-only
+- [ ] No concrete Infrastructure dependencies in Application/Domain layers
+
+**Test-Driven Development Check**:
+
+- [ ] Tests written first for all Command/Query handlers
+- [ ] Red-Green-Refactor cycle enforced
+- [ ] Integration tests cover Repository implementations
+- [ ] End-to-end tests cover Command/Query flows
 
 ## Project Structure
 
@@ -55,37 +88,60 @@ specs/[###-feature]/
   not include Option labels.
 -->
 
-```
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
+```text
+# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT) - DDD Structure
 src/
-├── models/
-├── services/
-├── cli/
-└── lib/
+├── domain/              # Core business logic and entities
+│   ├── entities/        # Domain entities (User, Wallet, etc.)
+│   ├── repositories/    # Repository interfaces
+│   └── value-objects/   # Value objects
+├── application/         # Application services and handlers
+│   ├── commands/        # Command handlers
+│   ├── queries/         # Query handlers
+│   └── interfaces/      # Application service interfaces
+├── infrastructure/      # External concerns implementation
+│   ├── domain/          # Repository implementations
+│   ├── persistence/     # Database/storage implementations
+│   └── external/        # External service integrations
+└── ui/                  # User interface layer
+    ├── cli/             # CLI interface
+    ├── web/             # Web interface (if applicable)
+    └── api/             # API controllers
 
 tests/
-├── contract/
-├── integration/
-└── unit/
+├── unit/                # Unit tests for domain logic
+├── integration/         # Integration tests for handlers
+└── contract/            # Contract tests for repositories
 
 # [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
 backend/
 ├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
+│   ├── domain/          # Core business logic
+│   │   ├── entities/
+│   │   ├── repositories/
+│   │   └── value-objects/
+│   ├── application/     # Application services
+│   │   ├── commands/
+│   │   ├── queries/
+│   │   └── interfaces/
+│   ├── infrastructure/  # External integrations
+│   │   ├── domain/
+│   │   ├── persistence/
+│   │   └── external/
+│   └── api/             # Web API controllers
 └── tests/
 
 frontend/
 ├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
+│   ├── components/      # UI components
+│   ├── pages/           # Application pages
+│   ├── services/        # Frontend services
+│   └── application/     # Frontend application logic
 └── tests/
 
 # [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
 api/
-└── [same as backend above]
+└── [same DDD structure as backend above]
 
 ios/ or android/
 └── [platform-specific structure: feature modules, UI flows, platform tests]
@@ -96,7 +152,7 @@ directories captured above]
 
 ## Complexity Tracking
 
-*Fill ONLY if Constitution Check has violations that must be justified*
+Fill ONLY if Constitution Check has violations that must be justified.
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
