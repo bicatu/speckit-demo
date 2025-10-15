@@ -1,18 +1,17 @@
 <!--
 Sync Impact Report:
-Version change: 1.1.0 → 1.2.0
+Version change: 1.2.0 → 1.3.0
 Modified principles: None
 Added sections:
-- VI. TypeScript Code Standards (string conventions, UUID generation, early returns)
-- VII. Input Validation Strategy (Zod validation patterns at UI and Infrastructure layers)
-- TypeScript Development section in Development Workflow
+- VIII. Web API Architecture with Koa (framework setup, routing patterns, action file structure, validation integration)
 Templates requiring updates:
-- ✅ Updated .specify/templates/plan-template.md
-- ✅ Updated .specify/templates/spec-template.md
-- ✅ Updated .specify/templates/tasks-template.md
+- ✅ Updated .specify/templates/plan-template.md - added Koa Web API architecture check
+- ⚠ .specify/templates/spec-template.md - may need web API endpoint examples (deferred - not critical)
+- ✅ Updated .specify/templates/tasks-template.md - added Koa-specific UI layer task examples
 - ✅ No command-specific files requiring updates (no agent-specific names found)
 - ✅ No runtime guidance docs requiring updates (none found)
-Follow-up TODOs: None - all TypeScript principles fully specified
+Follow-up TODOs:
+- Consider adding API endpoint documentation section to spec template (low priority)
 -->
 
 # SpecKit-Demo Constitution
@@ -60,6 +59,16 @@ All TypeScript code MUST use single quotes for strings. UUID generation MUST use
 Input validation MUST use Zod for schema definition and validation. Validation MUST occur at the UI layer (HTTP handlers, CLI input) and at the Infrastructure layer when receiving data from external services. Request schemas MUST be defined using `z.object()` with appropriate field validators. Type inference MUST use `z.infer<typeof Schema>` to derive TypeScript types from Zod schemas. Validation MUST use `safeParse()` for runtime validation with explicit error handling.
 
 **Rationale**: Provides type-safe runtime validation at system boundaries, ensures data integrity before it enters the domain layer, and maintains a single source of truth for data structure through schema-to-type inference.
+
+### VIII. Web API Architecture with Koa
+
+Non-serverless web APIs MUST use Koa framework. Package dependencies MUST include `koa` (^2.16.1), `koa-bodyparser` (^4.4.1), `koa-router` (^13.0.1), and `@types/koa-bodyparser` (^4.3.12) in devDependencies. Server setup MUST be created in `src/ui/http/server.ts` with a `createServer()` function that accepts dependencies and returns configured Koa app. Router MUST be configured with bodyParser middleware, routes, and allowedMethods. Each endpoint MUST have a dedicated action file in `src/ui/http/actions/[entity]/[actionName].ts`.
+
+Action files MUST follow this structure: (1) Define Zod schema for request validation, (2) Infer TypeScript type using `z.infer<typeof Schema>`, (3) Validate input with `safeParse()` and return 400 status with error details on failure, (4) Map validated request to Command/Query, (5) Call appropriate handler from container/dependencies, (6) Return appropriate HTTP status code with response body.
+
+POST/PUT actions MUST validate `ctx.request.body`, GET actions MUST validate `ctx.params`. Error responses MUST include `message` and `errors` (formatted Zod errors). Success responses for POST MUST return 201 status with created resource ID. GET responses MUST return 200 status with resource data or 404 if not found. Server MUST be startable as standalone module using `if (require.main === module)` guard.
+
+**Rationale**: Standardizes web API implementation with Koa framework, ensures consistent request validation and error handling patterns, maintains separation between HTTP concerns (UI layer) and business logic (Application layer), and provides clear action-based organization for HTTP endpoints.
 
 ## Architecture Constraints
 
@@ -132,4 +141,4 @@ This constitution supersedes all other development practices. All code reviews M
 
 Use project-specific guidance files for runtime development details while maintaining these core architectural principles.
 
-**Version**: 1.2.0 | **Ratified**: 2025-10-14 | **Last Amended**: 2025-10-14
+**Version**: 1.3.0 | **Ratified**: 2025-10-14 | **Last Amended**: 2025-10-14

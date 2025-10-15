@@ -89,6 +89,18 @@
 - [ ] Runtime validation uses `safeParse()` with explicit error handling
 - [ ] Validation occurs at system boundaries before data enters domain layer
 
+**Web API Architecture Check** (if Koa-based web API):
+
+- [ ] Koa framework dependencies included (`koa`, `koa-bodyparser`, `koa-router`, `@types/koa-bodyparser`)
+- [ ] Server setup created in `src/ui/http/server.ts` with `createServer()` function
+- [ ] Router configured with bodyParser, routes, and allowedMethods middleware
+- [ ] Each endpoint has dedicated action file in `src/ui/http/actions/[entity]/[actionName].ts`
+- [ ] Action files follow structure: Zod validation → type inference → safeParse → map to Command/Query → call handler → return response
+- [ ] POST/PUT actions validate `ctx.request.body`, GET actions validate `ctx.params`
+- [ ] Error responses include `message` and `errors` (formatted Zod errors)
+- [ ] Success responses use appropriate status codes (201 for POST, 200 for GET, 404 for not found)
+- [ ] Server startable as standalone module with `require.main === module` guard
+
 ## Project Structure
 
 ### Documentation (this feature)

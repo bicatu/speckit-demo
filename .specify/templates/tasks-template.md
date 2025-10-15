@@ -120,6 +120,13 @@ NOTE: Write these tests FIRST, ensure they FAIL before implementation
 
 - [ ] T021 [US1] Create [endpoint/CLI command] in src/ui/[interface]/[endpoint].py (depends on T015, T017)
 
+**UI Layer Tasks (Koa Web API)** - Use these if feature includes Koa-based HTTP API:
+
+- [ ] T022 [US1] Create Zod validation schema for [ActionName]Request in src/ui/http/actions/[entity]/[actionName].ts
+- [ ] T023 [US1] Implement [actionName] action handler in src/ui/http/actions/[entity]/[actionName].ts (validate → map to Command/Query → call handler → return response)
+- [ ] T024 [US1] Register route in src/ui/http/server.ts router (POST/GET/PUT/DELETE /[entity-path])
+- [ ] T025 [US1] Add error response formatting (message + Zod errors) with appropriate status codes
+
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
 ---
