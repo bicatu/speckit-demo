@@ -145,7 +145,7 @@
 
 ## Ambiguities & Conflicts
 
-- [ ] CHK093 - Is it clear who can edit entries (any user per FR-010 vs. creator-only pattern)? [Ambiguity, Spec §FR-010]
+- [x] CHK093 - Is it clear who can edit entries (any user per FR-010 vs. creator-only pattern)? [Resolved - Spec §FR-010 clarified: collaborative editing model with explicit acceptance scenario]
 - [ ] CHK094 - Is the relationship between "update rating" and initial "add rating" clearly defined? [Ambiguity, Spec §FR-004, §FR-005]
 - [ ] CHK095 - Are requirements clear about whether media type can be changed after creation? [Ambiguity, OpenAPI UpdateEntryRequest includes mediaType]
 - [ ] CHK096 - Is it clear whether users can rate their own entries? [Ambiguity, Gap]
@@ -169,6 +169,8 @@
 ## Summary
 
 **Total Items**: 104  
+**Completed**: 1  
+**Incomplete**: 103  
 **Focus Areas**: User Journey & Task Flow, Form Interactions, Entry Management Workflows  
 **Scenario Priority**: Secondary scenarios (add/edit entry, pagination, admin management)  
 **Specificity Level**: General UX patterns and principles  
@@ -183,7 +185,7 @@
 - Form interaction patterns need detailed specification (validation timing, button states)
 - Navigation patterns and information architecture are undocumented
 - Accessibility requirements (keyboard nav, screen readers, focus management) are absent
-- Ambiguity around "any user can edit entries" (FR-010) affects UX design decisions
+- ✓ **Resolved**: Collaborative editing authorization clarified (CHK093) - User Story 5 now includes explicit authorization model and cross-user editing acceptance scenario
 - Admin interface requirements lack detail despite dedicated user story
 
 **Next Steps**: Address high-priority gaps in user journeys (CHK001-CHK010), form interactions (CHK040-CHK047), and feedback mechanisms (CHK025-CHK033) before wireframing or UI development begins.

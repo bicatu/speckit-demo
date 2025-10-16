@@ -84,17 +84,20 @@ As a returning user, I want to see what's new since my last visit so I can quick
 
 ### User Story 5 - Edit Existing Content (Priority: P3)
 
-As a user, I want to update movie/series information to keep the database accurate and current.
+As a user, I want to update movie/series information to keep the database accurate and current, including entries created by other users.
 
 **Why this priority**: Data quality is important but not critical for initial value delivery. Users can still benefit from the platform even with occasional inaccuracies.
 
-**Independent Test**: Can be tested by editing an existing entry's title or tags and verifying the changes are reflected in all views.
+**Authorization Model**: Any authenticated user can edit any entry (collaborative editing). This differs from typical creator-only authorization and enables community-driven data quality improvements.
+
+**Independent Test**: Can be tested by User A creating an entry, then User B editing that entry's title or tags, and verifying the changes are reflected in all views.
 
 **Acceptance Scenarios**:
 
-1. **Given** I want to update an entry, **When** I edit the title to a unique value, **Then** the updated title is saved and displayed
-2. **Given** I want to modify tags, **When** I add or remove tags (keeping maximum of 3), **Then** the tag changes are saved
+1. **Given** I want to update any entry (including those created by other users), **When** I edit the title to a unique value, **Then** the updated title is saved and displayed
+2. **Given** I want to modify tags on any entry, **When** I add or remove tags (keeping maximum of 3), **Then** the tag changes are saved
 3. **Given** I try to change a title to one that already exists, **When** I submit the form, **Then** I receive an error message
+4. **Given** I am an authenticated user, **When** I attempt to edit any entry, **Then** the system allows the edit regardless of who created the entry
 
 ---
 
@@ -136,7 +139,7 @@ As an admin user, I want to manage streaming platforms and available tags to mai
 - **FR-007a**: System MUST return 0 entries with message "No entries found for the selected tag" when filtering by a tag with no associated entries
 - **FR-008**: System MUST provide filtering by "new to me" (items created OR updated since last login)
 - **FR-009**: System MUST track and display user's last login timestamp (stored as UTC)
-- **FR-010**: System MUST allow any user to edit existing entry titles and tags
+- **FR-010**: System MUST allow any authenticated user to edit existing entry titles and tags, regardless of who created the entry (collaborative editing model)
 - **FR-011**: System MUST calculate and display average ratings for each entry
 - **FR-012**: System MUST display detailed entry information including title, tags, average rating, creator, and all individual ratings
 - **FR-013**: System MUST support optional streaming platform assignment to entries
@@ -178,6 +181,7 @@ As an admin user, I want to manage streaming platforms and available tags to mai
 - Users will generally add content they have actually watched
 - Average ratings will be calculated in real-time rather than cached
 - User sessions will expire after a reasonable period of inactivity
+- **Authorization model uses collaborative editing**: Any authenticated user can edit any entry (not restricted to creator-only), enabling community-driven data quality improvements. This assumes users will act in good faith and destructive edits will be rare.
 
 ## Dependencies *(mandatory)*
 
