@@ -88,6 +88,7 @@ Represents a movie or series with metadata, tags, and optional streaming platfor
 - `media_type` (enum, not null): Type of media - 'film' or 'series'
 - `creator_id` (UUID, FK to User, nullable): User who created the entry (NULL or sentinel for deleted users)
 - `platform_id` (UUID, FK to StreamingPlatform, nullable): Associated streaming platform
+- `average_rating` (decimal, nullable): Cached average rating (updated when ratings change for performance)
 - `created_at` (timestamp, not null): Entry creation timestamp
 - `updated_at` (timestamp, not null): Last update timestamp
 
@@ -105,6 +106,7 @@ Represents a movie or series with metadata, tags, and optional streaming platfor
 - Streaming platform is optional
 - Last-write-wins for concurrent updates (no optimistic locking)
 - When creator user is deleted, `creator_id` becomes NULL or references sentinel "Deleted User"
+- Average rating is cached in `average_rating` column and updated whenever ratings are added/updated/deleted for performance
 
 **Validation Rules**:
 
@@ -122,7 +124,8 @@ class Entry {
   updateMediaType(mediaType: 'film' | 'series'): void
   updateTags(tags: GenreTag[]): void  // Enforces 1-3 constraint
   assignPlatform(platform: StreamingPlatform | null): void
-  getAverageRating(ratings: Rating[]): number | null
+  updateAverageRating(newAverage: number | null): void  // Updates cached average_rating
+  getAverageRating(): number | null  // Returns cached value
 }
 ```
 
@@ -404,6 +407,7 @@ CREATE TABLE entries (
   media_type VARCHAR(10) NOT NULL CHECK (media_type IN ('film', 'series')),
   creator_id UUID REFERENCES users(id) ON DELETE SET NULL,
   platform_id UUID REFERENCES streaming_platforms(id) ON DELETE SET NULL,
+  average_rating DECIMAL(3,2),
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
@@ -412,7 +416,7 @@ CREATE INDEX idx_entries_title ON entries(title);
 CREATE INDEX idx_entries_media_type ON entries(media_type);
 CREATE INDEX idx_entries_created_at ON entries(created_at DESC);
 CREATE INDEX idx_entries_creator_id ON entries(creator_id);
-CREATE INDEX idx_entries_creator_id ON entries(creator_id);
+CREATE INDEX idx_entries_average_rating ON entries(average_rating DESC);
 
 -- Entry tags junction table
 CREATE TABLE entry_tags (

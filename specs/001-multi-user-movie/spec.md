@@ -127,15 +127,15 @@ As an admin user, I want to manage streaming platforms and available tags to mai
 ### Functional Requirements
 
 - **FR-001**: System MUST allow users to create and authenticate user accounts using OAuth2 via WorkOS in production (with local Docker-based OAuth mock for development)
-- **FR-002**: System MUST allow users to add new movie/series entries with mandatory title and up to 3 genre tags
+- **FR-002**: System MUST allow users to add new movie/series entries with mandatory title, media type ('film' or 'series'), and up to 3 genre tags
 - **FR-003**: System MUST enforce unique titles across all entries
-- **FR-004**: System MUST allow users to add personal ratings as whole numbers (1-10 integer stars) to any entry
+- **FR-004**: System MUST allow users to add whole number ratings (1-10 stars) to any entry
 - **FR-005**: System MUST allow users to update their existing ratings
 - **FR-006**: System MUST display entries in a paginated list (10 entries per page) ordered by creation date (newest first)
 - **FR-007**: System MUST provide filtering by genre tags
-- **FR-007a**: System MUST return 0 entries with appropriate message when filtering by a tag with no associated entries
-- **FR-008**: System MUST provide filtering by "new to me" (items created/updated since last login)
-- **FR-009**: System MUST track and display user's last login timestamp
+- **FR-007a**: System MUST return 0 entries with message "No entries found for the selected tag" when filtering by a tag with no associated entries
+- **FR-008**: System MUST provide filtering by "new to me" (items created OR updated since last login)
+- **FR-009**: System MUST track and display user's last login timestamp (stored as UTC)
 - **FR-010**: System MUST allow any user to edit existing entry titles and tags
 - **FR-011**: System MUST calculate and display average ratings for each entry
 - **FR-012**: System MUST display detailed entry information including title, tags, average rating, creator, and all individual ratings
@@ -150,8 +150,8 @@ As an admin user, I want to manage streaming platforms and available tags to mai
 ### Key Entities
 
 - **User**: Represents platform users with authentication credentials, last login timestamp, and admin status
-- **Entry**: Represents a movie or series with unique title, genre tags (1-3), optional streaming platform, creator reference, and creation/update timestamps
-- **Rating**: Represents a user's personal rating (whole number 1-10 integer stars) for a specific entry, with user and entry references
+- **Entry**: Represents a movie or series with unique title, media type ('film' or 'series'), genre tags (1-3), optional streaming platform, creator reference, and creation/update timestamps
+- **Rating**: Represents a user's whole number rating (1-10 stars) for a specific entry, with user and entry references
 - **Streaming Platform**: Represents available streaming services that can be assigned to entries
 - **Genre Tag**: Represents available genre categories that can be assigned to entries (maximum 3 per entry)
 
@@ -162,7 +162,7 @@ As an admin user, I want to manage streaming platforms and available tags to mai
 - **SC-001**: Users can browse and discover content within 30 seconds of accessing the application
 - **SC-002**: Users can add a new movie/series entry in under 2 minutes
 - **SC-003**: Users can add or update a personal rating in under 30 seconds
-- **SC-004**: Entry lists load and display within 3 seconds even with 1000+ entries
+- **SC-004**: Entry lists load and display within 3 seconds even with 1000+ entries (includes full query with JOINs for tags, platforms, and average rating calculation)
 - **SC-005**: 90% of users successfully complete their primary task (browse, rate, or add content) on first attempt
 - **SC-006**: System maintains data integrity with 0% duplicate titles and accurate average rating calculations
 - **SC-007**: Admin users can manage platforms and tags without affecting existing user data

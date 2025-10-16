@@ -39,7 +39,7 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 - [ ] T007 [P] Setup Jest 29.7.0 with ts-jest 29.1.1, ts-jest-mocker 1.1.0 for backend testing
 - [ ] T008 [P] Setup React Testing Library 14.1.2 for frontend testing
 - [ ] T009 [P] Configure ESLint and Prettier for TypeScript
-- [ ] T010 Create docker-compose.yml with PostgreSQL 16 and OAuth mock services
+- [ ] T010 Create docker-compose.yml at repository root with PostgreSQL 16 service (exposed port 5432, health checks, volume mappings) and OAuth mock service for local development (per Constitution IX)
 - [ ] T011 [P] Create .env.example files for backend and frontend
 - [ ] T012 [P] Create README.md with quickstart instructions
 
@@ -54,7 +54,7 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 ### Backend Foundation
 
 - [ ] T013 Create database connection pool in backend/src/infrastructure/persistence/DatabaseConnection.ts
-- [ ] T014 Create database migration 001_initial_schema.sql in backend/src/infrastructure/persistence/migrations/
+- [ ] T014 Create database migration 001_initial_schema.sql in backend/src/infrastructure/persistence/migrations/ (includes all tables, constraints, and indexes per data-model.md)
 - [ ] T015 Create database migration 002_seed_data.sql for dev data in backend/src/infrastructure/persistence/migrations/
 - [ ] T016 [P] Create base Command interface in backend/src/application/commands/Command.ts
 - [ ] T017 [P] Create base Query interface in backend/src/application/queries/Query.ts
@@ -109,7 +109,8 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 ### Domain Layer Implementation for User Story 1
 
 - [ ] T044 [P] [US1] Create User entity in backend/src/domain/entities/User.ts
-- [ ] T045 [P] [US1] Create Entry entity in backend/src/domain/entities/Entry.ts
+- [ ] T045 [P] [US1] Create Entry entity with title, media_type ('film' or 'series'), and timestamps in backend/src/domain/entities/Entry.ts
+- [ ] T045a [US1] Add title uniqueness validation method to Entry entity or create EntryFactory in backend/src/domain/entities/ to enforce FR-003 title uniqueness at domain layer
 - [ ] T046 [P] [US1] Create GenreTag entity in backend/src/domain/entities/GenreTag.ts
 - [ ] T047 [P] [US1] Create StreamingPlatform entity in backend/src/domain/entities/StreamingPlatform.ts
 - [ ] T048 [P] [US1] Create Rating entity in backend/src/domain/entities/Rating.ts
@@ -190,14 +191,14 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 ### Application Layer Implementation for User Story 2
 
 - [ ] T092 [US2] Create AddRatingCommand in backend/src/application/commands/AddRatingCommand.ts
-- [ ] T093 [US2] Create AddRatingCommandHandler in backend/src/application/commands/AddRatingCommandHandler.ts (depends on T053)
+- [ ] T093 [US2] Create AddRatingCommandHandler in backend/src/application/commands/AddRatingCommandHandler.ts (depends on T053) - MUST update Entry.average_rating cache after adding rating
 - [ ] T094 [US2] Create UpdateRatingCommand in backend/src/application/commands/UpdateRatingCommand.ts
-- [ ] T095 [US2] Create UpdateRatingCommandHandler in backend/src/application/commands/UpdateRatingCommandHandler.ts (depends on T053)
+- [ ] T095 [US2] Create UpdateRatingCommandHandler in backend/src/application/commands/UpdateRatingCommandHandler.ts (depends on T053) - MUST update Entry.average_rating cache after updating rating
 
 ### UI Layer Implementation for User Story 2 (Backend)
 
 - [ ] T096 [US2] Create Zod schema for RatingRequest in backend/src/ui/http/actions/ratings/addRating.ts
-- [ ] T097 [US2] Implement addRating action handler in backend/src/ui/http/actions/ratings/addRating.ts (validate body → check if rating exists → map to AddRatingCommand or UpdateRatingCommand → call handler → return 201/200)
+- [ ] T097 [US2] Implement addRating action handler in backend/src/ui/http/actions/ratings/addRating.ts (validate body → check if user has existing rating for entry → map to AddRatingCommand (new) or UpdateRatingCommand (existing) → call handler → return 201/200)
 - [ ] T098 [US2] Register POST /api/v1/entries/:entryId/ratings route in backend/src/ui/http/server.ts
 
 ### UI Layer Implementation for User Story 2 (Frontend)
@@ -239,7 +240,7 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 ### Application Layer Implementation for User Story 3
 
 - [ ] T111 [US3] Create CreateEntryCommand in backend/src/application/commands/CreateEntryCommand.ts
-- [ ] T112 [US3] Create CreateEntryCommandHandler in backend/src/application/commands/CreateEntryCommandHandler.ts (depends on T051, T052, T053)
+- [ ] T112 [US3] Create CreateEntryCommandHandler in backend/src/application/commands/CreateEntryCommandHandler.ts (depends on T045a, T051, T052, T053) - MUST check title uniqueness via IEntryRepository before creating entry (FR-003)
 - [ ] T113 [US3] Create GetStreamingPlatformsQuery in backend/src/application/queries/GetStreamingPlatformsQuery.ts
 - [ ] T114 [US3] Create GetStreamingPlatformsQueryHandler in backend/src/application/queries/GetStreamingPlatformsQueryHandler.ts (depends on T110)
 
@@ -251,7 +252,7 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 ### UI Layer Implementation for User Story 3 (Backend)
 
 - [ ] T117 [US3] Create Zod schema for CreateEntryRequest in backend/src/ui/http/actions/entries/createEntry.ts
-- [ ] T118 [US3] Implement createEntry action handler in backend/src/ui/http/actions/entries/createEntry.ts (validate body → check title uniqueness → map to CreateEntryCommand → call handler → optionally add rating → return 201 or 409)
+- [ ] T118 [US3] Implement createEntry action handler in backend/src/ui/http/actions/entries/createEntry.ts (validate body → map to CreateEntryCommand → call handler which performs domain-level title uniqueness check via repository → if optional rating provided, call AddRatingCommand via handler to avoid duplicating rating logic → return 201 or 409)
 - [ ] T119 [US3] Implement getPlatforms action handler in backend/src/ui/http/actions/platforms/getPlatforms.ts
 - [ ] T120 [US3] Register POST /api/v1/entries route in backend/src/ui/http/server.ts
 - [ ] T121 [US3] Register GET /api/v1/platforms route in backend/src/ui/http/server.ts
@@ -260,8 +261,8 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 
 - [ ] T122 [US3] Create useCreateEntry hook with TanStack Query mutation in frontend/src/hooks/useCreateEntry.ts
 - [ ] T123 [US3] Create usePlatforms hook in frontend/src/hooks/usePlatforms.ts
-- [ ] T124 [US3] Implement AddEntryPage in frontend/src/pages/AddEntryPage.tsx (form with title, media type, tags selector, platform selector, optional rating)
-- [ ] T125 [US3] Add form validation with Zod in AddEntryPage (1-3 tags, unique title)
+- [ ] T124 [US3] Implement AddEntryPage in frontend/src/pages/AddEntryPage.tsx (form with title, media type dropdown ('film' or 'series'), tags selector (1-3), platform selector, optional rating)
+- [ ] T125 [US3] Add form validation with Zod in AddEntryPage (1-3 tags, unique title, required media type)
 - [ ] T126 [US3] Add route for AddEntryPage in frontend/src/App.tsx
 
 **Checkpoint**: All three user stories (US1, US2, US3) should now be independently functional. Users can browse (US1), rate (US2), and add content (US3).
@@ -288,7 +289,7 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 ### Implementation for User Story 4
 
 - [ ] T130 [US4] Extend GetEntriesQueryHandler to support newToMe filter in backend/src/application/queries/GetEntriesQueryHandler.ts (filter by created_at/updated_at > user.last_login)
-- [ ] T131 [US4] Update last_login timestamp on authentication in backend/src/ui/http/middleware/authMiddleware.ts
+- [ ] T131 [US4] Update last_login timestamp on authentication in backend/src/ui/http/middleware/authMiddleware.ts (async/non-blocking update to avoid delaying authentication response)
 - [ ] T132 [US4] Add "New to Me" filter option to FilterBar component in frontend/src/components/FilterBar.tsx
 - [ ] T133 [US4] Update useEntries hook to support newToMe parameter in frontend/src/hooks/useEntries.ts
 
@@ -364,11 +365,11 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 - [ ] T156 [P] [US6] Create CreateStreamingPlatformCommand in backend/src/application/commands/CreateStreamingPlatformCommand.ts
 - [ ] T157 [US6] Create CreateStreamingPlatformCommandHandler in backend/src/application/commands/CreateStreamingPlatformCommandHandler.ts (depends on T110)
 - [ ] T158 [P] [US6] Create DeleteStreamingPlatformCommand in backend/src/application/commands/DeleteStreamingPlatformCommand.ts
-- [ ] T159 [US6] Create DeleteStreamingPlatformCommandHandler in backend/src/application/commands/DeleteStreamingPlatformCommandHandler.ts (depends on T110)
+- [ ] T159 [US6] Create DeleteStreamingPlatformCommandHandler in backend/src/application/commands/DeleteStreamingPlatformCommandHandler.ts (depends on T051, T110) - MUST validate platform is not referenced by any entries via IEntryRepository before deletion, throw error if in use (FR-016)
 - [ ] T160 [P] [US6] Create CreateGenreTagCommand in backend/src/application/commands/CreateGenreTagCommand.ts
 - [ ] T161 [US6] Create CreateGenreTagCommandHandler in backend/src/application/commands/CreateGenreTagCommandHandler.ts (depends on T052)
 - [ ] T162 [P] [US6] Create DeleteGenreTagCommand in backend/src/application/commands/DeleteGenreTagCommand.ts
-- [ ] T163 [US6] Create DeleteGenreTagCommandHandler in backend/src/application/commands/DeleteGenreTagCommandHandler.ts (depends on T052)
+- [ ] T163 [US6] Create DeleteGenreTagCommandHandler in backend/src/application/commands/DeleteGenreTagCommandHandler.ts (depends on T051, T052) - MUST validate tag is not referenced by any entries via IEntryRepository before deletion, throw error if in use (FR-017)
 
 ### UI Layer Implementation for User Story 6 (Backend)
 
@@ -405,13 +406,14 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 ### Tests (TDD - Write FIRST, ensure they FAIL)
 
 - [ ] T180 [P] Unit test for DeleteUserCommand in backend/tests/unit/application/commands/DeleteUserCommand.spec.ts
-- [ ] T181 [P] Integration test for user anonymization in backend/tests/integration/application/commands/DeleteUserCommand.spec.ts
+- [ ] T181 [P] Integration test for user anonymization in backend/tests/integration/application/commands/DeleteUserCommand.spec.ts (MUST verify entries/ratings preserve data with user reference replaced by "Deleted User" per FR-019)
 - [ ] T182 [P] Contract test for DELETE /users/me endpoint in backend/tests/contract/endpoints/deleteUser.spec.ts
 
 ### Application Layer Implementation
 
 - [ ] T183 Create DeleteUserCommand in backend/src/application/commands/DeleteUserCommand.ts
 - [ ] T184 Create DeleteUserCommandHandler in backend/src/application/commands/DeleteUserCommandHandler.ts (depends on T050, anonymizes data)
+- [ ] T184a Add validation to DeleteUserCommandHandler to prevent deletion of last admin user (query IUserRepository for admin count, throw error if user is last admin)
 
 ### UI Layer Implementation (Backend)
 
@@ -434,9 +436,8 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 - [ ] T191 [P] Add input validation error messages to all frontend forms
 - [ ] T192 [P] Implement proper CORS configuration for production in backend/src/ui/http/server.ts
 - [ ] T193 [P] Add database connection pooling optimization in backend/src/infrastructure/persistence/DatabaseConnection.ts
-- [ ] T194 [P] Add database indexes per data-model.md specification
-- [ ] T195 [P] Add comprehensive logging throughout backend application
-- [ ] T196 [P] Create production build scripts for backend and frontend
+- [ ] T194 [P] Add comprehensive logging throughout backend application
+- [ ] T195 [P] Create production build scripts for backend and frontend
 - [ ] T197 [P] Add health check endpoint at /health in backend/src/ui/http/server.ts
 - [ ] T198 [P] Create frontend production environment configuration
 - [ ] T199 [P] Add accessibility improvements (ARIA labels, keyboard navigation) to frontend components
@@ -588,7 +589,7 @@ With multiple developers:
 
 ## Task Summary
 
-- **Total Tasks**: 205
+- **Total Tasks**: 204
 - **Phase 1 (Setup)**: 12 tasks
 - **Phase 2 (Foundational)**: 16 tasks (backend + frontend foundation)
 - **Phase 3 (US1 - Browse)**: 55 tasks (includes comprehensive tests)
