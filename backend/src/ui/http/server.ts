@@ -1,9 +1,11 @@
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import Router from '@koa/router';
-import { DatabaseConnection } from '../infrastructure/persistence/DatabaseConnection';
+import DatabaseConnection from '../infrastructure/persistence/DatabaseConnection';
 import { listEntries } from './actions/entries/listEntries';
 import { getEntryById } from './actions/entries/getEntryById';
+import { listTags } from './actions/tags/listTags';
+import { listPlatforms } from './actions/platforms/listPlatforms';
 
 /**
  * Creates and configures the Koa application server
@@ -39,13 +41,16 @@ export function createServer(): Koa {
     }
   });
 
-  // Entry endpoints (User Story 1: Browse and Discover Content)
+  // Entry routes
   router.get('/api/entries', listEntries);
   router.get('/api/entries/:id', getEntryById);
 
-  // Mount router
-  app.use(router.routes());
-  app.use(router.allowedMethods());
+  // Tag and Platform routes (for filters)
+  router.get('/api/tags', listTags);
+  router.get('/api/platforms', listPlatforms);
+
+  // Register routes
+  app.use(router.routes()).use(router.allowedMethods());
 
   // Global error handler
   app.on('error', (err: Error, _ctx: Koa.Context) => {

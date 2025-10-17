@@ -11,6 +11,8 @@ import { PostgresRatingRepository } from '../infrastructure/domain/PostgresRatin
 // Query Handlers
 import { GetEntriesQueryHandler } from '../application/queries/entries/GetEntriesQueryHandler';
 import { GetEntryByIdQueryHandler } from '../application/queries/entries/GetEntryByIdQueryHandler';
+import { GetGenreTagsQueryHandler } from '../application/queries/tags/GetGenreTagsQueryHandler';
+import { GetStreamingPlatformsQueryHandler } from '../application/queries/platforms/GetStreamingPlatformsQueryHandler';
 
 // Handler Registry
 import { HandlerRegistry } from '../application/HandlerRegistry';
@@ -74,6 +76,19 @@ export class Container {
       this.ratingRepository,
     );
     this.handlerRegistry.registerQueryHandler('GetEntryByIdQuery', getEntryByIdHandler);
+
+    // Register GetGenreTagsQueryHandler
+    const getGenreTagsHandler = new GetGenreTagsQueryHandler(this.genreTagRepository);
+    this.handlerRegistry.registerQueryHandler('GetGenreTagsQuery', getGenreTagsHandler);
+
+    // Register GetStreamingPlatformsQueryHandler
+    const getStreamingPlatformsHandler = new GetStreamingPlatformsQueryHandler(
+      this.streamingPlatformRepository,
+    );
+    this.handlerRegistry.registerQueryHandler(
+      'GetStreamingPlatformsQuery',
+      getStreamingPlatformsHandler,
+    );
   }
 
   // Getters for repositories (if needed elsewhere)

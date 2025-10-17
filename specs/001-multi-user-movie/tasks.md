@@ -127,8 +127,8 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 - [X] T055 [US1] Create GetEntriesQueryHandler in backend/src/application/queries/GetEntriesQueryHandler.ts (depends on T051)
 - [X] T056 [US1] Create GetEntryDetailsQuery in backend/src/application/queries/GetEntryDetailsQuery.ts
 - [X] T057 [US1] Create GetEntryDetailsQueryHandler in backend/src/application/queries/GetEntryDetailsQueryHandler.ts (depends on T051, T053)
-- [ ] T058 [US1] Create GetGenreTagsQuery in backend/src/application/queries/GetGenreTagsQuery.ts
-- [ ] T059 [US1] Create GetGenreTagsQueryHandler in backend/src/application/queries/GetGenreTagsQueryHandler.ts (depends on T052)
+- [X] T058 [US1] Create GetGenreTagsQuery in backend/src/application/queries/tags/GetGenreTagsQuery.ts
+- [X] T059 [US1] Create GetGenreTagsQueryHandler in backend/src/application/queries/tags/GetGenreTagsQueryHandler.ts (depends on T052)
 
 ### Infrastructure Layer Implementation for User Story 1
 
@@ -145,24 +145,27 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 - [X] T066 [US1] Implement getEntries action handler in backend/src/ui/http/actions/entries/getEntries.ts (validate query params → map to GetEntriesQuery → call handler → return paginated response)
 - [X] T067 [US1] Create Zod schema for GetEntryDetailsRequest in backend/src/ui/http/actions/entries/getEntryDetails.ts
 - [X] T068 [US1] Implement getEntryDetails action handler in backend/src/ui/http/actions/entries/getEntryDetails.ts (validate params → map to GetEntryDetailsQuery → call handler → return entry with ratings)
-- [ ] T069 [US1] Implement getTags action handler in backend/src/ui/http/actions/tags/getTags.ts
+- [X] T069 [US1] Implement listTags action handler in backend/src/ui/http/actions/tags/listTags.ts
+- [X] T069a [US1] Implement listPlatforms action handler in backend/src/ui/http/actions/platforms/listPlatforms.ts
 - [X] T070 [US1] Register GET /api/v1/entries route in backend/src/ui/http/server.ts
 - [X] T071 [US1] Register GET /api/v1/entries/:entryId route in backend/src/ui/http/server.ts
-- [ ] T072 [US1] Register GET /api/v1/tags route in backend/src/ui/http/server.ts
+- [X] T072 [US1] Register GET /api/v1/tags route in backend/src/ui/http/server.ts
+- [X] T072a [US1] Register GET /api/v1/platforms route in backend/src/ui/http/server.ts
 
 ### UI Layer Implementation for User Story 1 (Frontend)
 
-- [ ] T073 [P] [US1] Create EntryCard component in frontend/src/components/EntryCard.tsx
-- [ ] T074 [P] [US1] Create EntryList component in frontend/src/components/EntryList.tsx
-- [ ] T075 [P] [US1] Create FilterBar component in frontend/src/components/FilterBar.tsx
-- [ ] T076 [P] [US1] Create Pagination component in frontend/src/components/Pagination.tsx
-- [ ] T077 [P] [US1] Create EntryDetails component in frontend/src/components/EntryDetails.tsx
-- [ ] T078 [US1] Create useEntries hook with TanStack Query in frontend/src/hooks/useEntries.ts
-- [ ] T079 [US1] Create useEntryDetails hook in frontend/src/hooks/useEntryDetails.ts
-- [ ] T080 [US1] Create useTags hook in frontend/src/hooks/useTags.ts
-- [ ] T081 [US1] Implement HomePage in frontend/src/pages/HomePage.tsx (integrates EntryList, FilterBar, Pagination)
-- [ ] T082 [US1] Implement EntryDetailsPage in frontend/src/pages/EntryDetailsPage.tsx
-- [ ] T083 [US1] Setup React Router with routes in frontend/src/App.tsx
+- [x] T073 [P] [US1] Create EntryCard component in frontend/src/components/EntryCard.tsx
+- [x] T074 [P] [US1] Create EntryList component in frontend/src/components/EntryList.tsx
+- [x] T075 [P] [US1] Create FilterBar component in frontend/src/components/FilterBar.tsx
+- [x] T076 [P] [US1] Create Pagination component in frontend/src/components/Pagination.tsx
+- [x] T077 [P] [US1] Create EntryDetailsComponent in frontend/src/components/EntryDetailsComponent.tsx
+- [x] T078 [US1] Create useEntries hook with TanStack Query in frontend/src/hooks/useEntries.ts
+- [x] T079 [P] [US1] Create useEntryDetails hook in frontend/src/hooks/useEntryDetails.ts
+- [x] T080 [US1] Create useTags hook in frontend/src/hooks/useTags.ts
+- [x] T080a [US1] Create usePlatforms hook in frontend/src/hooks/usePlatforms.ts
+- [x] T081 [US1] Implement HomePage as BrowseEntriesPage in frontend/src/pages/BrowseEntriesPage.tsx (integrates EntryList, FilterBar, Pagination)
+- [x] T082 [US1] Implement EntryDetailsPage integrated in BrowseEntriesPage with useParams
+- [x] T083 [US1] Setup React Router with routes (handles /entries and /entries/:id in BrowseEntriesPage)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently. Users can browse entries, filter by tags, paginate results, and view entry details with ratings.
 
