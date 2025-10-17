@@ -1,6 +1,7 @@
 import 'dotenv/config';
-import { createServer } from './server';
-import { DatabaseConnection } from '../../infrastructure/persistence/DatabaseConnection';
+import { createServer } from './ui/http/server';
+import DatabaseConnection from './infrastructure/persistence/DatabaseConnection';
+import { Container } from './config/Container';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
@@ -13,6 +14,10 @@ async function bootstrap(): Promise<void> {
     const db = DatabaseConnection.getInstance();
     await db.query('SELECT 1');
     console.log('✅ Database connection established');
+
+    // Initialize dependency injection container
+    Container.getInstance();
+    console.log('✅ Dependency injection container initialized');
 
     // Create and start server
     const app = createServer();

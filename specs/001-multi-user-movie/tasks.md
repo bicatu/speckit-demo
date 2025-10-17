@@ -119,6 +119,7 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 - [X] T051 [P] [US1] Create IEntryRepository interface in backend/src/domain/repositories/IEntryRepository.ts
 - [X] T052 [P] [US1] Create IGenreTagRepository interface in backend/src/domain/repositories/IGenreTagRepository.ts
 - [X] T053 [P] [US1] Create IRatingRepository interface in backend/src/domain/repositories/IRatingRepository.ts
+- [X] T053a [P] [US1] Create IStreamingPlatformRepository interface in backend/src/domain/repositories/IStreamingPlatformRepository.ts
 
 ### Application Layer Implementation for User Story 1
 
@@ -131,11 +132,12 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 
 ### Infrastructure Layer Implementation for User Story 1
 
-- [ ] T060 [US1] Implement PostgresUserRepository in backend/src/infrastructure/domain/PostgresUserRepository.ts (depends on T050)
-- [ ] T061 [US1] Implement PostgresEntryRepository in backend/src/infrastructure/domain/PostgresEntryRepository.ts (depends on T051)
-- [ ] T062 [US1] Implement PostgresGenreTagRepository in backend/src/infrastructure/domain/PostgresGenreTagRepository.ts (depends on T052)
-- [ ] T063 [US1] Implement PostgresRatingRepository in backend/src/infrastructure/domain/PostgresRatingRepository.ts (depends on T053)
-- [ ] T064 [US1] Register repositories in dependency injection container
+- [X] T060 [US1] Implement PostgresUserRepository in backend/src/infrastructure/domain/PostgresUserRepository.ts (depends on T050)
+- [X] T061 [US1] Implement PostgresEntryRepository in backend/src/infrastructure/domain/PostgresEntryRepository.ts (depends on T051)
+- [X] T062 [US1] Implement PostgresGenreTagRepository in backend/src/infrastructure/domain/PostgresGenreTagRepository.ts (depends on T052)
+- [X] T063 [US1] Implement PostgresRatingRepository in backend/src/infrastructure/domain/PostgresRatingRepository.ts (depends on T053)
+- [X] T063a [US1] Implement PostgresStreamingPlatformRepository in backend/src/infrastructure/domain/PostgresStreamingPlatformRepository.ts (depends on T053a)
+- [X] T064 [US1] Register repositories in dependency injection container
 
 ### UI Layer Implementation for User Story 1 (Backend)
 

@@ -1,0 +1,99 @@
+import { Pool } from 'pg';
+import DatabaseConnection from '../infrastructure/persistence/DatabaseConnection';
+
+// Repositories
+import { PostgresUserRepository } from '../infrastructure/domain/PostgresUserRepository';
+import { PostgresEntryRepository } from '../infrastructure/domain/PostgresEntryRepository';
+import { PostgresGenreTagRepository } from '../infrastructure/domain/PostgresGenreTagRepository';
+import { PostgresStreamingPlatformRepository } from '../infrastructure/domain/PostgresStreamingPlatformRepository';
+import { PostgresRatingRepository } from '../infrastructure/domain/PostgresRatingRepository';
+
+// Query Handlers
+import { GetEntriesQueryHandler } from '../application/queries/entries/GetEntriesQueryHandler';
+import { GetEntryByIdQueryHandler } from '../application/queries/entries/GetEntryByIdQueryHandler';
+
+// Handler Registry
+import { HandlerRegistry } from '../application/HandlerRegistry';
+
+/**
+ * Dependency Injection Container
+ * Initializes and wires together all application dependencies
+ */
+export class Container {
+  private static instance: Container;
+  private pool: Pool;
+  private handlerRegistry: HandlerRegistry;
+
+  // Repository instances
+  private userRepository: PostgresUserRepository;
+  private entryRepository: PostgresEntryRepository;
+  private genreTagRepository: PostgresGenreTagRepository;
+  private streamingPlatformRepository: PostgresStreamingPlatformRepository;
+  private ratingRepository: PostgresRatingRepository;
+
+  private constructor() {
+    // Get database pool
+    this.pool = DatabaseConnection.getInstance().getPool();
+
+    // Initialize repositories
+    this.userRepository = new PostgresUserRepository(this.pool);
+    this.entryRepository = new PostgresEntryRepository(this.pool);
+    this.genreTagRepository = new PostgresGenreTagRepository(this.pool);
+    this.streamingPlatformRepository = new PostgresStreamingPlatformRepository(this.pool);
+    this.ratingRepository = new PostgresRatingRepository(this.pool);
+
+    // Initialize handler registry
+    this.handlerRegistry = HandlerRegistry.getInstance();
+
+    // Register query handlers
+    this.registerQueryHandlers();
+  }
+
+  public static getInstance(): Container {
+    if (!Container.instance) {
+      Container.instance = new Container();
+    }
+    return Container.instance;
+  }
+
+  private registerQueryHandlers(): void {
+    // Register GetEntriesQueryHandler
+    const getEntriesHandler = new GetEntriesQueryHandler(
+      this.entryRepository,
+      this.genreTagRepository,
+      this.streamingPlatformRepository,
+    );
+    this.handlerRegistry.registerQueryHandler('GetEntriesQuery', getEntriesHandler);
+
+    // Register GetEntryByIdQueryHandler
+    const getEntryByIdHandler = new GetEntryByIdQueryHandler(
+      this.entryRepository,
+      this.genreTagRepository,
+      this.streamingPlatformRepository,
+      this.userRepository,
+      this.ratingRepository,
+    );
+    this.handlerRegistry.registerQueryHandler('GetEntryByIdQuery', getEntryByIdHandler);
+  }
+
+  // Getters for repositories (if needed elsewhere)
+  public getUserRepository(): PostgresUserRepository {
+    return this.userRepository;
+  }
+
+  public getEntryRepository(): PostgresEntryRepository {
+    return this.entryRepository;
+  }
+
+  public getGenreTagRepository(): PostgresGenreTagRepository {
+    return this.genreTagRepository;
+  }
+
+  public getStreamingPlatformRepository(): PostgresStreamingPlatformRepository {
+    return this.streamingPlatformRepository;
+  }
+
+  public getRatingRepository(): PostgresRatingRepository {
+    return this.ratingRepository;
+  }
+}

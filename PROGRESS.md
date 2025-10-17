@@ -41,8 +41,8 @@ All 16 tasks completed:
 **Additional Files**:
 - `setup.sh` - Automated setup script (npm install, docker-compose up, run migrations)
 
-### Phase 3: User Story 1 - Browse and Discover Content (45% Complete)
-**Completed Tasks: 19/42**
+### Phase 3: User Story 1 - Browse and Discover Content (60% Complete)
+**Completed Tasks: 25/42**
 
 #### Domain Layer (9/11 tasks complete):
 - ✅ `User.ts` - Entity with OAuth subject, email, name, admin flag, last login tracking
@@ -54,7 +54,8 @@ All 16 tasks completed:
 - ✅ `IEntryRepository.ts` - Interface: findById, findByTitle, findAll (with filters), save, delete, count, findTopRated, findRecent
 - ✅ `IGenreTagRepository.ts` - Interface: findById, findByName, findAll, findByEntryId, save, delete, associateWithEntry, removeFromEntry
 - ✅ `IRatingRepository.ts` - Interface: findByUserAndEntry, findByEntryId, findByUserId, save, delete, calculateAverageForEntry, countByEntryId
-- ⏳ Missing: IStreamingPlatformRepository, EntryFilters value object
+- ✅ `IStreamingPlatformRepository.ts` - Interface: findById, findByName, findAll, save, delete
+- ⏳ Missing: EntryFilters value object
 
 #### Application Layer (4/6 tasks complete):
 - ✅ `GetEntriesQuery.ts` - Query with filters (mediaType, platformId, tagIds), pagination (limit/offset), sortBy (recent/topRated/title)
@@ -67,16 +68,20 @@ All 16 tasks completed:
 - ✅ `listEntries.ts` - GET /api/entries action handler (query param validation, handler dispatch, error formatting)
 - ✅ `getEntryById.ts` - GET /api/entries/:id action handler (param validation, NotFoundError handling)
 - ✅ Routes registered in `server.ts` for both endpoints
-- ⏳ Missing: IStreamingPlatformRepository implementation, getTags action handler + route
+- ⏳ Missing: getTags action handler + route, getStreamingPlatforms action handler + route
 
 #### Tests (2/15 tasks complete):
 - ✅ `Entry.spec.ts` - 12 unit tests covering constructor, validation (title length/empty, mediaType, averageRating range), business methods (updateTitle, updatePlatform, updateAverageRating)
 - ✅ `GenreTag.spec.ts` - 8 unit tests covering constructor, validation (name length/empty/whitespace trimming), updateName, equality checks
 - ⏳ Missing: 13 test files (EntryFilters, query handlers, repository integration tests, contract tests, frontend component tests)
 
-#### Infrastructure Layer (0/5 tasks complete):
-- ⏳ PostgresUserRepository, PostgresEntryRepository, PostgresGenreTagRepository, PostgresRatingRepository, PostgresStreamingPlatformRepository
-- ⏳ Dependency injection container registration
+#### Infrastructure Layer (6/6 tasks complete):
+- ✅ `PostgresUserRepository.ts` - Full IUserRepository implementation with pg.Pool, mapping rows to User entities
+- ✅ `PostgresEntryRepository.ts` - Complex findAll with filtering (mediaType, platformId, tagIds with JOIN on entry_tags), pagination, findTopRated, findRecent, save/delete with transactions
+- ✅ `PostgresGenreTagRepository.ts` - Junction table operations: associateWithEntry (batch INSERT), removeFromEntry, findByEntryId with JOIN
+- ✅ `PostgresRatingRepository.ts` - Composite key operations, calculateAverageForEntry with AVG aggregation, save/delete auto-updating entry.average_rating
+- ✅ `PostgresStreamingPlatformRepository.ts` - Full IStreamingPlatformRepository implementation
+- ✅ `Container.ts` - Dependency injection container registering all repositories and query handlers with HandlerRegistry
 
 #### UI Layer - Frontend (0/11 tasks complete):
 - ⏳ EntryCard, EntryList, FilterBar, Pagination, EntryDetails components
@@ -89,8 +94,8 @@ All 16 tasks completed:
 |-------|---------------|-------------|----------|
 | Phase 1: Setup | 12 | 12 | 100% ✅ |
 | Phase 2: Foundation | 16 | 16 | 100% ✅ |
-| Phase 3: User Story 1 | 19 | 42 | 45% 🔄 |
-| **Total** | **47** | **70** | **67%** |
+| Phase 3: User Story 1 | 25 | 42 | 60% 🔄 |
+| **Total** | **53** | **70** | **76%** |
 
 ## 🎯 Next Steps
 
@@ -102,17 +107,17 @@ All 16 tasks completed:
    docker-compose up -d
    ```
 
-2. **Infrastructure Layer** - Implement PostgreSQL repositories:
-   - PostgresEntryRepository (findAll with filters, findTopRated, findRecent)
-   - PostgresGenreTagRepository (associateWithEntry, findByEntryId)
-   - PostgresStreamingPlatformRepository
-   - PostgresUserRepository
-   - PostgresRatingRepository (calculateAverageForEntry)
+2. **Frontend Implementation** - Create React components and hooks:
+   - EntryCard component (display entry with title, platform, rating, tags)
+   - EntryList component (map entries with loading state)
+   - FilterBar component (dropdowns and tag checkboxes)
+   - Pagination component
+   - useEntries hook with TanStack Query
+   - HomePage integration
 
 3. **Missing Application Layer**:
-   - IStreamingPlatformRepository interface
-   - GetGenreTagsQuery/Handler
-   - GetStreamingPlatformsQuery/Handler
+   - GetGenreTagsQuery/Handler for filter dropdown
+   - GetStreamingPlatformsQuery/Handler for filter dropdown
 
 4. **Frontend Implementation**:
    - React components (EntryCard, EntryList, FilterBar, Pagination, EntryDetails)
