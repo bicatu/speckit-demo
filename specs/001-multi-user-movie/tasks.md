@@ -194,23 +194,23 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 
 ### Application Layer Implementation for User Story 2
 
-- [ ] T092 [US2] Create AddRatingCommand in backend/src/application/commands/AddRatingCommand.ts
-- [ ] T093 [US2] Create AddRatingCommandHandler in backend/src/application/commands/AddRatingCommandHandler.ts (depends on T053) - MUST update Entry.average_rating cache after adding rating
-- [ ] T094 [US2] Create UpdateRatingCommand in backend/src/application/commands/UpdateRatingCommand.ts
-- [ ] T095 [US2] Create UpdateRatingCommandHandler in backend/src/application/commands/UpdateRatingCommandHandler.ts (depends on T053) - MUST update Entry.average_rating cache after updating rating
+- [X] T092 [US2] Create AddRatingCommand in backend/src/application/commands/AddRatingCommand.ts
+- [X] T093 [US2] Create AddRatingCommandHandler in backend/src/application/commands/AddRatingCommandHandler.ts (depends on T053) - MUST update Entry.average_rating cache after adding rating
+- [X] T094 [US2] Create UpdateRatingCommand in backend/src/application/commands/UpdateRatingCommand.ts
+- [X] T095 [US2] Create UpdateRatingCommandHandler in backend/src/application/commands/UpdateRatingCommandHandler.ts (depends on T053) - MUST update Entry.average_rating cache after updating rating
 
 ### UI Layer Implementation for User Story 2 (Backend)
 
-- [ ] T096 [US2] Create Zod schema for RatingRequest in backend/src/ui/http/actions/ratings/addRating.ts
-- [ ] T097 [US2] Implement addRating action handler in backend/src/ui/http/actions/ratings/addRating.ts (validate body → check if user has existing rating for entry → map to AddRatingCommand (new) or UpdateRatingCommand (existing) → call handler → return 201/200)
-- [ ] T098 [US2] Register POST /api/v1/entries/:entryId/ratings route in backend/src/ui/http/server.ts
+- [X] T096 [US2] Create Zod schema for RatingRequest in backend/src/ui/http/actions/ratings/addRating.ts
+- [X] T097 [US2] Implement addRating action handler in backend/src/ui/http/actions/ratings/addRating.ts (validate body → check if user has existing rating for entry → map to AddRatingCommand (new) or UpdateRatingCommand (existing) → call handler → return 201/200)
+- [X] T098 [US2] Register POST /api/v1/entries/:entryId/ratings route in backend/src/ui/http/server.ts
 
 ### UI Layer Implementation for User Story 2 (Frontend)
 
-- [ ] T099 [P] [US2] Create RatingInput component in frontend/src/components/RatingInput.tsx
-- [ ] T100 [US2] Create useAddRating hook with TanStack Query mutation in frontend/src/hooks/useAddRating.ts
-- [ ] T101 [US2] Integrate RatingInput into EntryDetailsPage in frontend/src/pages/EntryDetailsPage.tsx
-- [ ] T102 [US2] Add optimistic updates and cache invalidation for ratings in frontend/src/hooks/useAddRating.ts
+- [X] T099 [P] [US2] Create RatingInput component in frontend/src/components/RatingInput.tsx
+- [X] T100 [US2] Create useAddRating hook with TanStack Query mutation in frontend/src/hooks/useAddRating.ts
+- [X] T101 [US2] Integrate RatingInput into EntryDetailsPage in frontend/src/pages/EntryDetailsPage.tsx
+- [X] T102 [US2] Add optimistic updates and cache invalidation for ratings in frontend/src/hooks/useAddRating.ts
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently. Users can browse content (US1) and add/update ratings (US2).
 

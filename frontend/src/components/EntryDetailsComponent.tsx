@@ -1,5 +1,7 @@
 import React from 'react';
 import type { EntryDetails } from '../hooks/useEntryDetails';
+import { RatingInput } from './RatingInput';
+import { useAddRating } from '../hooks/useAddRating';
 
 interface EntryDetailsComponentProps {
   entry: EntryDetails;
@@ -10,6 +12,32 @@ interface EntryDetailsComponentProps {
  * Detailed view component showing full entry information
  */
 export function EntryDetailsComponent({ entry, onBack }: EntryDetailsComponentProps) {
+  const [ratingError, setRatingError] = React.useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
+
+  // TODO: Get current user's rating from entry details (requires backend update)
+  // For now, we'll assume no existing rating (null)
+  const currentUserRating: number | null = null;
+
+  const addRatingMutation = useAddRating({
+    entryId: entry.id,
+    onSuccess: () => {
+      setSuccessMessage('Rating submitted successfully!');
+      setRatingError(null);
+      setTimeout(() => setSuccessMessage(null), 3000);
+    },
+    onError: (error) => {
+      setRatingError(error.message || 'Failed to submit rating');
+      setSuccessMessage(null);
+    },
+  });
+
+  const handleRatingSubmit = (stars: number) => {
+    setRatingError(null);
+    setSuccessMessage(null);
+    addRatingMutation.mutate(stars);
+  };
+
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
       {/* Back Button */}
@@ -68,6 +96,30 @@ export function EntryDetailsComponent({ entry, onBack }: EntryDetailsComponentPr
           </div>
         )}
       </div>
+
+      {/* Success Message */}
+      {successMessage && (
+        <div
+          style={{
+            backgroundColor: '#d4edda',
+            color: '#155724',
+            padding: '12px 20px',
+            borderRadius: '4px',
+            marginBottom: '20px',
+            border: '1px solid #c3e6cb',
+          }}
+        >
+          {successMessage}
+        </div>
+      )}
+
+      {/* Rating Input Section */}
+      <RatingInput
+        currentRating={currentUserRating}
+        onSubmit={handleRatingSubmit}
+        isSubmitting={addRatingMutation.isPending}
+        error={ratingError}
+      />
 
       {/* Tags Section */}
       {entry.tags.length > 0 && (
