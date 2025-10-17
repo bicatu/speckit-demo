@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './services/queryClient';
 import { BrowseEntriesPage } from './pages/BrowseEntriesPage';
+import { AddEntryPage } from './pages/AddEntryPage';
 
 // Placeholder components (will be implemented in subsequent phases)
 const HomePage: React.FC = () => <div>Home Page - Coming Soon</div>;
@@ -16,6 +17,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/entries" element={<BrowseEntriesPage />} />
+          <Route path="/entries/add" element={<AddEntryPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

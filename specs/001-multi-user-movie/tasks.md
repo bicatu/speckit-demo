@@ -227,7 +227,7 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 #### Backend Tests
 
 - [ ] T103 [P] [US3] Unit test for CreateEntryCommand in backend/tests/unit/application/commands/CreateEntryCommand.spec.ts
-- [ ] T104 [P] [US3] Unit test for CreateEntryCommandHandler in backend/tests/unit/application/commands/CreateEntryCommandHandler.spec.ts
+- [X] T104 [P] [US3] Unit test for CreateEntryCommandHandler in backend/tests/unit/application/commands/CreateEntryCommandHandler.spec.ts
 - [ ] T105 [P] [US3] Integration test for CreateEntryCommand flow in backend/tests/integration/application/commands/CreateEntryCommand.spec.ts
 - [ ] T106 [P] [US3] Contract test for POST /entries endpoint in backend/tests/contract/endpoints/createEntry.spec.ts
 - [ ] T107 [P] [US3] Unit test for GetStreamingPlatformsQueryHandler in backend/tests/unit/application/queries/GetStreamingPlatformsQueryHandler.spec.ts
@@ -243,8 +243,8 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 
 ### Application Layer Implementation for User Story 3
 
-- [ ] T111 [US3] Create CreateEntryCommand in backend/src/application/commands/CreateEntryCommand.ts
-- [ ] T112 [US3] Create CreateEntryCommandHandler in backend/src/application/commands/CreateEntryCommandHandler.ts (depends on T045a, T051, T052, T053) - MUST check title uniqueness via IEntryRepository before creating entry (FR-003)
+- [X] T111 [US3] Create CreateEntryCommand in backend/src/application/commands/CreateEntryCommand.ts
+- [X] T112 [US3] Create CreateEntryCommandHandler in backend/src/application/commands/CreateEntryCommandHandler.ts (depends on T045a, T051, T052, T053) - MUST check title uniqueness via IEntryRepository before creating entry (FR-003)
 - [ ] T113 [US3] Create GetStreamingPlatformsQuery in backend/src/application/queries/GetStreamingPlatformsQuery.ts
 - [ ] T114 [US3] Create GetStreamingPlatformsQueryHandler in backend/src/application/queries/GetStreamingPlatformsQueryHandler.ts (depends on T110)
 
@@ -255,19 +255,19 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 
 ### UI Layer Implementation for User Story 3 (Backend)
 
-- [ ] T117 [US3] Create Zod schema for CreateEntryRequest in backend/src/ui/http/actions/entries/createEntry.ts
-- [ ] T118 [US3] Implement createEntry action handler in backend/src/ui/http/actions/entries/createEntry.ts (validate body → map to CreateEntryCommand → call handler which performs domain-level title uniqueness check via repository → if optional rating provided, call AddRatingCommand via handler to avoid duplicating rating logic → return 201 or 409)
+- [X] T117 [US3] Create Zod schema for CreateEntryRequest in backend/src/ui/http/actions/entries/createEntry.ts
+- [X] T118 [US3] Implement createEntry action handler in backend/src/ui/http/actions/entries/createEntry.ts (validate body → map to CreateEntryCommand → call handler which performs domain-level title uniqueness check via repository → if optional rating provided, call AddRatingCommand via handler to avoid duplicating rating logic → return 201 or 409)
 - [ ] T119 [US3] Implement getPlatforms action handler in backend/src/ui/http/actions/platforms/getPlatforms.ts
-- [ ] T120 [US3] Register POST /api/v1/entries route in backend/src/ui/http/server.ts
+- [X] T120 [US3] Register POST /api/v1/entries route in backend/src/ui/http/server.ts
 - [ ] T121 [US3] Register GET /api/v1/platforms route in backend/src/ui/http/server.ts
 
 ### UI Layer Implementation for User Story 3 (Frontend)
 
-- [ ] T122 [US3] Create useCreateEntry hook with TanStack Query mutation in frontend/src/hooks/useCreateEntry.ts
+- [X] T122 [US3] Create useCreateEntry hook with TanStack Query mutation in frontend/src/hooks/useCreateEntry.ts
 - [ ] T123 [US3] Create usePlatforms hook in frontend/src/hooks/usePlatforms.ts
-- [ ] T124 [US3] Implement AddEntryPage in frontend/src/pages/AddEntryPage.tsx (form with title, media type dropdown ('film' or 'series'), tags selector (1-3), platform selector, optional rating)
-- [ ] T125 [US3] Add form validation with Zod in AddEntryPage (1-3 tags, unique title, required media type)
-- [ ] T126 [US3] Add route for AddEntryPage in frontend/src/App.tsx
+- [X] T124 [US3] Implement AddEntryPage in frontend/src/pages/AddEntryPage.tsx (form with title, media type dropdown ('film' or 'series'), tags selector (1-3), platform selector, optional rating)
+- [X] T125 [US3] Add form validation with Zod in AddEntryPage (1-3 tags, unique title, required media type)
+- [X] T126 [US3] Add route for AddEntryPage in frontend/src/App.tsx
 
 **Checkpoint**: All three user stories (US1, US2, US3) should now be independently functional. Users can browse (US1), rate (US2), and add content (US3).
 

@@ -25,6 +25,13 @@ export interface IGenreTagRepository {
   findAll(): Promise<GenreTag[]>;
 
   /**
+   * Find multiple tags by their IDs
+   * @param ids Array of tag UUIDs
+   * @returns Array of found tags
+   */
+  findByIds(ids: string[]): Promise<GenreTag[]>;
+
+  /**
    * Find tags associated with a specific entry
    * @param entryId Entry UUID
    * @returns Array of tags for the entry

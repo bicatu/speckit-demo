@@ -17,6 +17,7 @@ import { GetStreamingPlatformsQueryHandler } from '../application/queries/platfo
 // Command Handlers
 import { AddRatingCommandHandler } from '../application/commands/ratings/AddRatingCommandHandler';
 import { UpdateRatingCommandHandler } from '../application/commands/ratings/UpdateRatingCommandHandler';
+import { CreateEntryCommandHandler } from '../application/commands/entries/CreateEntryCommandHandler';
 
 // Handler Registry
 import { HandlerRegistry } from '../application/HandlerRegistry';
@@ -108,6 +109,14 @@ export class Container {
       this.entryRepository,
     );
     HandlerRegistry.registerCommand('UpdateRatingCommand', updateRatingHandler);
+
+    // Register CreateEntryCommandHandler
+    const createEntryHandler = new CreateEntryCommandHandler(
+      this.entryRepository,
+      this.genreTagRepository,
+      this.ratingRepository,
+    );
+    HandlerRegistry.registerCommand('CreateEntryCommand', createEntryHandler);
   }
 
   // Getters for repositories (if needed elsewhere)

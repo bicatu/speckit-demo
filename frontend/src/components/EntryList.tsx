@@ -1,4 +1,3 @@
-import React from 'react';
 import { EntryCard } from './EntryCard';
 import type { Entry } from '../hooks/useEntries';
 

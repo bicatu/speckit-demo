@@ -5,6 +5,7 @@ import Router from '@koa/router';
 import DatabaseConnection from '../../infrastructure/persistence/DatabaseConnection';
 import { listEntries } from './actions/entries/listEntries';
 import { getEntryById } from './actions/entries/getEntryById';
+import { createEntry } from './actions/entries/createEntry';
 import { listTags } from './actions/tags/listTags';
 import { listPlatforms } from './actions/platforms/listPlatforms';
 import { addRating } from './actions/ratings/addRating';
@@ -27,7 +28,7 @@ export function createServer(): Koa {
           return origin;
         }
         // Fallback for production or when FRONTEND_URL is set
-        return process.env.FRONTEND_URL || false;
+        return process.env.FRONTEND_URL || 'http://localhost:5173';
       },
       credentials: true,
     }),
@@ -62,6 +63,7 @@ export function createServer(): Koa {
   // Entry routes
   router.get('/api/entries', listEntries);
   router.get('/api/entries/:id', getEntryById);
+  router.post('/api/entries', createEntry);
 
   // Rating routes
   router.post('/api/entries/:entryId/ratings', addRating);

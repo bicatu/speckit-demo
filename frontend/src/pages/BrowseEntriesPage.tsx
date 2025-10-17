@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEntries } from '../hooks/useEntries';
 import { useEntryDetails } from '../hooks/useEntryDetails';
@@ -150,9 +150,26 @@ export function BrowseEntriesPage() {
   // Show list view
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
-      <h1 style={{ fontSize: '32px', fontWeight: '600', marginBottom: '20px' }}>
-        Browse Movies & Series
-      </h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h1 style={{ fontSize: '32px', fontWeight: '600', margin: 0 }}>
+          Browse Movies & Series
+        </h1>
+        <button
+          onClick={() => navigate('/entries/add')}
+          style={{
+            padding: '10px 20px',
+            backgroundColor: '#1976d2',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            fontSize: '16px',
+            cursor: 'pointer',
+            fontWeight: '500',
+          }}
+        >
+          + Add Entry
+        </button>
+      </div>
 
       <FilterBar
         mediaType={mediaType}

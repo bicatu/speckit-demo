@@ -43,6 +43,20 @@ export class PostgresGenreTagRepository implements IGenreTagRepository {
     return result.rows.map((row) => this.mapToEntity(row));
   }
 
+  async findByIds(ids: string[]): Promise<GenreTag[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const placeholders = ids.map((_id, index) => `$${index + 1}`).join(', ');
+    const result = await this.pool.query(
+      `SELECT id, name FROM genre_tags WHERE id IN (${placeholders}) ORDER BY name ASC`,
+      ids,
+    );
+
+    return result.rows.map((row) => this.mapToEntity(row));
+  }
+
   async findByEntryId(entryId: string): Promise<GenreTag[]> {
     const result = await this.pool.query(
       `SELECT gt.id, gt.name 

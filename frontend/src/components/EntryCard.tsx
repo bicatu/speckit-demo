@@ -1,4 +1,3 @@
-import React from 'react';
 import type { Entry } from '../hooks/useEntries';
 
 interface EntryCardProps {

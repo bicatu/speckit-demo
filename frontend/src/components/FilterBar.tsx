@@ -1,4 +1,4 @@
-import React from 'react';
+
 import type { GenreTag } from '../hooks/useTags';
 import type { StreamingPlatform } from '../hooks/usePlatforms';
 
