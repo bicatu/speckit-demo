@@ -24,7 +24,6 @@ import { HandlerRegistry } from '../application/HandlerRegistry';
 export class Container {
   private static instance: Container;
   private pool: Pool;
-  private handlerRegistry: HandlerRegistry;
 
   // Repository instances
   private userRepository: PostgresUserRepository;
@@ -44,9 +43,6 @@ export class Container {
     this.streamingPlatformRepository = new PostgresStreamingPlatformRepository(this.pool);
     this.ratingRepository = new PostgresRatingRepository(this.pool);
 
-    // Initialize handler registry
-    this.handlerRegistry = HandlerRegistry.getInstance();
-
     // Register query handlers
     this.registerQueryHandlers();
   }
@@ -65,7 +61,7 @@ export class Container {
       this.genreTagRepository,
       this.streamingPlatformRepository,
     );
-    this.handlerRegistry.registerQueryHandler('GetEntriesQuery', getEntriesHandler);
+    HandlerRegistry.registerQuery('GetEntriesQuery', getEntriesHandler);
 
     // Register GetEntryByIdQueryHandler
     const getEntryByIdHandler = new GetEntryByIdQueryHandler(
@@ -75,17 +71,17 @@ export class Container {
       this.userRepository,
       this.ratingRepository,
     );
-    this.handlerRegistry.registerQueryHandler('GetEntryByIdQuery', getEntryByIdHandler);
+    HandlerRegistry.registerQuery('GetEntryByIdQuery', getEntryByIdHandler);
 
     // Register GetGenreTagsQueryHandler
     const getGenreTagsHandler = new GetGenreTagsQueryHandler(this.genreTagRepository);
-    this.handlerRegistry.registerQueryHandler('GetGenreTagsQuery', getGenreTagsHandler);
+    HandlerRegistry.registerQuery('GetGenreTagsQuery', getGenreTagsHandler);
 
     // Register GetStreamingPlatformsQueryHandler
     const getStreamingPlatformsHandler = new GetStreamingPlatformsQueryHandler(
       this.streamingPlatformRepository,
     );
-    this.handlerRegistry.registerQueryHandler(
+    HandlerRegistry.registerQuery(
       'GetStreamingPlatformsQuery',
       getStreamingPlatformsHandler,
     );

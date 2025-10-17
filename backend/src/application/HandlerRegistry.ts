@@ -1,6 +1,6 @@
 import { Context } from 'koa';
-import { CommandHandler } from '../../application/commands/CommandHandler';
-import { QueryHandler } from '../../application/queries/QueryHandler';
+import { CommandHandler } from './commands/CommandHandler';
+import { QueryHandler } from './queries/QueryHandler';
 
 /**
  * Type for HTTP action handlers

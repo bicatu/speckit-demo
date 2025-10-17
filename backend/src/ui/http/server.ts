@@ -1,7 +1,7 @@
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import Router from '@koa/router';
-import DatabaseConnection from '../infrastructure/persistence/DatabaseConnection';
+import DatabaseConnection from '../../infrastructure/persistence/DatabaseConnection';
 import { listEntries } from './actions/entries/listEntries';
 import { getEntryById } from './actions/entries/getEntryById';
 import { listTags } from './actions/tags/listTags';

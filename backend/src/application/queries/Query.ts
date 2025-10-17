@@ -1,8 +1,8 @@
 /**
- * Base interface for all queries in the system.
- * Queries represent read operations that do not modify state.
- * Following CQRS pattern - queries only read data, never write.
+ * Base interface for all queries
+ * Queries request data from the system without causing side effects
  */
+// @ts-ignore - TResult is used for type inference
 export interface Query<TResult = unknown> {
   /**
    * Unique identifier for tracing and debugging

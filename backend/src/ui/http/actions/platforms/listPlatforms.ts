@@ -15,7 +15,7 @@ export async function listPlatforms(ctx: Context): Promise<void> {
       timestamp: new Date(),
     };
 
-    const handler = HandlerRegistry.getInstance().getQueryHandler<GetStreamingPlatformsQueryHandler>(
+    const handler = HandlerRegistry.getQueryHandler<GetStreamingPlatformsQueryHandler>(
       'GetStreamingPlatformsQuery',
     );
 

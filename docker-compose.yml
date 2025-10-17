@@ -20,21 +20,21 @@ services:
     networks:
       - movietrack-network
 
-  oauth-mock:
-    image: public.ecr.aws/workos/authkit-mock:latest
-    container_name: movietrack-oauth-mock
-    environment:
-      - WORKOS_API_KEY=sk_test_mock_key
-      - WORKOS_CLIENT_ID=client_mock_id
-    ports:
-      - "3001:3001"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-    networks:
-      - movietrack-network
+  # oauth-mock:
+  #   image: public.ecr.aws/workos/authkit-mock:latest
+  #   container_name: movietrack-oauth-mock
+  #   environment:
+  #     - WORKOS_API_KEY=sk_test_mock_key
+  #     - WORKOS_CLIENT_ID=client_mock_id
+  #   ports:
+  #     - "3001:3001"
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 3
+  #   networks:
+  #     - movietrack-network
 
 volumes:
   postgres_data:

@@ -1,8 +1,8 @@
 import { Context } from 'koa';
 import { v4 as uuidv4 } from 'uuid';
-import { HandlerRegistry } from '../../utils/HandlerRegistry';
-import { GetEntriesQuery } from '../../../application/queries/entries/GetEntriesQuery';
-import { GetEntriesQueryHandler } from '../../../application/queries/entries/GetEntriesQueryHandler';
+import { HandlerRegistry } from '../../../../application/HandlerRegistry';
+import { GetEntriesQuery } from '../../../../application/queries/entries/GetEntriesQuery';
+import { GetEntriesQueryHandler } from '../../../../application/queries/entries/GetEntriesQueryHandler';
 import { formatErrorResponse } from '../../utils/errors';
 
 /**

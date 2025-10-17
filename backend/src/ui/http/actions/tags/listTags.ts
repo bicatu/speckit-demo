@@ -15,7 +15,7 @@ export async function listTags(ctx: Context): Promise<void> {
       timestamp: new Date(),
     };
 
-    const handler = HandlerRegistry.getInstance().getQueryHandler<GetGenreTagsQueryHandler>(
+    const handler = HandlerRegistry.getQueryHandler<GetGenreTagsQueryHandler>(
       'GetGenreTagsQuery',
     );
 

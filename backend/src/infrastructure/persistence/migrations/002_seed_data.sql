@@ -108,7 +108,7 @@ ON CONFLICT DO NOTHING;
 
 -- Update average ratings
 UPDATE entries SET average_rating = (
-  SELECT AVG(stars)::DECIMAL(3,2)
+  SELECT AVG(stars)::DECIMAL(4,2)
   FROM ratings
   WHERE ratings.entry_id = entries.id
 ) WHERE id IN (

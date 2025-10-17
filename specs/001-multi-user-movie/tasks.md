@@ -114,7 +114,6 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 - [X] T046 [P] [US1] Create GenreTag entity in backend/src/domain/entities/GenreTag.ts
 - [X] T047 [P] [US1] Create StreamingPlatform entity in backend/src/domain/entities/StreamingPlatform.ts
 - [X] T048 [P] [US1] Create Rating entity in backend/src/domain/entities/Rating.ts
-- [ ] T049 [P] [US1] Create EntryFilters value object in backend/src/domain/value-objects/EntryFilters.ts
 - [X] T050 [P] [US1] Create IUserRepository interface in backend/src/domain/repositories/IUserRepository.ts
 - [X] T051 [P] [US1] Create IEntryRepository interface in backend/src/domain/repositories/IEntryRepository.ts
 - [X] T052 [P] [US1] Create IGenreTagRepository interface in backend/src/domain/repositories/IGenreTagRepository.ts

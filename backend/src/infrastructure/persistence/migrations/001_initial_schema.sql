@@ -30,13 +30,13 @@ CREATE TABLE IF NOT EXISTS genre_tags (
 -- Entries table
 CREATE TABLE IF NOT EXISTS entries (
   id UUID PRIMARY KEY,
-  title VARCHAR(200) UNIQUE NOT NULL,
-  media_type VARCHAR(10) NOT NULL CHECK (media_type IN ('film', 'series')),
-  creator_id UUID REFERENCES users(id) ON DELETE SET NULL,
-  platform_id UUID REFERENCES streaming_platforms(id) ON DELETE SET NULL,
-  average_rating DECIMAL(3,2),
-  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+  title VARCHAR(255) NOT NULL UNIQUE,
+  media_type VARCHAR(20) NOT NULL CHECK (media_type IN ('film', 'series')),
+  creator_id UUID NOT NULL REFERENCES users(id),
+  platform_id UUID NOT NULL REFERENCES streaming_platforms(id),
+  average_rating DECIMAL(4,2),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS idx_entries_title ON entries(title);
