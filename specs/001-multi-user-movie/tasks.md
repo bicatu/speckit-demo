@@ -87,8 +87,8 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 
 #### Backend Tests
 
-- [ ] T029 [P] [US1] Unit test for Entry entity in backend/tests/unit/domain/entities/Entry.spec.ts
-- [ ] T030 [P] [US1] Unit test for GenreTag entity in backend/tests/unit/domain/entities/GenreTag.spec.ts
+- [X] T029 [P] [US1] Unit test for Entry entity in backend/tests/unit/domain/entities/Entry.spec.ts
+- [X] T030 [P] [US1] Unit test for GenreTag entity in backend/tests/unit/domain/entities/GenreTag.spec.ts
 - [ ] T031 [P] [US1] Unit test for EntryFilters value object in backend/tests/unit/domain/value-objects/EntryFilters.spec.ts
 - [ ] T032 [P] [US1] Unit test for GetEntriesQueryHandler in backend/tests/unit/application/queries/GetEntriesQueryHandler.spec.ts
 - [ ] T033 [P] [US1] Unit test for GetEntryDetailsQueryHandler in backend/tests/unit/application/queries/GetEntryDetailsQueryHandler.spec.ts
@@ -108,24 +108,24 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 
 ### Domain Layer Implementation for User Story 1
 
-- [ ] T044 [P] [US1] Create User entity in backend/src/domain/entities/User.ts
-- [ ] T045 [P] [US1] Create Entry entity with title, media_type ('film' or 'series'), and timestamps in backend/src/domain/entities/Entry.ts
+- [X] T044 [P] [US1] Create User entity in backend/src/domain/entities/User.ts
+- [X] T045 [P] [US1] Create Entry entity with title, media_type ('film' or 'series'), and timestamps in backend/src/domain/entities/Entry.ts
 - [ ] T045a [US1] Add title uniqueness validation method to Entry entity or create EntryFactory in backend/src/domain/entities/ to enforce FR-003 title uniqueness at domain layer
-- [ ] T046 [P] [US1] Create GenreTag entity in backend/src/domain/entities/GenreTag.ts
-- [ ] T047 [P] [US1] Create StreamingPlatform entity in backend/src/domain/entities/StreamingPlatform.ts
-- [ ] T048 [P] [US1] Create Rating entity in backend/src/domain/entities/Rating.ts
+- [X] T046 [P] [US1] Create GenreTag entity in backend/src/domain/entities/GenreTag.ts
+- [X] T047 [P] [US1] Create StreamingPlatform entity in backend/src/domain/entities/StreamingPlatform.ts
+- [X] T048 [P] [US1] Create Rating entity in backend/src/domain/entities/Rating.ts
 - [ ] T049 [P] [US1] Create EntryFilters value object in backend/src/domain/value-objects/EntryFilters.ts
-- [ ] T050 [P] [US1] Create IUserRepository interface in backend/src/domain/repositories/IUserRepository.ts
-- [ ] T051 [P] [US1] Create IEntryRepository interface in backend/src/domain/repositories/IEntryRepository.ts
-- [ ] T052 [P] [US1] Create IGenreTagRepository interface in backend/src/domain/repositories/IGenreTagRepository.ts
-- [ ] T053 [P] [US1] Create IRatingRepository interface in backend/src/domain/repositories/IRatingRepository.ts
+- [X] T050 [P] [US1] Create IUserRepository interface in backend/src/domain/repositories/IUserRepository.ts
+- [X] T051 [P] [US1] Create IEntryRepository interface in backend/src/domain/repositories/IEntryRepository.ts
+- [X] T052 [P] [US1] Create IGenreTagRepository interface in backend/src/domain/repositories/IGenreTagRepository.ts
+- [X] T053 [P] [US1] Create IRatingRepository interface in backend/src/domain/repositories/IRatingRepository.ts
 
 ### Application Layer Implementation for User Story 1
 
-- [ ] T054 [US1] Create GetEntriesQuery in backend/src/application/queries/GetEntriesQuery.ts
-- [ ] T055 [US1] Create GetEntriesQueryHandler in backend/src/application/queries/GetEntriesQueryHandler.ts (depends on T051)
-- [ ] T056 [US1] Create GetEntryDetailsQuery in backend/src/application/queries/GetEntryDetailsQuery.ts
-- [ ] T057 [US1] Create GetEntryDetailsQueryHandler in backend/src/application/queries/GetEntryDetailsQueryHandler.ts (depends on T051, T053)
+- [X] T054 [US1] Create GetEntriesQuery in backend/src/application/queries/GetEntriesQuery.ts
+- [X] T055 [US1] Create GetEntriesQueryHandler in backend/src/application/queries/GetEntriesQueryHandler.ts (depends on T051)
+- [X] T056 [US1] Create GetEntryDetailsQuery in backend/src/application/queries/GetEntryDetailsQuery.ts
+- [X] T057 [US1] Create GetEntryDetailsQueryHandler in backend/src/application/queries/GetEntryDetailsQueryHandler.ts (depends on T051, T053)
 - [ ] T058 [US1] Create GetGenreTagsQuery in backend/src/application/queries/GetGenreTagsQuery.ts
 - [ ] T059 [US1] Create GetGenreTagsQueryHandler in backend/src/application/queries/GetGenreTagsQueryHandler.ts (depends on T052)
 
@@ -139,13 +139,13 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 
 ### UI Layer Implementation for User Story 1 (Backend)
 
-- [ ] T065 [US1] Create Zod schema for GetEntriesRequest in backend/src/ui/http/actions/entries/getEntries.ts
-- [ ] T066 [US1] Implement getEntries action handler in backend/src/ui/http/actions/entries/getEntries.ts (validate query params → map to GetEntriesQuery → call handler → return paginated response)
-- [ ] T067 [US1] Create Zod schema for GetEntryDetailsRequest in backend/src/ui/http/actions/entries/getEntryDetails.ts
-- [ ] T068 [US1] Implement getEntryDetails action handler in backend/src/ui/http/actions/entries/getEntryDetails.ts (validate params → map to GetEntryDetailsQuery → call handler → return entry with ratings)
+- [X] T065 [US1] Create Zod schema for GetEntriesRequest in backend/src/ui/http/actions/entries/getEntries.ts
+- [X] T066 [US1] Implement getEntries action handler in backend/src/ui/http/actions/entries/getEntries.ts (validate query params → map to GetEntriesQuery → call handler → return paginated response)
+- [X] T067 [US1] Create Zod schema for GetEntryDetailsRequest in backend/src/ui/http/actions/entries/getEntryDetails.ts
+- [X] T068 [US1] Implement getEntryDetails action handler in backend/src/ui/http/actions/entries/getEntryDetails.ts (validate params → map to GetEntryDetailsQuery → call handler → return entry with ratings)
 - [ ] T069 [US1] Implement getTags action handler in backend/src/ui/http/actions/tags/getTags.ts
-- [ ] T070 [US1] Register GET /api/v1/entries route in backend/src/ui/http/server.ts
-- [ ] T071 [US1] Register GET /api/v1/entries/:entryId route in backend/src/ui/http/server.ts
+- [X] T070 [US1] Register GET /api/v1/entries route in backend/src/ui/http/server.ts
+- [X] T071 [US1] Register GET /api/v1/entries/:entryId route in backend/src/ui/http/server.ts
 - [ ] T072 [US1] Register GET /api/v1/tags route in backend/src/ui/http/server.ts
 
 ### UI Layer Implementation for User Story 1 (Frontend)

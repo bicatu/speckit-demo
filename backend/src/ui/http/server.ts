@@ -2,6 +2,8 @@ import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import Router from '@koa/router';
 import { DatabaseConnection } from '../infrastructure/persistence/DatabaseConnection';
+import { listEntries } from './actions/entries/listEntries';
+import { getEntryById } from './actions/entries/getEntryById';
 
 /**
  * Creates and configures the Koa application server
@@ -17,7 +19,7 @@ export function createServer(): Koa {
       enableTypes: ['json'],
       jsonLimit: '10mb',
       strict: true,
-      onerror: (err, ctx) => {
+      onerror: (_err: Error, ctx: Koa.Context) => {
         ctx.status = 400;
         ctx.body = { error: 'Invalid JSON payload' };
       },
@@ -25,7 +27,7 @@ export function createServer(): Koa {
   );
 
   // Health check endpoint
-  router.get('/api/health', async (ctx) => {
+  router.get('/api/health', async (ctx: Koa.Context) => {
     try {
       const db = DatabaseConnection.getInstance();
       await db.query('SELECT 1');
@@ -37,34 +39,18 @@ export function createServer(): Koa {
     }
   });
 
+  // Entry endpoints (User Story 1: Browse and Discover Content)
+  router.get('/api/entries', listEntries);
+  router.get('/api/entries/:id', getEntryById);
+
   // Mount router
   app.use(router.routes());
   app.use(router.allowedMethods());
 
   // Global error handler
-  app.on('error', (err, ctx) => {
+  app.on('error', (err: Error, _ctx: Koa.Context) => {
     console.error('Server error:', err);
   });
 
   return app;
-}
-
-/**
- * Starts the HTTP server on specified port
- * @param port Port number to listen on
- */
-export async function startServer(port: number = 3000): Promise<void> {
-  const app = createServer();
-
-  // Graceful shutdown
-  process.on('SIGTERM', async () => {
-    console.log('SIGTERM received, closing server...');
-    const db = DatabaseConnection.getInstance();
-    await db.close();
-    process.exit(0);
-  });
-
-  app.listen(port, () => {
-    console.log(`Server listening on http://localhost:${port}`);
-  });
 }

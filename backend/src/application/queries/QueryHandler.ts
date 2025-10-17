@@ -1,4 +1,7 @@
-import { Query, QueryResult } from './Query';
+import { Query, QueryResult as QResult } from './Query';
+
+// Re-export QueryResult for convenience
+export type QueryResult<TData = unknown> = QResult<TData>;
 
 /**
  * Base interface for all query handlers.
