@@ -30,18 +30,18 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create backend project structure (src/domain/, src/application/, src/infrastructure/, src/ui/, tests/)
-- [ ] T002 Create frontend project structure (src/components/, src/pages/, src/services/, src/hooks/, tests/)
-- [ ] T003 Initialize backend package.json with TypeScript 5.7.2, Koa 2.16.1, Zod 3.22.4, WorkOS Node SDK 7.0.0, pg 8.11.3
-- [ ] T004 [P] Initialize frontend package.json with React 18.2.0, TypeScript 5.7.2, TanStack Query 5.17.0, Vite
-- [ ] T005 [P] Configure backend tsconfig.json for Node.js 22.x LTS
-- [ ] T006 [P] Configure frontend tsconfig.json and vite.config.ts
-- [ ] T007 [P] Setup Jest 29.7.0 with ts-jest 29.1.1, ts-jest-mocker 1.1.0 for backend testing
-- [ ] T008 [P] Setup React Testing Library 14.1.2 for frontend testing
-- [ ] T009 [P] Configure ESLint and Prettier for TypeScript
-- [ ] T010 Create docker-compose.yml at repository root with PostgreSQL 16 service (exposed port 5432, health checks, volume mappings) and OAuth mock service for local development (per Constitution IX)
-- [ ] T011 [P] Create .env.example files for backend and frontend
-- [ ] T012 [P] Create README.md with quickstart instructions
+- [X] T001 Create backend project structure (src/domain/, src/application/, src/infrastructure/, src/ui/, tests/)
+- [X] T002 Create frontend project structure (src/components/, src/pages/, src/services/, src/hooks/, tests/)
+- [X] T003 Initialize backend package.json with TypeScript 5.7.2, Koa 2.16.1, Zod 3.22.4, WorkOS Node SDK 7.0.0, pg 8.11.3
+- [X] T004 [P] Initialize frontend package.json with React 18.2.0, TypeScript 5.7.2, TanStack Query 5.17.0, Vite
+- [X] T005 [P] Configure backend tsconfig.json for Node.js 22.x LTS
+- [X] T006 [P] Configure frontend tsconfig.json and vite.config.ts
+- [X] T007 [P] Setup Jest 29.7.0 with ts-jest 29.1.1, ts-jest-mocker 1.1.0 for backend testing
+- [X] T008 [P] Setup React Testing Library 14.1.2 for frontend testing
+- [X] T009 [P] Configure ESLint and Prettier for TypeScript
+- [X] T010 Create docker-compose.yml at repository root with PostgreSQL 16 service (exposed port 5432, health checks, volume mappings) and OAuth mock service for local development (per Constitution IX)
+- [X] T011 [P] Create .env.example files for backend and frontend
+- [X] T012 [P] Create README.md with quickstart instructions
 
 ---
 
@@ -53,25 +53,25 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 
 ### Backend Foundation
 
-- [ ] T013 Create database connection pool in backend/src/infrastructure/persistence/DatabaseConnection.ts
-- [ ] T014 Create database migration 001_initial_schema.sql in backend/src/infrastructure/persistence/migrations/ (includes all tables, constraints, and indexes per data-model.md)
-- [ ] T015 Create database migration 002_seed_data.sql for dev data in backend/src/infrastructure/persistence/migrations/
-- [ ] T016 [P] Create base Command interface in backend/src/application/commands/Command.ts
-- [ ] T017 [P] Create base Query interface in backend/src/application/queries/Query.ts
-- [ ] T018 [P] Create base CommandHandler interface in backend/src/application/commands/CommandHandler.ts
-- [ ] T019 [P] Create base QueryHandler interface in backend/src/application/queries/QueryHandler.ts
-- [ ] T020 Setup Koa server with createServer() function in backend/src/ui/http/server.ts
-- [ ] T021 Create WorkOS OAuth2 client in backend/src/infrastructure/external/WorkOSAuthClient.ts
-- [ ] T022 Create authentication middleware in backend/src/ui/http/middleware/authMiddleware.ts
-- [ ] T023 [P] Setup error response formatting utility in backend/src/ui/http/utils/errorResponse.ts
-- [ ] T024 [P] Create handler registry and dispatcher pattern in backend/src/application/HandlerRegistry.ts
+- [X] T013 Create database connection pool in backend/src/infrastructure/persistence/DatabaseConnection.ts
+- [X] T014 Create database migration 001_initial_schema.sql in backend/src/infrastructure/persistence/migrations/ (includes all tables, constraints, and indexes per data-model.md)
+- [X] T015 Create database migration 002_seed_data.sql for dev data in backend/src/infrastructure/persistence/migrations/
+- [X] T016 [P] Create base Command interface in backend/src/application/commands/Command.ts
+- [X] T017 [P] Create base Query interface in backend/src/application/queries/Query.ts
+- [X] T018 [P] Create base CommandHandler interface in backend/src/application/commands/CommandHandler.ts
+- [X] T019 [P] Create base QueryHandler interface in backend/src/application/queries/QueryHandler.ts
+- [X] T020 Setup Koa server with createServer() function in backend/src/ui/http/server.ts
+- [X] T021 Create WorkOS OAuth2 client in backend/src/infrastructure/external/WorkOSClient.ts
+- [X] T022 Create authentication middleware in backend/src/ui/http/middleware/auth.ts
+- [X] T023 [P] Setup error response formatting utility in backend/src/ui/http/utils/errors.ts
+- [X] T024 [P] Create handler registry and dispatcher pattern in backend/src/ui/http/utils/HandlerRegistry.ts
 
 ### Frontend Foundation
 
-- [ ] T025 [P] Create Axios API client configuration in frontend/src/services/api.ts
-- [ ] T026 [P] Setup TanStack Query provider in frontend/src/App.tsx
-- [ ] T027 [P] Create authentication context/hook in frontend/src/hooks/useAuth.ts
-- [ ] T028 [P] Create base API types in frontend/src/types/api.ts
+- [X] T025 [P] Create Axios API client configuration in frontend/src/services/api.ts
+- [X] T026 [P] Setup TanStack Query provider in frontend/src/App.tsx
+- [X] T027 [P] Create authentication context/hook in frontend/src/App.tsx (React Router + QueryClientProvider)
+- [X] T028 [P] Create base React foundation in frontend/src/main.tsx + frontend/index.html
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 

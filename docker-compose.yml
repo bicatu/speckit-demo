@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: movietrack-postgres
+    environment:
+      POSTGRES_USER: movietrack
+      POSTGRES_PASSWORD: movietrack_dev_password
+      POSTGRES_DB: movietrack_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U movietrack"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - movietrack-network
+
+  oauth-mock:
+    image: public.ecr.aws/workos/authkit-mock:latest
+    container_name: movietrack-oauth-mock
+    environment:
+      - WORKOS_API_KEY=sk_test_mock_key
+      - WORKOS_CLIENT_ID=client_mock_id
+    ports:
+      - "3001:3001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - movietrack-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  movietrack-network:
+    driver: bridge
