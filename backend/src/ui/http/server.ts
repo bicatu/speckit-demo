@@ -1,5 +1,6 @@
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
+import cors from '@koa/cors';
 import Router from '@koa/router';
 import DatabaseConnection from '../../infrastructure/persistence/DatabaseConnection';
 import { listEntries } from './actions/entries/listEntries';
@@ -14,6 +15,22 @@ import { listPlatforms } from './actions/platforms/listPlatforms';
 export function createServer(): Koa {
   const app = new Koa();
   const router = new Router();
+
+  // Middleware: CORS
+  app.use(
+    cors({
+      origin: (ctx: Koa.Context) => {
+        const origin = ctx.request.headers.origin;
+        // Allow localhost on any port for development
+        if (origin && origin.match(/^http:\/\/localhost:\d+$/)) {
+          return origin;
+        }
+        // Fallback for production or when FRONTEND_URL is set
+        return process.env.FRONTEND_URL || false;
+      },
+      credentials: true,
+    }),
+  );
 
   // Middleware: Body parser for JSON requests
   app.use(
