@@ -21,6 +21,7 @@ const MockWorkOSClient = {
  * Authenticated user context added to Koa state
  */
 export interface AuthenticatedUser {
+  id: string;
   userId: string;
   oauthSubject: string;
 }
@@ -45,6 +46,7 @@ export async function authMiddleware(ctx: Context, next: Next): Promise<void> {
 
     // Add authenticated user to context state
     ctx.state.user = {
+      id: sub,
       userId: sub,
       oauthSubject: sub,
     } as AuthenticatedUser;

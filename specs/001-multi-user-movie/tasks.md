@@ -229,13 +229,13 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 - [ ] T103 [P] [US3] Unit test for CreateEntryCommand in backend/tests/unit/application/commands/CreateEntryCommand.spec.ts
 - [X] T104 [P] [US3] Unit test for CreateEntryCommandHandler in backend/tests/unit/application/commands/CreateEntryCommandHandler.spec.ts
 - [ ] T105 [P] [US3] Integration test for CreateEntryCommand flow in backend/tests/integration/application/commands/CreateEntryCommand.spec.ts
-- [ ] T106 [P] [US3] Contract test for POST /entries endpoint in backend/tests/contract/endpoints/createEntry.spec.ts
-- [ ] T107 [P] [US3] Unit test for GetStreamingPlatformsQueryHandler in backend/tests/unit/application/queries/GetStreamingPlatformsQueryHandler.spec.ts
+- [X] T106 [P] [US3] Contract test for POST /entries endpoint in backend/tests/contract/endpoints/createEntry.spec.ts
+- [X] T107 [P] [US3] Unit test for GetStreamingPlatformsQueryHandler in backend/tests/unit/application/queries/GetStreamingPlatformsQueryHandler.spec.ts
 
 #### Frontend Tests
 
-- [ ] T108 [P] [US3] Unit test for AddEntryPage in frontend/tests/unit/pages/AddEntryPage.spec.tsx
-- [ ] T109 [P] [US3] Integration test for add entry flow in frontend/tests/integration/pages/AddEntryPage.spec.tsx
+- [X] T108 [P] [US3] Unit test for AddEntryPage in frontend/tests/unit/pages/AddEntryPage.spec.tsx
+- [X] T109 [P] [US3] Integration test for add entry flow in frontend/tests/integration/pages/AddEntryPage.spec.tsx
 
 ### Domain Layer Implementation for User Story 3
 

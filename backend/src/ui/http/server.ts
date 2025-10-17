@@ -3,6 +3,7 @@ import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
 import Router from '@koa/router';
 import DatabaseConnection from '../../infrastructure/persistence/DatabaseConnection';
+import { authMiddleware } from './middleware/auth';
 import { listEntries } from './actions/entries/listEntries';
 import { getEntryById } from './actions/entries/getEntryById';
 import { createEntry } from './actions/entries/createEntry';
@@ -63,10 +64,10 @@ export function createServer(): Koa {
   // Entry routes
   router.get('/api/entries', listEntries);
   router.get('/api/entries/:id', getEntryById);
-  router.post('/api/entries', createEntry);
+  router.post('/api/entries', authMiddleware, createEntry);
 
   // Rating routes
-  router.post('/api/entries/:entryId/ratings', addRating);
+  router.post('/api/entries/:entryId/ratings', authMiddleware, addRating);
 
   // Tag and Platform routes (for filters)
   router.get('/api/tags', listTags);
