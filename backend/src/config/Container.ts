@@ -14,6 +14,10 @@ import { GetEntryByIdQueryHandler } from '../application/queries/entries/GetEntr
 import { GetGenreTagsQueryHandler } from '../application/queries/tags/GetGenreTagsQueryHandler';
 import { GetStreamingPlatformsQueryHandler } from '../application/queries/platforms/GetStreamingPlatformsQueryHandler';
 
+// Command Handlers
+import { AddRatingCommandHandler } from '../application/commands/ratings/AddRatingCommandHandler';
+import { UpdateRatingCommandHandler } from '../application/commands/ratings/UpdateRatingCommandHandler';
+
 // Handler Registry
 import { HandlerRegistry } from '../application/HandlerRegistry';
 
@@ -45,6 +49,9 @@ export class Container {
 
     // Register query handlers
     this.registerQueryHandlers();
+    
+    // Register command handlers
+    this.registerCommandHandlers();
   }
 
   public static getInstance(): Container {
@@ -85,6 +92,22 @@ export class Container {
       'GetStreamingPlatformsQuery',
       getStreamingPlatformsHandler,
     );
+  }
+
+  private registerCommandHandlers(): void {
+    // Register AddRatingCommandHandler
+    const addRatingHandler = new AddRatingCommandHandler(
+      this.ratingRepository,
+      this.entryRepository,
+    );
+    HandlerRegistry.registerCommand('AddRatingCommand', addRatingHandler);
+
+    // Register UpdateRatingCommandHandler
+    const updateRatingHandler = new UpdateRatingCommandHandler(
+      this.ratingRepository,
+      this.entryRepository,
+    );
+    HandlerRegistry.registerCommand('UpdateRatingCommand', updateRatingHandler);
   }
 
   // Getters for repositories (if needed elsewhere)

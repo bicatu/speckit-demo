@@ -7,6 +7,7 @@ import { listEntries } from './actions/entries/listEntries';
 import { getEntryById } from './actions/entries/getEntryById';
 import { listTags } from './actions/tags/listTags';
 import { listPlatforms } from './actions/platforms/listPlatforms';
+import { addRating } from './actions/ratings/addRating';
 
 /**
  * Creates and configures the Koa application server
@@ -61,6 +62,9 @@ export function createServer(): Koa {
   // Entry routes
   router.get('/api/entries', listEntries);
   router.get('/api/entries/:id', getEntryById);
+
+  // Rating routes
+  router.post('/api/entries/:entryId/ratings', addRating);
 
   // Tag and Platform routes (for filters)
   router.get('/api/tags', listTags);
