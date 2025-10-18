@@ -18,6 +18,11 @@ import { GetStreamingPlatformsQueryHandler } from '../application/queries/platfo
 import { AddRatingCommandHandler } from '../application/commands/ratings/AddRatingCommandHandler';
 import { UpdateRatingCommandHandler } from '../application/commands/ratings/UpdateRatingCommandHandler';
 import { CreateEntryCommandHandler } from '../application/commands/entries/CreateEntryCommandHandler';
+import { UpdateEntryCommandHandler } from '../application/commands/entries/UpdateEntryCommandHandler';
+import { CreateStreamingPlatformCommandHandler } from '../application/commands/platforms/CreateStreamingPlatformCommandHandler';
+import { DeleteStreamingPlatformCommandHandler } from '../application/commands/platforms/DeleteStreamingPlatformCommandHandler';
+import { CreateGenreTagCommandHandler } from '../application/commands/tags/CreateGenreTagCommandHandler';
+import { DeleteGenreTagCommandHandler } from '../application/commands/tags/DeleteGenreTagCommandHandler';
 
 // Handler Registry
 import { HandlerRegistry } from '../application/HandlerRegistry';
@@ -118,6 +123,39 @@ export class Container {
       this.ratingRepository,
     );
     HandlerRegistry.registerCommand('CreateEntryCommand', createEntryHandler);
+
+    // Register UpdateEntryCommandHandler
+    const updateEntryHandler = new UpdateEntryCommandHandler(
+      this.entryRepository,
+      this.genreTagRepository,
+    );
+    HandlerRegistry.registerCommand('UpdateEntryCommand', updateEntryHandler);
+
+    // Register CreateStreamingPlatformCommandHandler
+    const createPlatformHandler = new CreateStreamingPlatformCommandHandler(
+      this.streamingPlatformRepository,
+    );
+    HandlerRegistry.registerCommand('CreateStreamingPlatformCommand', createPlatformHandler);
+
+    // Register DeleteStreamingPlatformCommandHandler
+    const deletePlatformHandler = new DeleteStreamingPlatformCommandHandler(
+      this.streamingPlatformRepository,
+      this.entryRepository,
+    );
+    HandlerRegistry.registerCommand('DeleteStreamingPlatformCommand', deletePlatformHandler);
+
+    // Register CreateGenreTagCommandHandler
+    const createTagHandler = new CreateGenreTagCommandHandler(
+      this.genreTagRepository,
+    );
+    HandlerRegistry.registerCommand('CreateGenreTagCommand', createTagHandler);
+
+    // Register DeleteGenreTagCommandHandler
+    const deleteTagHandler = new DeleteGenreTagCommandHandler(
+      this.genreTagRepository,
+      this.entryRepository,
+    );
+    HandlerRegistry.registerCommand('DeleteGenreTagCommand', deleteTagHandler);
   }
 
   // Getters for repositories (if needed elsewhere)

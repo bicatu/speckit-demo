@@ -1,6 +1,8 @@
 import { Command } from '../Command';
 
 export class UpdateEntryCommand implements Command {
+  public readonly commandId: string;
+  public readonly timestamp: Date;
   public readonly entryId: string;
   public readonly title?: string;
   public readonly mediaType?: 'film' | 'series';
@@ -14,6 +16,9 @@ export class UpdateEntryCommand implements Command {
     platformId?: string;
     tagIds?: string[];
   }) {
+    this.commandId = crypto.randomUUID();
+    this.timestamp = new Date();
+
     if (!data.entryId || data.entryId.trim() === '') {
       throw new Error('Entry ID is required');
     }

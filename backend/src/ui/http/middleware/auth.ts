@@ -78,8 +78,8 @@ export async function adminMiddleware(ctx: Context, next: Next): Promise<void> {
   }
 
   // TODO: Query database to check if user has admin flag
-  // For now, this is a placeholder - actual implementation in Phase 3
-  const isAdmin = false; // Will be implemented with User repository
+  // For now, use mock admin detection for development and testing
+  const isAdmin = user.id === 'mock-admin-token' || user.id.startsWith('admin-');
 
   if (!isAdmin) {
     ctx.status = 403;

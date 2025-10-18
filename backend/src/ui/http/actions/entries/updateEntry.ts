@@ -1,8 +1,8 @@
 import { Context } from 'koa';
 import { z } from 'zod';
-import { UpdateEntryCommand } from '../../../application/commands/entries/UpdateEntryCommand';
-import { UpdateEntryCommandHandler } from '../../../application/commands/entries/UpdateEntryCommandHandler';
-import { formatZodErrors } from '../utils/errors';
+import { UpdateEntryCommand } from '../../../../application/commands/entries/UpdateEntryCommand';
+import { UpdateEntryCommandHandler } from '../../../../application/commands/entries/UpdateEntryCommandHandler';
+import { HandlerRegistry } from '../../../../application/HandlerRegistry';
 
 const UpdateEntryRequestSchema = z
   .object({
@@ -20,17 +20,13 @@ const UpdateEntryRequestSchema = z
 
 type UpdateEntryRequest = z.infer<typeof UpdateEntryRequestSchema>;
 
-export async function updateEntry(
-  ctx: Context,
-  handler: UpdateEntryCommandHandler,
-): Promise<void> {
+export async function updateEntry(ctx: Context): Promise<void> {
   const { entryId } = ctx.params;
 
   if (!entryId) {
     ctx.status = 400;
     ctx.body = {
-      message: 'Entry ID is required',
-      errors: [],
+      error: 'Entry ID is required',
     };
     return;
   }
@@ -40,8 +36,8 @@ export async function updateEntry(
   if (!validation.success) {
     ctx.status = 400;
     ctx.body = {
-      message: 'Validation failed',
-      errors: formatZodErrors(validation.error),
+      error: 'Validation failed',
+      details: validation.error.errors,
     };
     return;
   }
@@ -57,6 +53,7 @@ export async function updateEntry(
       tagIds: data.tagIds,
     });
 
+    const handler = HandlerRegistry.getCommandHandler<UpdateEntryCommandHandler>('UpdateEntryCommand');
     await handler.handle(command);
 
     ctx.status = 200;
@@ -68,8 +65,7 @@ export async function updateEntry(
       if (error.message === 'Entry not found') {
         ctx.status = 404;
         ctx.body = {
-          message: 'Entry not found',
-          errors: [],
+          error: 'Entry not found',
         };
         return;
       }
@@ -77,8 +73,7 @@ export async function updateEntry(
       if (error.message === 'Title already exists') {
         ctx.status = 409;
         ctx.body = {
-          message: 'An entry with this title already exists',
-          errors: [],
+          error: 'An entry with this title already exists',
         };
         return;
       }
@@ -86,13 +81,15 @@ export async function updateEntry(
       if (error.message === 'One or more tags not found') {
         ctx.status = 400;
         ctx.body = {
-          message: 'One or more specified tags do not exist',
-          errors: [],
+          error: 'One or more specified tags do not exist',
         };
         return;
       }
     }
 
-    throw error;
+    ctx.status = 500;
+    ctx.body = {
+      error: 'An error occurred while updating the entry',
+    };
   }
 }

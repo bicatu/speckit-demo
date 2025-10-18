@@ -3,7 +3,7 @@ import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
 import Router from '@koa/router';
 import DatabaseConnection from '../../infrastructure/persistence/DatabaseConnection';
-import { authMiddleware } from './middleware/auth';
+import { authMiddleware, adminMiddleware } from './middleware/auth';
 import { listEntries } from './actions/entries/listEntries';
 import { getEntryById } from './actions/entries/getEntryById';
 import { createEntry } from './actions/entries/createEntry';
@@ -11,6 +11,10 @@ import { updateEntry } from './actions/entries/updateEntry';
 import { listTags } from './actions/tags/listTags';
 import { listPlatforms } from './actions/platforms/listPlatforms';
 import { addRating } from './actions/ratings/addRating';
+import { createPlatform } from './actions/platforms/createPlatform';
+import { deletePlatform } from './actions/platforms/deletePlatform';
+import { createTag } from './actions/tags/createTag';
+import { deleteTag } from './actions/tags/deleteTag';
 
 /**
  * Creates and configures the Koa application server
@@ -74,6 +78,14 @@ export function createServer(): Koa {
   // Tag and Platform routes (for filters)
   router.get('/api/tags', listTags);
   router.get('/api/platforms', listPlatforms);
+
+  // Admin routes for platform management
+  router.post('/api/platforms', authMiddleware, adminMiddleware, createPlatform);
+  router.delete('/api/platforms/:platformId', authMiddleware, adminMiddleware, deletePlatform);
+
+  // Admin routes for tag management
+  router.post('/api/tags', authMiddleware, adminMiddleware, createTag);
+  router.delete('/api/tags/:tagId', authMiddleware, adminMiddleware, deleteTag);
 
   // Register routes
   app.use(router.routes()).use(router.allowedMethods());
