@@ -366,36 +366,36 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 
 ### Application Layer Implementation for User Story 6
 
-- [ ] T156 [P] [US6] Create CreateStreamingPlatformCommand in backend/src/application/commands/CreateStreamingPlatformCommand.ts
-- [ ] T157 [US6] Create CreateStreamingPlatformCommandHandler in backend/src/application/commands/CreateStreamingPlatformCommandHandler.ts (depends on T110)
-- [ ] T158 [P] [US6] Create DeleteStreamingPlatformCommand in backend/src/application/commands/DeleteStreamingPlatformCommand.ts
-- [ ] T159 [US6] Create DeleteStreamingPlatformCommandHandler in backend/src/application/commands/DeleteStreamingPlatformCommandHandler.ts (depends on T051, T110) - MUST validate platform is not referenced by any entries via IEntryRepository before deletion, throw error if in use (FR-016)
-- [ ] T160 [P] [US6] Create CreateGenreTagCommand in backend/src/application/commands/CreateGenreTagCommand.ts
-- [ ] T161 [US6] Create CreateGenreTagCommandHandler in backend/src/application/commands/CreateGenreTagCommandHandler.ts (depends on T052)
-- [ ] T162 [P] [US6] Create DeleteGenreTagCommand in backend/src/application/commands/DeleteGenreTagCommand.ts
-- [ ] T163 [US6] Create DeleteGenreTagCommandHandler in backend/src/application/commands/DeleteGenreTagCommandHandler.ts (depends on T051, T052) - MUST validate tag is not referenced by any entries via IEntryRepository before deletion, throw error if in use (FR-017)
+- [X] T156 [P] [US6] Create CreateStreamingPlatformCommand in backend/src/application/commands/CreateStreamingPlatformCommand.ts
+- [X] T157 [US6] Create CreateStreamingPlatformCommandHandler in backend/src/application/commands/CreateStreamingPlatformCommandHandler.ts (depends on T110)
+- [X] T158 [P] [US6] Create DeleteStreamingPlatformCommand in backend/src/application/commands/DeleteStreamingPlatformCommand.ts
+- [X] T159 [US6] Create DeleteStreamingPlatformCommandHandler in backend/src/application/commands/DeleteStreamingPlatformCommandHandler.ts (depends on T051, T110) - MUST validate platform is not referenced by any entries via IEntryRepository before deletion, throw error if in use (FR-016)
+- [X] T160 [P] [US6] Create CreateGenreTagCommand in backend/src/application/commands/CreateGenreTagCommand.ts
+- [X] T161 [US6] Create CreateGenreTagCommandHandler in backend/src/application/commands/CreateGenreTagCommandHandler.ts (depends on T052)
+- [X] T162 [P] [US6] Create DeleteGenreTagCommand in backend/src/application/commands/DeleteGenreTagCommand.ts
+- [X] T163 [US6] Create DeleteGenreTagCommandHandler in backend/src/application/commands/DeleteGenreTagCommandHandler.ts (depends on T051, T052) - MUST validate tag is not referenced by any entries via IEntryRepository before deletion, throw error if in use (FR-017)
 
 ### UI Layer Implementation for User Story 6 (Backend)
 
-- [ ] T164 [US6] Create admin authorization middleware in backend/src/ui/http/middleware/adminMiddleware.ts
-- [ ] T165 [P] [US6] Create Zod schema and implement createPlatform action in backend/src/ui/http/actions/platforms/createPlatform.ts
-- [ ] T166 [P] [US6] Implement deletePlatform action in backend/src/ui/http/actions/platforms/deletePlatform.ts
-- [ ] T167 [P] [US6] Create Zod schema and implement createTag action in backend/src/ui/http/actions/tags/createTag.ts
-- [ ] T168 [P] [US6] Implement deleteTag action in backend/src/ui/http/actions/tags/deleteTag.ts
-- [ ] T169 [US6] Register POST /api/v1/platforms route with admin middleware in backend/src/ui/http/server.ts
-- [ ] T170 [US6] Register DELETE /api/v1/platforms/:platformId route with admin middleware in backend/src/ui/http/server.ts
-- [ ] T171 [US6] Register POST /api/v1/tags route with admin middleware in backend/src/ui/http/server.ts
-- [ ] T172 [US6] Register DELETE /api/v1/tags/:tagId route with admin middleware in backend/src/ui/http/server.ts
+- [X] T164 [US6] Create admin authorization middleware in backend/src/ui/http/middleware/adminMiddleware.ts
+- [X] T165 [P] [US6] Create Zod schema and implement createPlatform action in backend/src/ui/http/actions/platforms/createPlatform.ts
+- [X] T166 [P] [US6] Implement deletePlatform action in backend/src/ui/http/actions/platforms/deletePlatform.ts
+- [X] T167 [P] [US6] Create Zod schema and implement createTag action in backend/src/ui/http/actions/tags/createTag.ts
+- [X] T168 [P] [US6] Implement deleteTag action in backend/src/ui/http/actions/tags/deleteTag.ts
+- [X] T169 [US6] Register POST /api/v1/platforms route with admin middleware in backend/src/ui/http/server.ts
+- [X] T170 [US6] Register DELETE /api/v1/platforms/:platformId route with admin middleware in backend/src/ui/http/server.ts
+- [X] T171 [US6] Register POST /api/v1/tags route with admin middleware in backend/src/ui/http/server.ts
+- [X] T172 [US6] Register DELETE /api/v1/tags/:tagId route with admin middleware in backend/src/ui/http/server.ts
 
 ### UI Layer Implementation for User Story 6 (Frontend)
 
-- [ ] T173 [P] [US6] Create useCreatePlatform hook in frontend/src/hooks/useCreatePlatform.ts
-- [ ] T174 [P] [US6] Create useDeletePlatform hook in frontend/src/hooks/useDeletePlatform.ts
-- [ ] T175 [P] [US6] Create useCreateTag hook in frontend/src/hooks/useCreateTag.ts
-- [ ] T176 [P] [US6] Create useDeleteTag hook in frontend/src/hooks/useDeleteTag.ts
-- [ ] T177 [US6] Implement AdminPage in frontend/src/pages/AdminPage.tsx (platform and tag management UI)
-- [ ] T178 [US6] Add admin route protection in frontend/src/App.tsx
-- [ ] T179 [US6] Add admin navigation link (conditionally shown) in frontend/src/App.tsx
+- [X] T173 [P] [US6] Create useCreatePlatform hook in frontend/src/hooks/useCreatePlatform.ts
+- [X] T174 [P] [US6] Create useDeletePlatform hook in frontend/src/hooks/useDeletePlatform.ts
+- [X] T175 [P] [US6] Create useCreateTag hook in frontend/src/hooks/useCreateTag.ts
+- [X] T176 [P] [US6] Create useDeleteTag hook in frontend/src/hooks/useDeleteTag.ts
+- [X] T177 [US6] Implement AdminPage in frontend/src/pages/AdminPage.tsx (platform and tag management UI)
+- [X] T178 [US6] Add admin route protection in frontend/src/App.tsx
+- [X] T179 [US6] Add admin navigation link (conditionally shown) in frontend/src/App.tsx
 
 **Checkpoint**: Admin users can now manage platforms and tags, completing all user stories.
 
@@ -409,25 +409,25 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 
 ### Tests (TDD - Write FIRST, ensure they FAIL)
 
-- [ ] T180 [P] Unit test for DeleteUserCommand in backend/tests/unit/application/commands/DeleteUserCommand.spec.ts
-- [ ] T181 [P] Integration test for user anonymization in backend/tests/integration/application/commands/DeleteUserCommand.spec.ts (MUST verify entries/ratings preserve data with user reference replaced by "Deleted User" per FR-019)
-- [ ] T182 [P] Contract test for DELETE /users/me endpoint in backend/tests/contract/endpoints/deleteUser.spec.ts
+- [X] T180 [P] Unit test for DeleteUserCommand in backend/tests/unit/application/commands/DeleteUserCommand.spec.ts
+- [X] T181 [P] Integration test for user anonymization in backend/tests/integration/application/commands/DeleteUserCommand.spec.ts (MUST verify entries/ratings preserve data with user reference replaced by "Deleted User" per FR-019)
+- [X] T182 [P] Contract test for DELETE /users/me endpoint in backend/tests/contract/endpoints/deleteUser.spec.ts
 
 ### Application Layer Implementation
 
-- [ ] T183 Create DeleteUserCommand in backend/src/application/commands/DeleteUserCommand.ts
-- [ ] T184 Create DeleteUserCommandHandler in backend/src/application/commands/DeleteUserCommandHandler.ts (depends on T050, anonymizes data)
-- [ ] T184a Add validation to DeleteUserCommandHandler to prevent deletion of last admin user (query IUserRepository for admin count, throw error if user is last admin)
+- [X] T183 Create DeleteUserCommand in backend/src/application/commands/DeleteUserCommand.ts
+- [X] T184 Create DeleteUserCommandHandler in backend/src/application/commands/DeleteUserCommandHandler.ts (depends on T050, anonymizes data)
+- [X] T184a Add validation to DeleteUserCommandHandler to prevent deletion of last admin user (query IUserRepository for admin count, throw error if user is last admin)
 
 ### UI Layer Implementation (Backend)
 
-- [ ] T185 Implement deleteUser action handler in backend/src/ui/http/actions/users/deleteUser.ts
-- [ ] T186 Register DELETE /api/v1/users/me route in backend/src/ui/http/server.ts
+- [X] T185 Implement deleteUser action handler in backend/src/ui/http/actions/users/deleteUser.ts
+- [X] T186 Register DELETE /api/v1/users/me route in backend/src/ui/http/server.ts
 
 ### UI Layer Implementation (Frontend)
 
-- [ ] T187 Create useDeleteAccount hook in frontend/src/hooks/useDeleteAccount.ts
-- [ ] T188 Add account deletion UI to user profile/settings page
+- [X] T187 Create useDeleteAccount hook in frontend/src/hooks/useDeleteAccount.ts
+- [X] T188 Add account deletion UI to user profile/settings page
 
 ---
 

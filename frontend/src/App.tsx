@@ -5,6 +5,7 @@ import { queryClient } from './services/queryClient';
 import { BrowseEntriesPage } from './pages/BrowseEntriesPage';
 import { AddEntryPage } from './pages/AddEntryPage';
 import { AdminPage } from './pages/AdminPage';
+import { SettingsPage } from './pages/SettingsPage';
 
 // Placeholder components (will be implemented in subsequent phases)
 const HomePage: React.FC = () => <div>Home Page - Coming Soon</div>;
@@ -27,6 +28,7 @@ function App() {
           <Link to="/entries" style={{ marginRight: '15px' }}>Browse</Link>
           <Link to="/entries/add" style={{ marginRight: '15px' }}>Add Entry</Link>
           {isAdmin && <Link to="/admin" style={{ marginRight: '15px' }}>Admin</Link>}
+          <Link to="/settings" style={{ marginRight: '15px' }}>Settings</Link>
         </nav>
 
         <Routes>
@@ -34,6 +36,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/entries" element={<BrowseEntriesPage />} />
           <Route path="/entries/add" element={<AddEntryPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
           {isAdmin && <Route path="/admin" element={<AdminPage />} />}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

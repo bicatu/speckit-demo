@@ -89,4 +89,19 @@ export interface IEntryRepository {
    * @returns Array of recent entries
    */
   findRecent(limit: number): Promise<Entry[]>;
+
+  /**
+   * Find all entries created by a specific user
+   * @param creatorId User UUID
+   * @returns Array of entries created by the user
+   */
+  findByCreatorId(creatorId: string): Promise<Entry[]>;
+
+  /**
+   * Anonymize creator for an entry (set creator_id to NULL)
+   * Used when a user account is deleted
+   * @param entryId Entry UUID
+   * @returns void
+   */
+  anonymizeCreator(entryId: string): Promise<void>;
 }

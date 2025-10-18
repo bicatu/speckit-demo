@@ -278,6 +278,25 @@ export class PostgresEntryRepository implements IEntryRepository {
     return result.rows.map((row) => this.mapToEntity(row));
   }
 
+  async findByCreatorId(creatorId: string): Promise<Entry[]> {
+    const result = await this.pool.query(
+      `SELECT id, title, media_type, creator_id, platform_id, average_rating, created_at, updated_at
+       FROM entries
+       WHERE creator_id = $1
+       ORDER BY created_at DESC`,
+      [creatorId],
+    );
+
+    return result.rows.map((row) => this.mapToEntity(row));
+  }
+
+  async anonymizeCreator(entryId: string): Promise<void> {
+    await this.pool.query(
+      'UPDATE entries SET creator_id = NULL WHERE id = $1',
+      [entryId]
+    );
+  }
+
   private mapToEntity(row: any): Entry {
     return new Entry({
       id: row.id,

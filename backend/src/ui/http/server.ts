@@ -15,6 +15,7 @@ import { createPlatform } from './actions/platforms/createPlatform';
 import { deletePlatform } from './actions/platforms/deletePlatform';
 import { createTag } from './actions/tags/createTag';
 import { deleteTag } from './actions/tags/deleteTag';
+import { deleteUser } from './actions/users/deleteUser';
 
 /**
  * Creates and configures the Koa application server
@@ -86,6 +87,9 @@ export function createServer(): Koa {
   // Admin routes for tag management
   router.post('/api/tags', authMiddleware, adminMiddleware, createTag);
   router.delete('/api/tags/:tagId', authMiddleware, adminMiddleware, deleteTag);
+
+  // User account routes
+  router.delete('/api/v1/users/me', authMiddleware, deleteUser);
 
   // Register routes
   app.use(router.routes()).use(router.allowedMethods());

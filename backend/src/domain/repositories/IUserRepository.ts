@@ -52,4 +52,10 @@ export interface IUserRepository {
    * @returns True if user exists
    */
   existsByOAuthSubject(oauthSubject: string): Promise<boolean>;
+
+  /**
+   * Count total number of admin users
+   * @returns Number of admin users
+   */
+  countAdmins(): Promise<number>;
 }

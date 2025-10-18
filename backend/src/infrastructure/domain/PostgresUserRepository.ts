@@ -122,6 +122,13 @@ export class PostgresUserRepository implements IUserRepository {
     return result.rows.length > 0;
   }
 
+  async countAdmins(): Promise<number> {
+    const result = await this.pool.query(
+      'SELECT COUNT(*) as count FROM users WHERE is_admin = true'
+    );
+    return parseInt(result.rows[0].count, 10);
+  }
+
   private mapToEntity(row: any): User {
     return new User({
       id: row.id,
