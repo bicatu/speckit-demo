@@ -311,31 +311,31 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 
 #### Backend Tests
 
-- [ ] T134 [P] [US5] Unit test for UpdateEntryCommand in backend/tests/unit/application/commands/UpdateEntryCommand.spec.ts
-- [ ] T135 [P] [US5] Unit test for UpdateEntryCommandHandler in backend/tests/unit/application/commands/UpdateEntryCommandHandler.spec.ts
-- [ ] T136 [P] [US5] Integration test for UpdateEntryCommand flow in backend/tests/integration/application/commands/UpdateEntryCommand.spec.ts
-- [ ] T137 [P] [US5] Contract test for PUT /entries/:entryId endpoint in backend/tests/contract/endpoints/updateEntry.spec.ts
+- [X] T134 [P] [US5] Unit test for UpdateEntryCommand in backend/tests/unit/application/commands/UpdateEntryCommand.spec.ts
+- [X] T135 [P] [US5] Unit test for UpdateEntryCommandHandler in backend/tests/unit/application/commands/UpdateEntryCommandHandler.spec.ts
+- [X] T136 [P] [US5] Integration test for UpdateEntryCommand flow in backend/tests/integration/application/commands/UpdateEntryCommand.spec.ts
+- [X] T137 [P] [US5] Contract test for PUT /entries/:entryId endpoint in backend/tests/contract/endpoints/updateEntry.spec.ts
 
 #### Frontend Tests
 
-- [ ] T138 [P] [US5] Unit test for edit functionality in EntryDetailsPage in frontend/tests/unit/pages/EntryDetailsPage.spec.tsx
+- [X] T138 [P] [US5] Unit test for edit functionality in EntryDetailsPage in frontend/tests/unit/pages/EntryDetailsPage.spec.tsx
 
 ### Application Layer Implementation for User Story 5
 
-- [ ] T139 [US5] Create UpdateEntryCommand in backend/src/application/commands/UpdateEntryCommand.ts
-- [ ] T140 [US5] Create UpdateEntryCommandHandler in backend/src/application/commands/UpdateEntryCommandHandler.ts (depends on T051, T052)
+- [X] T139 [US5] Create UpdateEntryCommand in backend/src/application/commands/UpdateEntryCommand.ts
+- [X] T140 [US5] Create UpdateEntryCommandHandler in backend/src/application/commands/UpdateEntryCommandHandler.ts (depends on T051, T052)
 
 ### UI Layer Implementation for User Story 5 (Backend)
 
-- [ ] T141 [US5] Create Zod schema for UpdateEntryRequest in backend/src/ui/http/actions/entries/updateEntry.ts
-- [ ] T142 [US5] Implement updateEntry action handler in backend/src/ui/http/actions/entries/updateEntry.ts (validate body → check title uniqueness → map to UpdateEntryCommand → call handler → return 200 or 409)
-- [ ] T143 [US5] Register PUT /api/v1/entries/:entryId route in backend/src/ui/http/server.ts
+- [X] T141 [US5] Create Zod schema for UpdateEntryRequest in backend/src/ui/http/actions/entries/updateEntry.ts
+- [X] T142 [US5] Implement updateEntry action handler in backend/src/ui/http/actions/entries/updateEntry.ts (validate body → check title uniqueness → map to UpdateEntryCommand → call handler → return 200 or 409)
+- [X] T143 [US5] Register PUT /api/v1/entries/:entryId route in backend/src/ui/http/server.ts
 
 ### UI Layer Implementation for User Story 5 (Frontend)
 
-- [ ] T144 [US5] Create useUpdateEntry hook with TanStack Query mutation in frontend/src/hooks/useUpdateEntry.ts
-- [ ] T145 [US5] Add edit mode UI to EntryDetailsPage in frontend/src/pages/EntryDetailsPage.tsx (inline editing or modal)
-- [ ] T146 [US5] Add optimistic updates and cache invalidation for entry updates in frontend/src/hooks/useUpdateEntry.ts
+- [X] T144 [US5] Create useUpdateEntry hook with TanStack Query mutation in frontend/src/hooks/useUpdateEntry.ts
+- [X] T145 [US5] Add edit mode UI to EntryDetailsPage in frontend/src/pages/EntryDetailsPage.tsx (inline editing or modal)
+- [X] T146 [US5] Add optimistic updates and cache invalidation for entry updates in frontend/src/hooks/useUpdateEntry.ts
 
 **Checkpoint**: Users can now edit content in addition to all previous functionality.
 

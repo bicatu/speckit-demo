@@ -7,6 +7,7 @@ import { authMiddleware } from './middleware/auth';
 import { listEntries } from './actions/entries/listEntries';
 import { getEntryById } from './actions/entries/getEntryById';
 import { createEntry } from './actions/entries/createEntry';
+import { updateEntry } from './actions/entries/updateEntry';
 import { listTags } from './actions/tags/listTags';
 import { listPlatforms } from './actions/platforms/listPlatforms';
 import { addRating } from './actions/ratings/addRating';
@@ -65,6 +66,7 @@ export function createServer(): Koa {
   router.get('/api/entries', listEntries);
   router.get('/api/entries/:id', getEntryById);
   router.post('/api/entries', authMiddleware, createEntry);
+  router.put('/api/entries/:entryId', authMiddleware, updateEntry);
 
   // Rating routes
   router.post('/api/entries/:entryId/ratings', authMiddleware, addRating);

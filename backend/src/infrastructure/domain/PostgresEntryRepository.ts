@@ -154,6 +154,51 @@ export class PostgresEntryRepository implements IEntryRepository {
     }
   }
 
+  async update(entry: Entry): Promise<void> {
+    await this.pool.query(
+      `UPDATE entries 
+       SET title = $2, media_type = $3, creator_id = $4, platform_id = $5, 
+           average_rating = $6, updated_at = $7
+       WHERE id = $1`,
+      [
+        entry.id,
+        entry.title,
+        entry.mediaType,
+        entry.creatorId,
+        entry.platformId,
+        entry.averageRating,
+        entry.updatedAt,
+      ],
+    );
+  }
+
+  async updateTags(entryId: string, tagIds: string[]): Promise<void> {
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      // Delete existing tags
+      await client.query('DELETE FROM entry_genre_tags WHERE entry_id = $1', [entryId]);
+
+      // Insert new tags
+      if (tagIds.length > 0) {
+        const values = tagIds.map((_tagId, index) => `($1, $${index + 2})`).join(', ');
+        const params = [entryId, ...tagIds];
+        await client.query(
+          `INSERT INTO entry_genre_tags (entry_id, tag_id) VALUES ${values}`,
+          params,
+        );
+      }
+
+      await client.query('COMMIT');
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
   async delete(id: string): Promise<boolean> {
     const result = await this.pool.query('DELETE FROM entries WHERE id = $1', [id]);
     return result.rowCount !== null && result.rowCount > 0;

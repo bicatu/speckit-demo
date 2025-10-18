@@ -42,6 +42,21 @@ export interface IEntryRepository {
   save(entry: Entry): Promise<Entry>;
 
   /**
+   * Update existing entry
+   * @param entry Entry with updated data
+   * @returns void
+   */
+  update(entry: Entry): Promise<void>;
+
+  /**
+   * Update entry tags
+   * @param entryId Entry UUID
+   * @param tagIds Array of tag UUIDs
+   * @returns void
+   */
+  updateTags(entryId: string, tagIds: string[]): Promise<void>;
+
+  /**
    * Delete entry by ID
    * @param id Entry UUID
    * @returns True if deleted, false if not found
