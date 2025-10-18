@@ -8,10 +8,12 @@ services:
       POSTGRES_USER: movietrack
       POSTGRES_PASSWORD: movietrack_dev_password
       POSTGRES_DB: movietrack_db
+      POSTGRES_MULTIPLE_DATABASES: movietrack_db,keycloak_db
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U movietrack"]
       interval: 10s
@@ -35,6 +37,37 @@ services:
   #     retries: 3
   #   networks:
   #     - movietrack-network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    container_name: movietrack-keycloak
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak_db
+      KC_DB_USERNAME: movietrack
+      KC_DB_PASSWORD: movietrack_dev_password
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: 8080
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+      KC_HTTP_ENABLED: true
+      KC_HEALTH_ENABLED: true
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    networks:
+      - movietrack-network
 
 volumes:
   postgres_data:
