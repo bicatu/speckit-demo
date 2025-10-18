@@ -20,6 +20,7 @@ export function BrowseEntriesPage() {
   const [mediaType, setMediaType] = useState<'film' | 'series' | ''>('');
   const [platformId, setPlatformId] = useState<string>('');
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [newToMe, setNewToMe] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<'recent' | 'topRated' | 'title'>('recent');
   
   // Pagination state
@@ -38,6 +39,7 @@ export function BrowseEntriesPage() {
     mediaType: mediaType || undefined,
     platformId: platformId || undefined,
     tagIds: selectedTagIds.length > 0 ? selectedTagIds : undefined,
+    newToMe: newToMe || undefined,
     sortBy,
     limit: itemsPerPage,
     offset: (currentPage - 1) * itemsPerPage,
@@ -61,6 +63,7 @@ export function BrowseEntriesPage() {
     setMediaType('');
     setPlatformId('');
     setSelectedTagIds([]);
+    setNewToMe(false);
     setCurrentPage(1);
   };
 
@@ -76,6 +79,11 @@ export function BrowseEntriesPage() {
 
   const handleSortByChange = (value: 'recent' | 'topRated' | 'title') => {
     setSortBy(value);
+    setCurrentPage(1);
+  };
+
+  const handleNewToMeChange = (value: boolean) => {
+    setNewToMe(value);
     setCurrentPage(1);
   };
 
@@ -176,12 +184,14 @@ export function BrowseEntriesPage() {
         platformId={platformId}
         selectedTagIds={selectedTagIds}
         sortBy={sortBy}
+        newToMe={newToMe}
         tags={tagsData || []}
         platforms={platformsData || []}
         onMediaTypeChange={handleMediaTypeChange}
         onPlatformChange={handlePlatformChange}
         onTagToggle={handleTagToggle}
         onSortByChange={handleSortByChange}
+        onNewToMeChange={handleNewToMeChange}
         onClearFilters={handleClearFilters}
       />
 

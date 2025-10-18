@@ -9,6 +9,9 @@ export interface GetEntriesQuery extends Query<GetEntriesResult> {
     mediaType?: 'film' | 'series';
     platformId?: string;
     tagIds?: string[];
+    newToMe?: boolean;
+    userId?: string;
+    userLastLogin?: Date;
   };
   pagination?: {
     limit: number;

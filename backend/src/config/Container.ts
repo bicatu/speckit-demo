@@ -68,6 +68,7 @@ export class Container {
       this.entryRepository,
       this.genreTagRepository,
       this.streamingPlatformRepository,
+      this.userRepository,
     );
     HandlerRegistry.registerQuery('GetEntriesQuery', getEntriesHandler);
 

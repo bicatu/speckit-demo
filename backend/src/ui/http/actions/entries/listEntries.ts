@@ -11,7 +11,7 @@ import { formatErrorResponse } from '../../utils/errors';
  */
 export async function listEntries(ctx: Context): Promise<void> {
   try {
-    const { mediaType, platformId, tagIds, sortBy, limit, offset } = ctx.query;
+    const { mediaType, platformId, tagIds, newToMe, sortBy, limit, offset } = ctx.query;
 
     // Build query
     const query: GetEntriesQuery = {
@@ -38,6 +38,11 @@ export async function listEntries(ctx: Context): Promise<void> {
         ? tagIds
         : (tagIds as string).split(',');
       query.filters!.tagIds = tagIdArray as string[];
+    }
+
+    if (newToMe === 'true' && ctx.state.user) {
+      query.filters!.newToMe = true;
+      query.filters!.userId = ctx.state.user.id;
     }
 
     // Execute query

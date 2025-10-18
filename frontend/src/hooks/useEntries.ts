@@ -17,6 +17,7 @@ export interface EntriesFilters {
   mediaType?: 'film' | 'series';
   platformId?: string;
   tagIds?: string[];
+  newToMe?: boolean;
   sortBy?: 'recent' | 'topRated' | 'title';
   limit?: number;
   offset?: number;
@@ -43,6 +44,7 @@ export function useEntries(filters: EntriesFilters = {}) {
       if (filters.tagIds && filters.tagIds.length > 0) {
         filters.tagIds.forEach(tagId => params.append('tagIds', tagId));
       }
+      if (filters.newToMe) params.append('newToMe', 'true');
       if (filters.sortBy) params.append('sortBy', filters.sortBy);
       if (filters.limit !== undefined) params.append('limit', filters.limit.toString());
       if (filters.offset !== undefined) params.append('offset', filters.offset.toString());

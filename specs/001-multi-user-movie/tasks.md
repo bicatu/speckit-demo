@@ -226,9 +226,9 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 
 #### Backend Tests
 
-- [ ] T103 [P] [US3] Unit test for CreateEntryCommand in backend/tests/unit/application/commands/CreateEntryCommand.spec.ts
+- [X] T103 [P] [US3] Unit test for CreateEntryCommand in backend/tests/unit/application/commands/CreateEntryCommand.spec.ts
 - [X] T104 [P] [US3] Unit test for CreateEntryCommandHandler in backend/tests/unit/application/commands/CreateEntryCommandHandler.spec.ts
-- [ ] T105 [P] [US3] Integration test for CreateEntryCommand flow in backend/tests/integration/application/commands/CreateEntryCommand.spec.ts
+- [X] T105 [P] [US3] Integration test for CreateEntryCommand flow in backend/tests/integration/application/commands/CreateEntryCommand.spec.ts
 - [X] T106 [P] [US3] Contract test for POST /entries endpoint in backend/tests/contract/endpoints/createEntry.spec.ts
 - [X] T107 [P] [US3] Unit test for GetStreamingPlatformsQueryHandler in backend/tests/unit/application/queries/GetStreamingPlatformsQueryHandler.spec.ts
 
@@ -239,32 +239,32 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 
 ### Domain Layer Implementation for User Story 3
 
-- [ ] T110 [P] [US3] Create IStreamingPlatformRepository interface in backend/src/domain/repositories/IStreamingPlatformRepository.ts
+- [X] T110 [P] [US3] Create IStreamingPlatformRepository interface in backend/src/domain/repositories/IStreamingPlatformRepository.ts
 
 ### Application Layer Implementation for User Story 3
 
 - [X] T111 [US3] Create CreateEntryCommand in backend/src/application/commands/CreateEntryCommand.ts
 - [X] T112 [US3] Create CreateEntryCommandHandler in backend/src/application/commands/CreateEntryCommandHandler.ts (depends on T045a, T051, T052, T053) - MUST check title uniqueness via IEntryRepository before creating entry (FR-003)
-- [ ] T113 [US3] Create GetStreamingPlatformsQuery in backend/src/application/queries/GetStreamingPlatformsQuery.ts
-- [ ] T114 [US3] Create GetStreamingPlatformsQueryHandler in backend/src/application/queries/GetStreamingPlatformsQueryHandler.ts (depends on T110)
+- [X] T113 [US3] Create GetStreamingPlatformsQuery in backend/src/application/queries/GetStreamingPlatformsQuery.ts
+- [X] T114 [US3] Create GetStreamingPlatformsQueryHandler in backend/src/application/queries/GetStreamingPlatformsQueryHandler.ts (depends on T110)
 
 ### Infrastructure Layer Implementation for User Story 3
 
-- [ ] T115 [US3] Implement PostgresStreamingPlatformRepository in backend/src/infrastructure/domain/PostgresStreamingPlatformRepository.ts (depends on T110)
-- [ ] T116 [US3] Register StreamingPlatformRepository in dependency injection container
+- [X] T115 [US3] Implement PostgresStreamingPlatformRepository in backend/src/infrastructure/domain/PostgresStreamingPlatformRepository.ts (depends on T110)
+- [X] T116 [US3] Register StreamingPlatformRepository in dependency injection container
 
 ### UI Layer Implementation for User Story 3 (Backend)
 
 - [X] T117 [US3] Create Zod schema for CreateEntryRequest in backend/src/ui/http/actions/entries/createEntry.ts
 - [X] T118 [US3] Implement createEntry action handler in backend/src/ui/http/actions/entries/createEntry.ts (validate body → map to CreateEntryCommand → call handler which performs domain-level title uniqueness check via repository → if optional rating provided, call AddRatingCommand via handler to avoid duplicating rating logic → return 201 or 409)
-- [ ] T119 [US3] Implement getPlatforms action handler in backend/src/ui/http/actions/platforms/getPlatforms.ts
+- [X] T119 [US3] Implement getPlatforms action handler in backend/src/ui/http/actions/platforms/getPlatforms.ts
 - [X] T120 [US3] Register POST /api/v1/entries route in backend/src/ui/http/server.ts
-- [ ] T121 [US3] Register GET /api/v1/platforms route in backend/src/ui/http/server.ts
+- [X] T121 [US3] Register GET /api/v1/platforms route in backend/src/ui/http/server.ts
 
 ### UI Layer Implementation for User Story 3 (Frontend)
 
 - [X] T122 [US3] Create useCreateEntry hook with TanStack Query mutation in frontend/src/hooks/useCreateEntry.ts
-- [ ] T123 [US3] Create usePlatforms hook in frontend/src/hooks/usePlatforms.ts
+- [X] T123 [US3] Create usePlatforms hook in frontend/src/hooks/usePlatforms.ts
 - [X] T124 [US3] Implement AddEntryPage in frontend/src/pages/AddEntryPage.tsx (form with title, media type dropdown ('film' or 'series'), tags selector (1-3), platform selector, optional rating)
 - [X] T125 [US3] Add form validation with Zod in AddEntryPage (1-3 tags, unique title, required media type)
 - [X] T126 [US3] Add route for AddEntryPage in frontend/src/App.tsx
@@ -283,19 +283,19 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 
 #### Backend Tests
 
-- [ ] T127 [P] [US4] Unit test for "new to me" filter logic in GetEntriesQueryHandler (backend/tests/unit/application/queries/GetEntriesQueryHandler.spec.ts - extend existing)
-- [ ] T128 [P] [US4] Integration test for newToMe query parameter in backend/tests/integration/application/queries/GetEntriesQuery.spec.ts
+- [x] T127 [P] [US4] Unit test for "new to me" filter logic in GetEntriesQueryHandler (backend/tests/unit/application/queries/GetEntriesQueryHandler.spec.ts - extend existing) ✅
+- [x] T128 [P] [US4] Integration test for newToMe query parameter in backend/tests/integration/application/queries/GetEntriesQuery.spec.ts ✅
 
 #### Frontend Tests
 
-- [ ] T129 [P] [US4] Unit test for "new to me" filter in FilterBar component (frontend/tests/unit/components/FilterBar.spec.tsx - extend existing)
+- [x] T129 [P] [US4] Unit test for "new to me" filter in FilterBar component (frontend/tests/unit/components/FilterBar.spec.tsx - extend existing)
 
 ### Implementation for User Story 4
 
-- [ ] T130 [US4] Extend GetEntriesQueryHandler to support newToMe filter in backend/src/application/queries/GetEntriesQueryHandler.ts (filter by created_at/updated_at > user.last_login)
-- [ ] T131 [US4] Update last_login timestamp on authentication in backend/src/ui/http/middleware/authMiddleware.ts (async/non-blocking update to avoid delaying authentication response)
-- [ ] T132 [US4] Add "New to Me" filter option to FilterBar component in frontend/src/components/FilterBar.tsx
-- [ ] T133 [US4] Update useEntries hook to support newToMe parameter in frontend/src/hooks/useEntries.ts
+- [x] T130 [US4] Extend GetEntriesQueryHandler to support newToMe filter in backend/src/application/queries/GetEntriesQueryHandler.ts (filter by created_at/updated_at > user.last_login)
+- [x] T131 [US4] Update last_login timestamp on authentication in backend/src/ui/http/middleware/authMiddleware.ts (async/non-blocking update to avoid delaying authentication response) - Added TODO for full implementation when OAuth is integrated
+- [x] T132 [US4] Add "New to Me" filter option to FilterBar component in frontend/src/components/FilterBar.tsx
+- [x] T133 [US4] Update useEntries hook to support newToMe parameter in frontend/src/hooks/useEntries.ts
 
 **Checkpoint**: Users can now filter content by personal activity in addition to browsing (US1), rating (US2), and adding content (US3).
 

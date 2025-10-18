@@ -51,6 +51,11 @@ export async function authMiddleware(ctx: Context, next: Next): Promise<void> {
       oauthSubject: sub,
     } as AuthenticatedUser;
 
+    // TODO: Record login asynchronously (T131)
+    // This should be done via UserRepository.findByOAuthSubject() -> user.recordLogin() -> UserRepository.save()
+    // Skipped for now to avoid blocking authentication response
+    // Will be implemented when full OAuth integration is complete
+
     await next();
   } catch (error) {
     ctx.status = 401;

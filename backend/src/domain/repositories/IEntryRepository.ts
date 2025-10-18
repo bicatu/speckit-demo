@@ -21,7 +21,7 @@ export interface IEntryRepository {
 
   /**
    * Find all entries with optional filtering
-   * @param filters Optional filters for mediaType, platformId, tagIds
+   * @param filters Optional filters for mediaType, platformId, tagIds, newToMe, userLastLogin
    * @param limit Maximum number of results
    * @param offset Pagination offset
    * @returns Array of entries matching criteria
@@ -30,6 +30,8 @@ export interface IEntryRepository {
     mediaType?: 'film' | 'series';
     platformId?: string;
     tagIds?: string[];
+    newToMe?: boolean;
+    userLastLogin?: Date;
   }, limit?: number, offset?: number): Promise<Entry[]>;
 
   /**
@@ -55,6 +57,8 @@ export interface IEntryRepository {
     mediaType?: 'film' | 'series';
     platformId?: string;
     tagIds?: string[];
+    newToMe?: boolean;
+    userLastLogin?: Date;
   }): Promise<number>;
 
   /**

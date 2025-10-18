@@ -42,6 +42,8 @@ export class PostgresEntryRepository implements IEntryRepository {
       mediaType?: 'film' | 'series';
       platformId?: string;
       tagIds?: string[];
+      newToMe?: boolean;
+      userLastLogin?: Date;
     },
     limit: number = 20,
     offset: number = 0,
@@ -73,6 +75,13 @@ export class PostgresEntryRepository implements IEntryRepository {
     if (filters?.platformId) {
       conditions.push(`e.platform_id = $${paramIndex}`);
       params.push(filters.platformId);
+      paramIndex++;
+    }
+
+    // Apply "new to me" filter - entries created or updated after user's last login
+    if (filters?.newToMe && filters.userLastLogin) {
+      conditions.push(`(e.created_at > $${paramIndex}::timestamp OR e.updated_at > $${paramIndex}::timestamp)`);
+      params.push(filters.userLastLogin.toISOString());
       paramIndex++;
     }
 
@@ -154,6 +163,8 @@ export class PostgresEntryRepository implements IEntryRepository {
     mediaType?: 'film' | 'series';
     platformId?: string;
     tagIds?: string[];
+    newToMe?: boolean;
+    userLastLogin?: Date;
   }): Promise<number> {
     let query = 'SELECT COUNT(DISTINCT e.id) as total FROM entries e';
     const params: any[] = [];
@@ -178,6 +189,13 @@ export class PostgresEntryRepository implements IEntryRepository {
     if (filters?.platformId) {
       conditions.push(`e.platform_id = $${paramIndex}`);
       params.push(filters.platformId);
+      paramIndex++;
+    }
+
+    // Apply "new to me" filter - entries created or updated after user's last login
+    if (filters?.newToMe && filters.userLastLogin) {
+      conditions.push(`(e.created_at > $${paramIndex}::timestamp OR e.updated_at > $${paramIndex}::timestamp)`);
+      params.push(filters.userLastLogin.toISOString());
       paramIndex++;
     }
 

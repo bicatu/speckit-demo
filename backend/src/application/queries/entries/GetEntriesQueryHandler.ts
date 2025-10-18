@@ -3,6 +3,7 @@ import { GetEntriesQuery, GetEntriesResult } from './GetEntriesQuery';
 import { IEntryRepository } from '../../../domain/repositories/IEntryRepository';
 import { IGenreTagRepository } from '../../../domain/repositories/IGenreTagRepository';
 import { IStreamingPlatformRepository } from '../../../domain/repositories/IStreamingPlatformRepository';
+import { IUserRepository } from '../../../domain/repositories/IUserRepository';
 
 /**
  * Handler for GetEntriesQuery
@@ -15,12 +16,28 @@ export class GetEntriesQueryHandler
     private entryRepository: IEntryRepository,
     private tagRepository: IGenreTagRepository,
     private platformRepository: IStreamingPlatformRepository,
+    private userRepository: IUserRepository,
   ) {}
 
   async handle(query: GetEntriesQuery): Promise<QueryResult<GetEntriesResult>> {
     try {
       const limit = query.pagination?.limit || 20;
       const offset = query.pagination?.offset || 0;
+
+      // If newToMe filter is active, retrieve user's lastLogin
+      let userLastLogin: Date | undefined;
+      if (query.filters?.newToMe && query.filters?.userId) {
+        const user = await this.userRepository.findById(query.filters.userId);
+        if (user && user.lastLogin) {
+          userLastLogin = user.lastLogin;
+        }
+      }
+
+      // Build filters with userLastLogin if needed
+      const filters = {
+        ...query.filters,
+        userLastLogin,
+      };
 
       // Get entries based on sorting preference
       let entries;
@@ -29,11 +46,11 @@ export class GetEntriesQueryHandler
       } else if (query.sortBy === 'recent') {
         entries = await this.entryRepository.findRecent(limit);
       } else {
-        entries = await this.entryRepository.findAll(query.filters, limit, offset);
+        entries = await this.entryRepository.findAll(filters, limit, offset);
       }
 
       // Get total count for pagination
-      const total = await this.entryRepository.count(query.filters);
+      const total = await this.entryRepository.count(filters);
 
       // Enrich entries with tags and platform names
       const enrichedEntries = await Promise.all(

@@ -7,12 +7,14 @@ interface FilterBarProps {
   platformId: string;
   selectedTagIds: string[];
   sortBy: 'recent' | 'topRated' | 'title';
+  newToMe: boolean;
   tags: GenreTag[];
   platforms: StreamingPlatform[];
   onMediaTypeChange: (value: 'film' | 'series' | '') => void;
   onPlatformChange: (value: string) => void;
   onTagToggle: (tagId: string) => void;
   onSortByChange: (value: 'recent' | 'topRated' | 'title') => void;
+  onNewToMeChange: (value: boolean) => void;
   onClearFilters: () => void;
 }
 
@@ -24,15 +26,17 @@ export function FilterBar({
   platformId,
   selectedTagIds,
   sortBy,
+  newToMe,
   tags,
   platforms,
   onMediaTypeChange,
   onPlatformChange,
   onTagToggle,
   onSortByChange,
+  onNewToMeChange,
   onClearFilters,
 }: FilterBarProps) {
-  const hasActiveFilters = mediaType !== '' || platformId !== '' || selectedTagIds.length > 0;
+  const hasActiveFilters = mediaType !== '' || platformId !== '' || selectedTagIds.length > 0 || newToMe;
 
   return (
     <div style={{ backgroundColor: '#f5f5f5', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
@@ -58,10 +62,11 @@ export function FilterBar({
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '16px' }}>
         {/* Media Type Filter */}
         <div>
-          <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500' }}>
+          <label htmlFor="filter-media-type" style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500' }}>
             Type
           </label>
           <select
+            id="filter-media-type"
             value={mediaType}
             onChange={(e) => onMediaTypeChange(e.target.value as 'film' | 'series' | '')}
             style={{
@@ -80,10 +85,11 @@ export function FilterBar({
 
         {/* Platform Filter */}
         <div>
-          <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500' }}>
+          <label htmlFor="filter-platform" style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500' }}>
             Platform
           </label>
           <select
+            id="filter-platform"
             value={platformId}
             onChange={(e) => onPlatformChange(e.target.value)}
             style={{
@@ -105,10 +111,11 @@ export function FilterBar({
 
         {/* Sort By */}
         <div>
-          <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500' }}>
+          <label htmlFor="filter-sort-by" style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500' }}>
             Sort By
           </label>
           <select
+            id="filter-sort-by"
             value={sortBy}
             onChange={(e) => onSortByChange(e.target.value as 'recent' | 'topRated' | 'title')}
             style={{
@@ -124,6 +131,19 @@ export function FilterBar({
             <option value="title">Title (A-Z)</option>
           </select>
         </div>
+      </div>
+
+      {/* New to Me Filter */}
+      <div style={{ marginBottom: '16px' }}>
+        <label style={{ display: 'flex', alignItems: 'center', fontSize: '14px', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={newToMe}
+            onChange={(e) => onNewToMeChange(e.target.checked)}
+            style={{ marginRight: '8px', cursor: 'pointer' }}
+          />
+          Show only new to me (created or updated since my last login)
+        </label>
       </div>
 
       {/* Genre Tags */}
