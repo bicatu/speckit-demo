@@ -21,7 +21,7 @@ describe('POST /api/entries - Contract Tests', () => {
   });
 
   afterAll(async () => {
-    // Don't close shared database connection in tests
+    await dbConnection.getPool().end();
   });
 
   beforeEach(async () => {

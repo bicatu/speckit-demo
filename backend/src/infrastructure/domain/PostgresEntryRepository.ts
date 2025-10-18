@@ -178,14 +178,14 @@ export class PostgresEntryRepository implements IEntryRepository {
       await client.query('BEGIN');
 
       // Delete existing tags
-      await client.query('DELETE FROM entry_genre_tags WHERE entry_id = $1', [entryId]);
+      await client.query('DELETE FROM entry_tags WHERE entry_id = $1', [entryId]);
 
       // Insert new tags
       if (tagIds.length > 0) {
         const values = tagIds.map((_tagId, index) => `($1, $${index + 2})`).join(', ');
         const params = [entryId, ...tagIds];
         await client.query(
-          `INSERT INTO entry_genre_tags (entry_id, tag_id) VALUES ${values}`,
+          `INSERT INTO entry_tags (entry_id, tag_id) VALUES ${values}`,
           params,
         );
       }

@@ -18,7 +18,7 @@ describe('POST /api/platforms - Admin', () => {
   });
 
   afterAll(async () => {
-    // Don't close shared database connection in tests
+    await dbConnection.getPool().end();
   });
 
   beforeEach(async () => {
@@ -68,11 +68,14 @@ describe('POST /api/platforms - Admin', () => {
   });
 
   it('should return 409 when platform name already exists', async () => {
+    const testSuffix = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
+    const platformName = `Dup-${testSuffix}`;
+    
     await request(app.callback())
       .post('/api/platforms')
       .set('Authorization', `Bearer ${adminToken}`)
       .send({
-        name: 'Duplicate Platform',
+        name: platformName,
       })
       .expect(201);
 
@@ -80,7 +83,7 @@ describe('POST /api/platforms - Admin', () => {
       .post('/api/platforms')
       .set('Authorization', `Bearer ${adminToken}`)
       .send({
-        name: 'Duplicate Platform',
+        name: platformName,
       })
       .expect(409);
 

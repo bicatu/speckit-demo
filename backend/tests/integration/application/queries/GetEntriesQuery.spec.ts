@@ -112,7 +112,7 @@ describe('GetEntriesQuery Integration Tests', () => {
         timestamp: new Date(),
         filters: {
           newToMe: true,
-          userLastLogin: lastLogin,
+          userId: testUserId,
         },
       };
 
@@ -166,7 +166,7 @@ describe('GetEntriesQuery Integration Tests', () => {
         timestamp: new Date(),
         filters: {
           newToMe: true,
-          userLastLogin: lastLogin,
+          userId: testUserId,
         },
       };
 
@@ -301,7 +301,7 @@ describe('GetEntriesQuery Integration Tests', () => {
         filters: {
           mediaType: 'film',
           newToMe: true,
-          userLastLogin: lastLogin,
+          userId: testUserId,
         },
       };
 
@@ -353,7 +353,7 @@ describe('GetEntriesQuery Integration Tests', () => {
         timestamp: new Date(),
         filters: {
           newToMe: true,
-          userLastLogin: lastLogin,
+          userId: testUserId,
         },
       };
 

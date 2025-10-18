@@ -18,6 +18,8 @@ describe('CreateEntryCommandHandler', () => {
       findByTitle: jest.fn(),
       findAll: jest.fn(),
       save: jest.fn(),
+      update: jest.fn(),
+      updateTags: jest.fn(),
       delete: jest.fn(),
       count: jest.fn(),
       findTopRated: jest.fn(),

@@ -6,22 +6,24 @@ import { CreateEntryCommandHandler } from '../../../../src/application/commands/
 import { PostgresEntryRepository } from '../../../../src/infrastructure/domain/PostgresEntryRepository';
 import { PostgresGenreTagRepository } from '../../../../src/infrastructure/domain/PostgresGenreTagRepository';
 import { PostgresRatingRepository } from '../../../../src/infrastructure/domain/PostgresRatingRepository';
-import { DatabaseConnection } from '../../../../src/infrastructure/persistence/DatabaseConnection';
+import DatabaseConnection from '../../../../src/infrastructure/persistence/DatabaseConnection';
 
 describe('UpdateEntryCommand Integration', () => {
-  let db: DatabaseConnection;
+  let dbConnection: DatabaseConnection;
   let entryRepository: PostgresEntryRepository;
   let genreTagRepository: PostgresGenreTagRepository;
   let ratingRepository: PostgresRatingRepository;
   let updateHandler: UpdateEntryCommandHandler;
   let createHandler: CreateEntryCommandHandler;
+  let userId: string;
 
   beforeEach(async () => {
-    db = new DatabaseConnection();
-    await db.connect();
-    entryRepository = new PostgresEntryRepository(db);
-    genreTagRepository = new PostgresGenreTagRepository(db);
-    ratingRepository = new PostgresRatingRepository(db);
+    dbConnection = DatabaseConnection.getInstance();
+    const pool = dbConnection.getPool();
+    
+    entryRepository = new PostgresEntryRepository(pool);
+    genreTagRepository = new PostgresGenreTagRepository(pool);
+    ratingRepository = new PostgresRatingRepository(pool);
     updateHandler = new UpdateEntryCommandHandler(entryRepository, genreTagRepository);
     createHandler = new CreateEntryCommandHandler(
       entryRepository,
@@ -30,32 +32,40 @@ describe('UpdateEntryCommand Integration', () => {
     );
 
     // Clean up test data
-    await db.query('DELETE FROM ratings WHERE 1=1');
-    await db.query('DELETE FROM entry_genre_tags WHERE 1=1');
-    await db.query('DELETE FROM entries WHERE 1=1');
+    await pool.query('DELETE FROM ratings WHERE 1=1');
+    await pool.query('DELETE FROM entry_tags WHERE 1=1');
+    await pool.query('DELETE FROM entries WHERE 1=1');
+    await pool.query('DELETE FROM users WHERE email = $1', ['test-integration@example.com']);
+    await pool.query('DELETE FROM genre_tags WHERE name IN ($1, $2, $3, $4, $5)', ['Action', 'Drama', 'Thriller', 'Comedy', 'Horror']);
+
+    // Create test user
+    userId = crypto.randomUUID();
+    await pool.query('INSERT INTO users (id, oauth_subject, email, name) VALUES ($1, $2, $3, $4)', [
+      userId,
+      'test-oauth',
+      'test-integration@example.com',
+      'Test User',
+    ]);
   });
 
   afterAll(async () => {
-    if (db) {
-      await db.disconnect();
-    }
+    await dbConnection.getPool().end();
   });
 
   it('should update entry title in database', async () => {
     // Create entry first
     const tagId = crypto.randomUUID();
-    await db.query('INSERT INTO genre_tags (id, name) VALUES ($1, $2)', [tagId, 'Action']);
+    await dbConnection.getPool().query('INSERT INTO genre_tags (id, name) VALUES ($1, $2)', [tagId, 'Action']);
 
-    const createCommand = new CreateEntryCommand({
-      title: 'Original Title',
-      mediaType: 'film',
-      tagIds: [tagId],
-      creatorId: null,
-      platformId: null,
-      rating: null,
-    });
+    const createCommand = new CreateEntryCommand(
+      userId,
+      'Original Title',
+      'film',
+      [tagId]
+    );
 
-    const entryId = await createHandler.execute(createCommand);
+    const createResult = await createHandler.handle(createCommand);
+    const entryId = createResult.resourceId!;
 
     // Update entry
     const updateCommand = new UpdateEntryCommand({
@@ -63,37 +73,36 @@ describe('UpdateEntryCommand Integration', () => {
       title: 'Updated Title',
     });
 
-    await updateHandler.execute(updateCommand);
+    await updateHandler.handle(updateCommand);
 
     // Verify update
-    const result = await db.query('SELECT title FROM entries WHERE id = $1', [entryId]);
+    const result = await dbConnection.getPool().query('SELECT title FROM entries WHERE id = $1', [entryId]);
 
     expect(result.rows[0].title).toBe('Updated Title');
   });
 
   it('should update entry media type in database', async () => {
     const tagId = crypto.randomUUID();
-    await db.query('INSERT INTO genre_tags (id, name) VALUES ($1, $2)', [tagId, 'Drama']);
+    await dbConnection.getPool().query('INSERT INTO genre_tags (id, name) VALUES ($1, $2)', [tagId, 'Drama']);
 
-    const createCommand = new CreateEntryCommand({
-      title: 'Test Movie',
-      mediaType: 'film',
-      tagIds: [tagId],
-      creatorId: null,
-      platformId: null,
-      rating: null,
-    });
+    const createCommand = new CreateEntryCommand(
+      userId,
+      'Test Movie',
+      'film',
+      [tagId]
+    );
 
-    const entryId = await createHandler.execute(createCommand);
+    const createResult = await createHandler.handle(createCommand);
+    const entryId = createResult.resourceId!;
 
     const updateCommand = new UpdateEntryCommand({
       entryId,
       mediaType: 'series',
     });
 
-    await updateHandler.execute(updateCommand);
+    await updateHandler.handle(updateCommand);
 
-    const result = await db.query('SELECT media_type FROM entries WHERE id = $1', [entryId]);
+    const result = await dbConnection.getPool().query('SELECT media_type FROM entries WHERE id = $1', [entryId]);
 
     expect(result.rows[0].media_type).toBe('series');
   });
@@ -103,87 +112,82 @@ describe('UpdateEntryCommand Integration', () => {
     const tagId2 = crypto.randomUUID();
     const tagId3 = crypto.randomUUID();
 
-    await db.query('INSERT INTO genre_tags (id, name) VALUES ($1, $2)', [tagId1, 'Action']);
-    await db.query('INSERT INTO genre_tags (id, name) VALUES ($1, $2)', [tagId2, 'Drama']);
-    await db.query('INSERT INTO genre_tags (id, name) VALUES ($1, $2)', [tagId3, 'Thriller']);
+    await dbConnection.getPool().query('INSERT INTO genre_tags (id, name) VALUES ($1, $2)', [tagId1, 'Action']);
+    await dbConnection.getPool().query('INSERT INTO genre_tags (id, name) VALUES ($1, $2)', [tagId2, 'Drama']);
+    await dbConnection.getPool().query('INSERT INTO genre_tags (id, name) VALUES ($1, $2)', [tagId3, 'Thriller']);
 
-    const createCommand = new CreateEntryCommand({
-      title: 'Test Movie',
-      mediaType: 'film',
-      tagIds: [tagId1, tagId2],
-      creatorId: null,
-      platformId: null,
-      rating: null,
-    });
+    const createCommand = new CreateEntryCommand(
+      userId,
+      'Test Movie',
+      'film',
+      [tagId1, tagId2]
+    );
 
-    const entryId = await createHandler.execute(createCommand);
+    const createResult = await createHandler.handle(createCommand);
+    const entryId = createResult.resourceId!;
 
     const updateCommand = new UpdateEntryCommand({
       entryId,
       tagIds: [tagId2, tagId3],
     });
 
-    await updateHandler.execute(updateCommand);
+    await updateHandler.handle(updateCommand);
 
-    const result = await db.query(
-      'SELECT tag_id FROM entry_genre_tags WHERE entry_id = $1 ORDER BY tag_id',
+    const result = await dbConnection.getPool().query(
+      'SELECT tag_id FROM entry_tags WHERE entry_id = $1 ORDER BY tag_id',
       [entryId]
     );
 
-    const tagIds = result.rows.map((row) => row.tag_id);
+    const tagIds = result.rows.map((row: any) => row.tag_id);
     expect(tagIds).toEqual([tagId2, tagId3].sort());
   });
 
   it('should reject duplicate title', async () => {
     const tagId = crypto.randomUUID();
-    await db.query('INSERT INTO genre_tags (id, name) VALUES ($1, $2)', [tagId, 'Comedy']);
+    await dbConnection.getPool().query('INSERT INTO genre_tags (id, name) VALUES ($1, $2)', [tagId, 'Comedy']);
 
-    const createCommand1 = new CreateEntryCommand({
-      title: 'First Movie',
-      mediaType: 'film',
-      tagIds: [tagId],
-      creatorId: null,
-      platformId: null,
-      rating: null,
-    });
+    const createCommand1 = new CreateEntryCommand(
+      userId,
+      'First Movie',
+      'film',
+      [tagId]
+    );
 
-    const entryId1 = await createHandler.execute(createCommand1);
+    const createResult1 = await createHandler.handle(createCommand1);
+    const entryId1 = createResult1.resourceId!;
 
-    const createCommand2 = new CreateEntryCommand({
-      title: 'Second Movie',
-      mediaType: 'film',
-      tagIds: [tagId],
-      creatorId: null,
-      platformId: null,
-      rating: null,
-    });
+    const createCommand2 = new CreateEntryCommand(
+      userId,
+      'Second Movie',
+      'film',
+      [tagId]
+    );
 
-    await createHandler.execute(createCommand2);
+    await createHandler.handle(createCommand2);
 
     const updateCommand = new UpdateEntryCommand({
       entryId: entryId1,
       title: 'Second Movie',
     });
 
-    await expect(updateHandler.execute(updateCommand)).rejects.toThrow('Title already exists');
+    await expect(updateHandler.handle(updateCommand)).rejects.toThrow('Title already exists');
   });
 
   it('should update updatedAt timestamp', async () => {
     const tagId = crypto.randomUUID();
-    await db.query('INSERT INTO genre_tags (id, name) VALUES ($1, $2)', [tagId, 'Horror']);
+    await dbConnection.getPool().query('INSERT INTO genre_tags (id, name) VALUES ($1, $2)', [tagId, 'Horror']);
 
-    const createCommand = new CreateEntryCommand({
-      title: 'Test Movie',
-      mediaType: 'film',
-      tagIds: [tagId],
-      creatorId: null,
-      platformId: null,
-      rating: null,
-    });
+    const createCommand = new CreateEntryCommand(
+      userId,
+      'Test Movie',
+      'film',
+      [tagId]
+    );
 
-    const entryId = await createHandler.execute(createCommand);
+    const createResult = await createHandler.handle(createCommand);
+    const entryId = createResult.resourceId!;
 
-    const beforeUpdate = await db.query('SELECT updated_at FROM entries WHERE id = $1', [entryId]);
+    const beforeUpdate = await dbConnection.getPool().query('SELECT updated_at FROM entries WHERE id = $1', [entryId]);
     const beforeTime = beforeUpdate.rows[0].updated_at;
 
     // Wait a bit to ensure timestamp changes
@@ -194,9 +198,9 @@ describe('UpdateEntryCommand Integration', () => {
       title: 'Updated Title',
     });
 
-    await updateHandler.execute(updateCommand);
+    await updateHandler.handle(updateCommand);
 
-    const afterUpdate = await db.query('SELECT updated_at FROM entries WHERE id = $1', [entryId]);
+    const afterUpdate = await dbConnection.getPool().query('SELECT updated_at FROM entries WHERE id = $1', [entryId]);
     const afterTime = afterUpdate.rows[0].updated_at;
 
     expect(new Date(afterTime).getTime()).toBeGreaterThan(new Date(beforeTime).getTime());

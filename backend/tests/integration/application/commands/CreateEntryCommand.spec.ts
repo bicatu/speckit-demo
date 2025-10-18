@@ -19,7 +19,7 @@ describe('CreateEntryCommand Integration', () => {
   });
 
   afterAll(async () => {
-    // Don't close the connection in tests - it's shared
+    await dbConnection.getPool().end();
   });
 
   beforeEach(async () => {

@@ -36,12 +36,13 @@ export class UpdateEntryCommandHandler implements CommandHandler<UpdateEntryComm
       existingEntry.updateTitle(command.title);
     }
 
+    if (command.mediaType) {
+      existingEntry.updateMediaType(command.mediaType);
+    }
+
     if (command.platformId !== undefined) {
       existingEntry.updatePlatform(command.platformId);
     }
-
-    // Note: mediaType updates not supported by domain entity currently
-    // This would require adding updateMediaType method to Entry entity
 
     await this.entryRepository.update(existingEntry);
 

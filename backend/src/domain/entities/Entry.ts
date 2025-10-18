@@ -78,6 +78,12 @@ export class Entry {
     this._updatedAt = new Date();
   }
 
+  public updateMediaType(mediaType: 'film' | 'series'): void {
+    this.validateMediaType(mediaType);
+    this._mediaType = mediaType;
+    this._updatedAt = new Date();
+  }
+
   public updatePlatform(platformId: string | null): void {
     this._platformId = platformId;
     this._updatedAt = new Date();

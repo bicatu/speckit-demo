@@ -7,6 +7,7 @@ import { IUserRepository } from '../../../../src/domain/repositories/IUserReposi
 import { Entry } from '../../../../src/domain/entities/Entry';
 import { GenreTag } from '../../../../src/domain/entities/GenreTag';
 import { StreamingPlatform } from '../../../../src/domain/entities/StreamingPlatform';
+import { User } from '../../../../src/domain/entities/User';
 
 describe('GetEntriesQueryHandler', () => {
   let handler: GetEntriesQueryHandler;
@@ -25,6 +26,8 @@ describe('GetEntriesQueryHandler', () => {
       save: jest.fn(),
       delete: jest.fn(),
       count: jest.fn(),
+      update: jest.fn(),
+      updateTags: jest.fn(),
     } as jest.Mocked<IEntryRepository>;
 
     mockTagRepository = {
@@ -212,12 +215,13 @@ describe('GetEntriesQueryHandler', () => {
       expect(result.success).toBe(true);
       expect(result.data!.limit).toBe(10);
       expect(result.data!.offset).toBe(20);
-      expect(mockEntryRepository.findAll).toHaveBeenCalledWith(undefined, 10, 20);
+      expect(mockEntryRepository.findAll).toHaveBeenCalledWith({userLastLogin: undefined}, 10, 20);
     });
   });
 
   describe('New To Me Filter (User Story 4)', () => {
     it('should filter entries created after user last login when newToMe is true', async () => {
+      const userId = 'test-user-1';
       const userLastLogin = new Date('2025-10-01T00:00:00Z');
 
       const mockEntries = [
@@ -233,6 +237,17 @@ describe('GetEntriesQueryHandler', () => {
         }),
       ];
 
+      const mockUser = new User({
+        id: userId,
+        oauthSubject: 'oauth-123',
+        email: 'test@example.com',
+        name: 'Test User',
+        isAdmin: false,
+        lastLogin: userLastLogin,
+        createdAt: new Date(),
+      });
+
+      mockUserRepository.findById.mockResolvedValue(mockUser);
       mockEntryRepository.findAll.mockResolvedValue(mockEntries);
       mockEntryRepository.count.mockResolvedValue(1);
       mockTagRepository.findByEntryId.mockResolvedValue([]);
@@ -242,7 +257,7 @@ describe('GetEntriesQueryHandler', () => {
         timestamp: new Date(),
         filters: {
           newToMe: true,
-          userLastLogin,
+          userId,
         },
       };
 
@@ -262,6 +277,7 @@ describe('GetEntriesQueryHandler', () => {
     });
 
     it('should filter entries updated after user last login when newToMe is true', async () => {
+      const userId = 'test-user-1';
       const userLastLogin = new Date('2025-10-01T00:00:00Z');
 
       const mockEntries = [
@@ -277,6 +293,17 @@ describe('GetEntriesQueryHandler', () => {
         }),
       ];
 
+      const mockUser = new User({
+        id: userId,
+        oauthSubject: 'oauth-123',
+        email: 'test@example.com',
+        name: 'Test User',
+        isAdmin: false,
+        lastLogin: userLastLogin,
+        createdAt: new Date(),
+      });
+
+      mockUserRepository.findById.mockResolvedValue(mockUser);
       mockEntryRepository.findAll.mockResolvedValue(mockEntries);
       mockEntryRepository.count.mockResolvedValue(1);
       mockTagRepository.findByEntryId.mockResolvedValue([]);
@@ -286,7 +313,7 @@ describe('GetEntriesQueryHandler', () => {
         timestamp: new Date(),
         filters: {
           newToMe: true,
-          userLastLogin,
+          userId,
         },
       };
 
@@ -321,10 +348,36 @@ describe('GetEntriesQueryHandler', () => {
     });
 
     it('should combine newToMe filter with other filters', async () => {
+      const userId = 'test-user-1';
       const userLastLogin = new Date('2025-10-01T00:00:00Z');
 
-      mockEntryRepository.findAll.mockResolvedValue([]);
-      mockEntryRepository.count.mockResolvedValue(0);
+      const mockEntries = [
+        new Entry({
+          id: 'entry-1',
+          title: 'New Action Film',
+          mediaType: 'film',
+          creatorId: 'user-2',
+          platformId: null,
+          averageRating: null,
+          createdAt: new Date('2025-10-15T00:00:00Z'),
+          updatedAt: new Date('2025-10-15T00:00:00Z'),
+        }),
+      ];
+
+      const mockUser = new User({
+        id: userId,
+        oauthSubject: 'oauth-123',
+        email: 'test@example.com',
+        name: 'Test User',
+        isAdmin: false,
+        lastLogin: userLastLogin,
+        createdAt: new Date(),
+      });
+
+      mockUserRepository.findById.mockResolvedValue(mockUser);
+      mockEntryRepository.findAll.mockResolvedValue(mockEntries);
+      mockEntryRepository.count.mockResolvedValue(1);
+      mockTagRepository.findByEntryId.mockResolvedValue([]);
 
       const query: GetEntriesQuery = {
         queryId: crypto.randomUUID(),
@@ -333,7 +386,7 @@ describe('GetEntriesQueryHandler', () => {
           mediaType: 'film',
           tagIds: ['tag-1'],
           newToMe: true,
-          userLastLogin,
+          userId,
         },
       };
 

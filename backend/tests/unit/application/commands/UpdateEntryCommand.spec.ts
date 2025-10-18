@@ -31,15 +31,12 @@ describe('UpdateEntryCommand', () => {
       expect(command.tagIds).toEqual(validCommandData.tagIds);
     });
 
-    it('should create command with only entryId', () => {
+    it('should throw error when no update fields are provided', () => {
       const minimalData = { entryId: validCommandData.entryId };
-      const command = new UpdateEntryCommand(minimalData);
 
-      expect(command.entryId).toBe(validCommandData.entryId);
-      expect(command.title).toBeUndefined();
-      expect(command.mediaType).toBeUndefined();
-      expect(command.platformId).toBeUndefined();
-      expect(command.tagIds).toBeUndefined();
+      expect(() => new UpdateEntryCommand(minimalData)).toThrow(
+        'At least one field must be provided for update'
+      );
     });
 
     it('should create command with only title update', () => {

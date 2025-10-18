@@ -65,7 +65,7 @@ export async function updateEntry(ctx: Context): Promise<void> {
       if (error.message === 'Entry not found') {
         ctx.status = 404;
         ctx.body = {
-          error: 'Entry not found',
+          message: 'Entry not found',
         };
         return;
       }
@@ -73,7 +73,7 @@ export async function updateEntry(ctx: Context): Promise<void> {
       if (error.message === 'Title already exists') {
         ctx.status = 409;
         ctx.body = {
-          error: 'An entry with this title already exists',
+          message: 'An entry with this title already exists',
         };
         return;
       }
@@ -81,7 +81,7 @@ export async function updateEntry(ctx: Context): Promise<void> {
       if (error.message === 'One or more tags not found') {
         ctx.status = 400;
         ctx.body = {
-          error: 'One or more specified tags do not exist',
+          errors: ['One or more specified tags do not exist'],
         };
         return;
       }
