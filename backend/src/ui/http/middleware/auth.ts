@@ -1,21 +1,6 @@
 import { Context, Next } from 'koa';
-// import { WorkOSClient } from '../../../infrastructure/external/WorkOSClient';
-
-/**
- * Mock WorkOS client for development
- * TODO: Enable actual WorkOSClient when OAuth is configured
- */
-const MockWorkOSClient = {
-  async verifyAccessToken(token: string): Promise<{ sub: string }> {
-    // For development, accept any token and extract user ID
-    // In production, this would verify the JWT with WorkOS
-    if (!token || token === 'invalid') {
-      throw new Error('Invalid token');
-    }
-    // Mock user ID - in real implementation, this comes from JWT claims
-    return { sub: token };
-  }
-};
+import { AuthProviderFactory } from '../../../infrastructure/external/AuthProviderFactory';
+import { Container } from '../../../config/Container';
 
 /**
  * Authenticated user context added to Koa state
@@ -24,11 +9,13 @@ export interface AuthenticatedUser {
   id: string;
   userId: string;
   oauthSubject: string;
+  isAdmin?: boolean;
 }
 
 /**
  * Authentication middleware
  * Verifies Bearer token and adds user info to context state
+ * Uses configured auth provider (Mock, Keycloak, or WorkOS)
  */
 export async function authMiddleware(ctx: Context, next: Next): Promise<void> {
   const authHeader = ctx.headers.authorization;
@@ -42,13 +29,25 @@ export async function authMiddleware(ctx: Context, next: Next): Promise<void> {
   const token = authHeader.substring(7);
 
   try {
-    const { sub } = await MockWorkOSClient.verifyAccessToken(token);
+    // Use configured auth provider to verify token
+    const authProvider = AuthProviderFactory.getInstance();
+    const authUser = await authProvider.verifyAccessToken(token);
+
+    // If provider doesn't give us admin status, check database
+    let isAdmin = authUser.isAdmin;
+    if (isAdmin === undefined) {
+      const container = Container.getInstance();
+      const userRepository = container.getUserRepository();
+      const user = await userRepository.findByOAuthSubject(authUser.sub);
+      isAdmin = user?.isAdmin ?? false;
+    }
 
     // Add authenticated user to context state
     ctx.state.user = {
-      id: sub,
-      userId: sub,
-      oauthSubject: sub,
+      id: authUser.sub,
+      userId: authUser.sub,
+      oauthSubject: authUser.sub,
+      isAdmin,
     } as AuthenticatedUser;
 
     // TODO: Record login asynchronously (T131)
@@ -58,6 +57,8 @@ export async function authMiddleware(ctx: Context, next: Next): Promise<void> {
 
     await next();
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Authentication failed:', errorMessage);
     ctx.status = 401;
     ctx.body = { error: 'Invalid or expired access token' };
   }
@@ -77,11 +78,7 @@ export async function adminMiddleware(ctx: Context, next: Next): Promise<void> {
     return;
   }
 
-  // TODO: Query database to check if user has admin flag
-  // For now, use mock admin detection for development and testing
-  const isAdmin = user.id === 'mock-admin-token' || user.id.startsWith('admin-');
-
-  if (!isAdmin) {
+  if (!user.isAdmin) {
     ctx.status = 403;
     ctx.body = { error: 'Admin privileges required' };
     return;
