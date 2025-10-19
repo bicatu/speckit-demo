@@ -1,5 +1,7 @@
 import { Pool } from 'pg';
 import DatabaseConnection from '../infrastructure/persistence/DatabaseConnection';
+import { TokenCache } from '../infrastructure/external/TokenCache';
+import { OAuthStateManager } from '../infrastructure/external/OAuthStateManager';
 
 // Repositories
 import { PostgresUserRepository } from '../infrastructure/domain/PostgresUserRepository';
@@ -36,6 +38,10 @@ export class Container {
   private static instance: Container;
   private pool: Pool;
 
+  // Authentication services
+  private tokenCache: TokenCache;
+  private oauthStateManager: OAuthStateManager;
+
   // Repository instances
   private userRepository: PostgresUserRepository;
   private entryRepository: PostgresEntryRepository;
@@ -46,6 +52,10 @@ export class Container {
   private constructor() {
     // Get database pool
     this.pool = DatabaseConnection.getInstance().getPool();
+
+    // Initialize authentication services
+    this.tokenCache = new TokenCache(10000); // Max 10,000 entries
+    this.oauthStateManager = new OAuthStateManager(600000, 1000); // 10 min TTL, max 1,000 entries
 
     // Initialize repositories
     this.userRepository = new PostgresUserRepository(this.pool);
@@ -185,5 +195,14 @@ export class Container {
 
   public getRatingRepository(): PostgresRatingRepository {
     return this.ratingRepository;
+  }
+
+  // Getters for authentication services
+  public getTokenCache(): TokenCache {
+    return this.tokenCache;
+  }
+
+  public getOAuthStateManager(): OAuthStateManager {
+    return this.oauthStateManager;
   }
 }

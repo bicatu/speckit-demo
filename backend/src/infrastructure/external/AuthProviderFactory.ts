@@ -10,12 +10,21 @@ export type AuthProviderType = 'mock' | 'keycloak' | 'workos';
 
 /**
  * Factory for creating authentication providers based on configuration
+ * 
+ * Supports multiple authentication providers that can be switched via AUTH_PROVIDER environment variable:
+ * - 'mock': Simple token-based auth for development/testing (no external dependencies)
+ * - 'keycloak': OAuth2/OIDC provider (requires KEYCLOAK_* env vars)
+ * - 'workos': Enterprise SSO provider (requires WORKOS_* env vars)
+ * 
+ * The factory validates all required environment variables for the selected provider
+ * and throws clear errors if configuration is incomplete, enabling fail-fast startup validation.
  */
 export class AuthProviderFactory {
   private static instance: IAuthProvider | null = null;
 
   /**
    * Get or create authentication provider based on environment configuration
+   * Singleton pattern ensures consistent provider throughout application lifecycle
    */
   static getInstance(): IAuthProvider {
     if (!this.instance) {

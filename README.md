@@ -7,15 +7,17 @@ A web application for tracking movies and series with community ratings, built w
 - 🎬 Browse and discover movies and series
 - ⭐ Rate content (1-10 stars) and view community ratings
 - 🏷️ Filter by genre tags and streaming platforms
-- 👤 OAuth2 authentication via WorkOS
+- � OAuth2/OIDC authentication (Keycloak for dev, WorkOS for production)
 - 👨‍💼 Admin management of platforms and tags
 - 📄 Pagination (10 items per page)
 - 🔍 "New to me" filter for recent additions
+- 🔒 Secure session management with in-memory token caching
 
 ## Tech Stack
 
 - **Backend**: TypeScript 5.7.2, Node.js 22.x LTS, Koa 2.16.1, PostgreSQL 16
 - **Frontend**: React 18.2.0, TypeScript 5.7.2, TanStack Query 5.17.0, Vite
+- **Authentication**: Keycloak (dev/staging), WorkOS (production)
 - **Testing**: Jest 29.7.0 (backend), Vitest (frontend)
 - **Architecture**: Domain-Driven Design (DDD) with CQRS pattern
 
@@ -27,7 +29,7 @@ A web application for tracking movies and series with community ratings, built w
 
 ## Quick Start
 
-### 1. Clone and Install
+### 1. Clone and Install Dependencies
 
 ```bash
 # Install backend dependencies
@@ -39,9 +41,9 @@ cd ../frontend
 npm install
 ```
 
-### 2. Start Local Services
+### 2. Start Services with Docker
 
-Start PostgreSQL and OAuth mock services:
+Start PostgreSQL and Keycloak:
 
 ```bash
 # From repository root
@@ -49,42 +51,97 @@ docker-compose up -d
 
 # Verify services are running
 docker-compose ps
+
+# Check logs (Keycloak takes ~30-60 seconds to start)
+docker-compose logs -f keycloak
 ```
 
-### 3. Configure Environment
+### 3. Configure Environment Files
 
 ```bash
 # Backend environment
 cd backend
 cp .env.example .env
+# Edit .env and set KEYCLOAK_CLIENT_SECRET (see step 4)
 
 # Frontend environment
 cd ../frontend
 cp .env.example .env
+# Default values should work for local development
 ```
 
-### 4. Run Database Migrations
+### 4. Set Up Authentication (Keycloak)
+
+**Option A: Quick Setup (Recommended for first time)**
+
+Follow the comprehensive guide:
+```bash
+cat KEYCLOAK_SETUP.md
+```
+
+This will walk you through:
+1. Accessing Keycloak admin console (http://localhost:8080)
+2. Creating the `movietrack` realm
+3. Creating the `movietrack-app` client and getting the **client secret**
+4. Creating test users (admin@test.com / admin123, user@test.com / user123)
+
+**Option B: Already Configured**
+
+If you already have Keycloak configured, just:
+1. Copy the client secret from Keycloak admin console (Clients → movietrack-app → Credentials)
+2. Paste it into `backend/.env` as `KEYCLOAK_CLIENT_SECRET`
+
+**Important**: Update `backend/.env` with your Keycloak client secret:
+```bash
+KEYCLOAK_CLIENT_SECRET=<your-client-secret-here>
+```
+
+### 5. Initialize Database
 
 ```bash
 cd backend
+
+# Run migrations to create schema
 npm run migrate
+
+# (Optional) Seed sample data for testing
+node scripts/seed-sample-data.ts
 ```
 
-### 5. Start Development Servers
+### 6. Start Development Servers
 
 ```bash
 # Terminal 1: Start backend (from backend/)
+cd backend
 npm run dev
+# Backend will run on http://localhost:3000
 
 # Terminal 2: Start frontend (from frontend/)
+cd frontend
 npm run dev
+# Frontend will run on http://localhost:5173
 ```
 
-### 6. Access the Application
+### 7. Test the Application
 
-- **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:3000/api/v1
-- **API Documentation**: http://localhost:3000/docs (after implementation)
+1. **Open the app**: http://localhost:5173
+2. **Click "Log In"**: You'll be redirected to Keycloak
+3. **Log in with test user**:
+   - Email: `admin@test.com` / Password: `admin123` (admin user)
+   - Email: `user@test.com` / Password: `user123` (regular user)
+4. **Verify authentication**: You should see your name and "DEV" badge in the header
+5. **Browse entries**: Navigate to entries, add ratings, test filters
+6. **Admin features** (admin@test.com only): Create/delete platforms and tags via `/admin` page
+7. **Click "Log Out"**: Session will be terminated
+
+## API Endpoints
+
+Once running, the backend API is available at:
+
+- **Health Check**: http://localhost:3000/api/health
+- **Entries**: http://localhost:3000/api/entries
+- **Authentication**: http://localhost:3000/api/auth/*
+- **Admin endpoints**: Require admin privileges (see AUTHENTICATION.md)
 
 ## Development
 
@@ -229,10 +286,21 @@ PostgreSQL database with the following schema:
 
 ## Authentication
 
-The application uses OAuth2 authentication via WorkOS:
+The application uses **OAuth2/OpenID Connect (OIDC)** authentication with provider abstraction:
 
+- **Development/Staging**: Keycloak (self-hosted, configured via Docker)
 - **Production**: WorkOS AuthKit
-- **Local Development**: Docker-based OAuth mock service
+- **Testing**: Mock provider (no external dependencies)
+
+The provider is configured via the `AUTH_PROVIDER` environment variable. See `backend/AUTHENTICATION.md` for detailed architecture documentation and `KEYCLOAK_SETUP.md` for local setup instructions.
+
+### Key Features
+
+- **Provider-agnostic**: Switch between Keycloak/WorkOS without code changes
+- **Secure session management**: JWT tokens with in-memory caching
+- **Token cache**: >95% cache hit rate target, 10-minute token TTL
+- **Error handling**: Automatic retry with user-friendly error messages
+- **Environment indicator**: "DEV" badge visible in development mode
 
 ## Contributing
 

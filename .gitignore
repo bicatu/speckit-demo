@@ -10,6 +10,8 @@ build/
 .env
 .env.local
 .env.*.local
+backend/.env
+frontend/.env
 
 # Logs
 logs/

@@ -12,7 +12,7 @@ export function useDeleteAccount() {
 
   return useMutation({
     mutationFn: async () => {
-      const response = await api.delete('/api/v1/users/me');
+      const response = await api.delete('/api/users/me');
       return response.data;
     },
     onSuccess: () => {

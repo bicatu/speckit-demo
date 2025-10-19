@@ -20,6 +20,11 @@ import { deletePlatform } from './actions/platforms/deletePlatform';
 import { createTag } from './actions/tags/createTag';
 import { deleteTag } from './actions/tags/deleteTag';
 import { deleteUser } from './actions/users/deleteUser';
+import login from './actions/auth/login';
+import callback from './actions/auth/callback';
+import me from './actions/auth/me';
+import { logout } from './actions/auth/logout';
+import cacheStats from './actions/auth/cacheStats';
 
 /**
  * Creates and configures the Koa application server
@@ -96,6 +101,13 @@ export function createServer(): Koa {
   router.post('/api/entries', authMiddleware, createEntry);
   router.put('/api/entries/:entryId', authMiddleware, updateEntry);
 
+  // Auth routes
+  router.get('/api/auth/login', login);
+  router.post('/api/auth/callback', callback);
+  router.get('/api/auth/me', me);
+  router.post('/api/auth/logout', logout);
+  router.get('/api/auth/cache-stats', authMiddleware, adminMiddleware, cacheStats);
+
   // Rating routes
   router.post('/api/entries/:entryId/ratings', authMiddleware, addRating);
 
@@ -112,7 +124,7 @@ export function createServer(): Koa {
   router.delete('/api/tags/:tagId', authMiddleware, adminMiddleware, deleteTag);
 
   // User account routes
-  router.delete('/api/v1/users/me', authMiddleware, deleteUser);
+  router.delete('/api/users/me', authMiddleware, deleteUser);
 
   // Register routes
   app.use(router.routes()).use(router.allowedMethods());

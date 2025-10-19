@@ -129,6 +129,14 @@ export class PostgresUserRepository implements IUserRepository {
     return parseInt(result.rows[0].count, 10);
   }
 
+  async updateLastLogin(id: string, lastLogin: Date): Promise<boolean> {
+    const result = await this.pool.query(
+      'UPDATE users SET last_login = $2 WHERE id = $1',
+      [id, lastLogin],
+    );
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
   private mapToEntity(row: any): User {
     return new User({
       id: row.id,
