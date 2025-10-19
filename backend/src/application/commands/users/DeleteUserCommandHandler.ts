@@ -3,7 +3,6 @@ import { DeleteUserCommand } from './DeleteUserCommand';
 import { CommandResult } from '../Command';
 import { IUserRepository } from '../../../domain/repositories/IUserRepository';
 import { IEntryRepository } from '../../../domain/repositories/IEntryRepository';
-import { IRatingRepository } from '../../../domain/repositories/IRatingRepository';
 
 export class DeleteUserCommandHandler
   implements CommandHandler<DeleteUserCommand>
@@ -11,7 +10,6 @@ export class DeleteUserCommandHandler
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly entryRepository: IEntryRepository,
-    private readonly ratingRepository: IRatingRepository
   ) {}
 
   async handle(command: DeleteUserCommand): Promise<CommandResult> {

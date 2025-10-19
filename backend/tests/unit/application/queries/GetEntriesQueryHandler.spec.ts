@@ -24,10 +24,12 @@ describe('GetEntriesQueryHandler', () => {
       findById: jest.fn(),
       findByTitle: jest.fn(),
       save: jest.fn(),
-      delete: jest.fn(),
-      count: jest.fn(),
       update: jest.fn(),
+      delete: jest.fn(),
       updateTags: jest.fn(),
+      findByCreatorId: jest.fn(),
+      anonymizeCreator: jest.fn(),
+      count: jest.fn(),
     } as jest.Mocked<IEntryRepository>;
 
     mockTagRepository = {
@@ -58,6 +60,7 @@ describe('GetEntriesQueryHandler', () => {
       save: jest.fn(),
       delete: jest.fn(),
       existsByOAuthSubject: jest.fn(),
+      countAdmins: jest.fn(),
     } as jest.Mocked<IUserRepository>;
 
     handler = new GetEntriesQueryHandler(

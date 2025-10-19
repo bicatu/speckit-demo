@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: movietrack
       POSTGRES_PASSWORD: movietrack_dev_password
       POSTGRES_DB: movietrack_db
-      POSTGRES_MULTIPLE_DATABASES: movietrack_db,keycloak_db
+      POSTGRES_MULTIPLE_DATABASES: movietrack_db,movietrack_db_test,keycloak_db
     ports:
       - "5432:5432"
     volumes:
@@ -51,10 +51,10 @@ services:
       KC_DB_PASSWORD: movietrack_dev_password
       KC_HOSTNAME: localhost
       KC_HOSTNAME_PORT: 8080
-      KC_HOSTNAME_STRICT: false
-      KC_HOSTNAME_STRICT_HTTPS: false
-      KC_HTTP_ENABLED: true
-      KC_HEALTH_ENABLED: true
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
     ports:
       - "8080:8080"
     depends_on:

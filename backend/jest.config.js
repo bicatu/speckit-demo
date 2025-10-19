@@ -18,5 +18,7 @@ module.exports = {
         esModuleInterop: true
       }
     }
-  }
+  },
+  // Setup test environment to use test database
+  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts']
 };

@@ -24,6 +24,8 @@ describe('CreateEntryCommandHandler', () => {
       count: jest.fn(),
       findTopRated: jest.fn(),
       findRecent: jest.fn(),
+      findByCreatorId: jest.fn(),
+      anonymizeCreator: jest.fn(),
     } as jest.Mocked<IEntryRepository>;
 
     mockGenreTagRepository = {

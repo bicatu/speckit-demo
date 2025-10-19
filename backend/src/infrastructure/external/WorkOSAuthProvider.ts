@@ -1,121 +1,59 @@
 import { IAuthProvider, AuthUser } from './IAuthProvider';
-import { WorkOS } from '@workos-inc/node';
+// import { WorkOS } from '@workos-inc/node';
 
 /**
  * WorkOS authentication provider
  * Wraps WorkOS SDK to implement IAuthProvider interface
+ * 
+ * NOTE: This implementation is incomplete as the WorkOS SDK doesn't have
+ * a verifyAccessToken method in the current version. You would need to:
+ * 1. Verify JWT tokens manually using jose library
+ * 2. Use WorkOS JWKS endpoint for verification
+ * 3. Or wait for SDK update with token verification support
+ * 
+ * For now, use MockAuthProvider or KeycloakAuthProvider instead.
  */
 export class WorkOSAuthProvider implements IAuthProvider {
-  private readonly workos: WorkOS;
-  private readonly clientId: string;
+  // private readonly workos: WorkOS;
+  // private readonly clientId: string;
 
-  constructor(apiKey: string, clientId: string) {
-    this.workos = new WorkOS(apiKey, { clientId });
-    this.clientId = clientId;
+  constructor(_apiKey: string, _clientId: string) {
+    // this.workos = new WorkOS(apiKey, { clientId });
+    // this.clientId = clientId;
+    throw new Error(
+      'WorkOSAuthProvider is not fully implemented. ' +
+      'The WorkOS SDK does not provide verifyAccessToken method. ' +
+      'Use MockAuthProvider or KeycloakAuthProvider instead.',
+    );
   }
 
   /**
    * Verify WorkOS access token
    */
-  async verifyAccessToken(accessToken: string): Promise<AuthUser> {
-    try {
-      const { sid, sub } = await this.workos.userManagement.verifyAccessToken(
-        accessToken,
-      );
-
-      // WorkOS doesn't include user details in token verification
-      // We only get sub (user ID) and sid (session ID)
-      // Additional user info would need to be fetched from WorkOS API or database
-      return {
-        sub,
-        // TODO: Fetch user details from WorkOS or database
-        // For now, we'll need to query the database for admin status
-        isAdmin: undefined,
-      };
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`Token verification failed: ${error.message}`);
-      }
-      throw new Error('Token verification failed');
-    }
+  async verifyAccessToken(_accessToken: string): Promise<AuthUser> {
+    throw new Error('Not implemented');
   }
 
   /**
    * Generate WorkOS authorization URL
    */
-  getAuthorizationUrl(redirectUri: string, state?: string): string {
-    return this.workos.userManagement.getAuthorizationUrl({
-      provider: 'authkit',
-      redirectUri,
-      state,
-    });
+  getAuthorizationUrl(_redirectUri: string, _state?: string): string {
+    throw new Error('Not implemented');
   }
 
   /**
    * Exchange authorization code for tokens using WorkOS
    */
   async authenticateWithCode(
-    code: string,
-    redirectUri: string,
+    _code: string,
+    _redirectUri: string,
   ): Promise<{
     accessToken: string;
     refreshToken?: string;
     expiresIn?: number;
     user: AuthUser;
   }> {
-    try {
-      const { accessToken, refreshToken, user } =
-        await this.workos.userManagement.authenticateWithCode({
-          code,
-          clientId: this.clientId,
-        });
-
-      return {
-        accessToken,
-        refreshToken,
-        expiresIn: undefined, // WorkOS doesn't provide expires_in
-        user: {
-          sub: user.id,
-          email: user.email,
-          firstName: user.firstName || undefined,
-          lastName: user.lastName || undefined,
-          // Admin status needs to be determined from database
-          isAdmin: undefined,
-        },
-      };
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`Authentication failed: ${error.message}`);
-      }
-      throw new Error('Authentication failed');
-    }
-  }
-
-  /**
-   * Refresh WorkOS access token
-   */
-  async refreshAccessToken(refreshToken: string): Promise<{
-    accessToken: string;
-    refreshToken?: string;
-    expiresIn?: number;
-  }> {
-    try {
-      const response = await this.workos.userManagement.refreshToken({
-        refreshToken,
-        clientId: this.clientId,
-      });
-
-      return {
-        accessToken: response.accessToken,
-        refreshToken: response.refreshToken,
-        expiresIn: undefined,
-      };
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`Token refresh failed: ${error.message}`);
-      }
-      throw new Error('Token refresh failed');
-    }
+    throw new Error('Not implemented');
   }
 
   /**
@@ -123,8 +61,6 @@ export class WorkOSAuthProvider implements IAuthProvider {
    * Note: WorkOS uses session management, logout URL may vary
    */
   getLogoutUrl(redirectUri?: string): string {
-    // WorkOS logout is typically handled through session management
-    // This is a simplified implementation
     return redirectUri || '/';
   }
 }

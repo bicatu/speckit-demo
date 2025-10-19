@@ -1,6 +1,7 @@
 import { Context } from 'koa';
-import { DeleteUserCommand } from '../../../application/commands/users/DeleteUserCommand';
-import { DeleteUserCommandHandler } from '../../../application/commands/users/DeleteUserCommandHandler';
+import { DeleteUserCommand } from '../../../../application/commands/users/DeleteUserCommand';
+import { DeleteUserCommandHandler } from '../../../../application/commands/users/DeleteUserCommandHandler';
+import { HandlerRegistry } from '../../../../application/HandlerRegistry';
 
 /**
  * DELETE /api/v1/users/me - Delete user account
@@ -26,13 +27,22 @@ export async function deleteUser(ctx: Context): Promise<void> {
       return;
     }
 
-    // Get handler from DI container
-    const handler: DeleteUserCommandHandler = ctx.state.container.get(
-      'DeleteUserCommandHandler'
-    );
+    // Get handler from registry
+    const handler = HandlerRegistry.getCommandHandler<DeleteUserCommandHandler>('DeleteUserCommand');
 
     // Create and execute command
-    const command = new DeleteUserCommand(userId);
+    let command;
+    try {
+      command = new DeleteUserCommand(userId);
+    } catch (error) {
+      // Handle validation errors from command constructor (e.g., invalid UUID)
+      ctx.status = 400;
+      ctx.body = {
+        error: error instanceof Error ? error.message : 'Invalid user ID',
+      };
+      return;
+    }
+
     const result = await handler.handle(command);
 
     if (!result.success) {

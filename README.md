@@ -164,17 +164,56 @@ The project follows Test-Driven Development (TDD) with comprehensive test covera
 
 - **Unit Tests**: Domain logic and business rules
 - **Integration Tests**: Command/Query handlers and repositories
-- **Contract Tests**: API endpoints
+- **Contract Tests**: API endpoints with real database interactions
 - **Component Tests**: React components (frontend)
 
-Run all tests:
+### Running Tests
 
 ```bash
-# Backend
+# Backend tests
 cd backend && npm test
 
-# Frontend
+# Frontend tests
 cd frontend && npm test
+
+# Backend tests with coverage
+cd backend && npm test:coverage
+```
+
+### Test Database Setup
+
+The backend tests use a separate test database to avoid interfering with development data.
+
+1. **Create test environment file**:
+   ```bash
+   cd backend
+   cp .env.test.example .env.test
+   ```
+
+2. **Initialize test database** (one-time setup):
+   ```bash
+   npm run test:db:setup
+   ```
+
+   This will:
+   - Create the test database schema
+   - Seed pre-configured test users (regular user and admin user)
+
+3. **Run tests**:
+   ```bash
+   npm test
+   ```
+
+**Test Database Configuration**:
+- Database: `movietrack_db_test` (automatically created by docker-compose)
+- Pre-configured test users (UUIDs defined in `.env.test`):
+  - Regular user: `550e8400-e29b-41d4-a716-446655440000`
+  - Admin user: `550e8400-e29b-41d4-a716-446655440001`
+- Tests automatically setup and cleanup database state
+
+**Note**: The test database is automatically created when you run `docker-compose up`. If you need to reset it:
+```bash
+npm run test:db:reset
 ```
 
 ## Database

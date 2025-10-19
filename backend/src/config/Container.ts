@@ -23,6 +23,7 @@ import { CreateStreamingPlatformCommandHandler } from '../application/commands/p
 import { DeleteStreamingPlatformCommandHandler } from '../application/commands/platforms/DeleteStreamingPlatformCommandHandler';
 import { CreateGenreTagCommandHandler } from '../application/commands/tags/CreateGenreTagCommandHandler';
 import { DeleteGenreTagCommandHandler } from '../application/commands/tags/DeleteGenreTagCommandHandler';
+import { DeleteUserCommandHandler } from '../application/commands/users/DeleteUserCommandHandler';
 
 // Handler Registry
 import { HandlerRegistry } from '../application/HandlerRegistry';
@@ -156,6 +157,13 @@ export class Container {
       this.entryRepository,
     );
     HandlerRegistry.registerCommand('DeleteGenreTagCommand', deleteTagHandler);
+
+    // Register DeleteUserCommandHandler
+    const deleteUserHandler = new DeleteUserCommandHandler(
+      this.userRepository,
+      this.entryRepository,
+    );
+    HandlerRegistry.registerCommand('DeleteUserCommand', deleteUserHandler);
   }
 
   // Getters for repositories (if needed elsewhere)

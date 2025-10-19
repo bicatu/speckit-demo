@@ -7,21 +7,44 @@ import { IAuthProvider, AuthUser } from './IAuthProvider';
 export class MockAuthProvider implements IAuthProvider {
   /**
    * Verify access token (mock implementation)
-   * Token format: "user-<id>" or "admin-<id>" or "mock-admin-token"
+   * Token format: 
+   * - "user-<id>" or "admin-<id>" or "mock-admin-token" (for string tokens)
+   * - Valid UUID format (admin status determined from database)
    * @param accessToken Mock token
    * @returns Mock user information
    */
   async verifyAccessToken(accessToken: string): Promise<AuthUser> {
-    if (!accessToken || accessToken === 'invalid' || accessToken === 'expired') {
+    if (
+      !accessToken ||
+      accessToken === 'invalid' ||
+      accessToken === 'expired' ||
+      accessToken.startsWith('invalid-') ||
+      accessToken.startsWith('expired-')
+    ) {
       throw new Error('Invalid or expired access token');
     }
 
-    // Determine if user is admin based on token pattern
-    const isAdmin =
-      accessToken === 'mock-admin-token' || accessToken.startsWith('admin-');
-
     // Extract user ID from token (or use token as ID)
     const sub = accessToken;
+
+    // Check if token is a UUID (let database determine admin status)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const isUuid = uuidRegex.test(accessToken);
+
+    if (isUuid) {
+      // For UUID tokens, don't set isAdmin here - let middleware query database
+      return {
+        sub,
+        email: `user-${sub.substring(0, 8)}@example.com`,
+        firstName: 'Test',
+        lastName: 'User',
+        isAdmin: undefined, // Will be determined from database
+      };
+    }
+
+    // For non-UUID tokens, use token pattern to determine admin status
+    const isAdmin =
+      accessToken === 'mock-admin-token' || accessToken.startsWith('admin-');
 
     // Generate mock email
     const email = isAdmin
@@ -56,7 +79,7 @@ export class MockAuthProvider implements IAuthProvider {
    */
   async authenticateWithCode(
     code: string,
-    redirectUri: string,
+    _redirectUri: string,
   ): Promise<{
     accessToken: string;
     refreshToken?: string;
