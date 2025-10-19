@@ -7,8 +7,10 @@ A web application for tracking movies and series with community ratings, built w
 - 🎬 Browse and discover movies and series
 - ⭐ Rate content (1-10 stars) and view community ratings
 - 🏷️ Filter by genre tags and streaming platforms
-- � OAuth2/OIDC authentication (Keycloak for dev, WorkOS for production)
-- 👨‍💼 Admin management of platforms and tags
+- 🔐 OAuth2/OIDC authentication with Google Sign-In (Keycloak for dev, WorkOS for production)
+- 👥 User approval workflow - new users require admin approval
+- � Email notifications for new user requests
+- �👨‍💼 Admin management: platforms, tags, and user approvals
 - 📄 Pagination (10 items per page)
 - 🔍 "New to me" filter for recent additions
 - 🔒 Secure session management with in-memory token caching
@@ -26,6 +28,8 @@ A web application for tracking movies and series with community ratings, built w
 - Node.js 22.x LTS or higher
 - npm 10.x or higher
 - Docker and Docker Compose (for local development)
+- SMTP server credentials (for email notifications)
+- Google OAuth credentials (for Google Sign-In)
 
 ## Quick Start
 
@@ -62,7 +66,10 @@ docker-compose logs -f keycloak
 # Backend environment
 cd backend
 cp .env.example .env
-# Edit .env and set KEYCLOAK_CLIENT_SECRET (see step 4)
+# Edit .env and configure:
+# - KEYCLOAK_CLIENT_SECRET (see step 4)
+# - SMTP settings for email notifications (see docs/EMAIL_SETUP.md)
+# - ADMIN_EMAIL for receiving new user notifications
 
 # Frontend environment
 cd ../frontend
@@ -70,31 +77,30 @@ cp .env.example .env
 # Default values should work for local development
 ```
 
-### 4. Set Up Authentication (Keycloak)
+### 4. Set Up Authentication
 
-**Option A: Quick Setup (Recommended for first time)**
+The application uses OAuth2/OIDC authentication. Choose your environment:
 
-Follow the comprehensive guide:
+**For Local Development:**
+- Follow **[KEYCLOAK_SETUP.md](KEYCLOAK_SETUP.md)** for complete Keycloak configuration
+- Includes Keycloak realm setup, client configuration, and Google Sign-In integration
+
+**For Production:**
+- Follow **[WORKOS_SETUP.md](WORKOS_SETUP.md)** for WorkOS configuration
+- Includes WorkOS organization setup, Google SSO connection, and deployment guide
+
+**Quick Start (Development):**
 ```bash
-cat KEYCLOAK_SETUP.md
-```
+# 1. Start Keycloak
+docker-compose up -d
 
-This will walk you through:
-1. Accessing Keycloak admin console (http://localhost:8080)
-2. Creating the `movietrack` realm
-3. Creating the `movietrack-app` client and getting the **client secret**
-4. Creating test users (admin@test.com / admin123, user@test.com / user123)
+# 2. Follow KEYCLOAK_SETUP.md to configure realm and client
 
-**Option B: Already Configured**
-
-If you already have Keycloak configured, just:
-1. Copy the client secret from Keycloak admin console (Clients → movietrack-app → Credentials)
-2. Paste it into `backend/.env` as `KEYCLOAK_CLIENT_SECRET`
-
-**Important**: Update `backend/.env` with your Keycloak client secret:
-```bash
+# 3. Copy client secret to backend/.env
 KEYCLOAK_CLIENT_SECRET=<your-client-secret-here>
 ```
+
+**Note:** Both guides link to the [Google OAuth Setup](docs/GOOGLE_OAUTH_SETUP.md) for configuring Google Sign-In credentials.
 
 ### 5. Initialize Database
 
@@ -277,30 +283,52 @@ npm run test:db:reset
 
 PostgreSQL database with the following schema:
 
-- **users**: User accounts with OAuth2 identity
+- **users**: User accounts with OAuth2 identity and approval status
 - **entries**: Movies and series with metadata
 - **ratings**: User ratings (1-10 stars)
 - **genre_tags**: Available genre categories
 - **streaming_platforms**: Available streaming services
 - **entry_tags**: Many-to-many relationship between entries and tags
 
-## Authentication
+### User Approval Fields
 
-The application uses **OAuth2/OpenID Connect (OIDC)** authentication with provider abstraction:
+The `users` table includes fields for the approval workflow:
+- `approval_status`: ENUM ('pending', 'approved', 'rejected')
+- `approval_requested_at`: Timestamp when approval was requested
+- `approved_by`: UUID of admin who approved/rejected
+- `approved_at`: Timestamp of approval/rejection
 
-- **Development/Staging**: Keycloak (self-hosted, configured via Docker)
-- **Production**: WorkOS AuthKit
-- **Testing**: Mock provider (no external dependencies)
+## Authentication & Authorization
 
-The provider is configured via the `AUTH_PROVIDER` environment variable. See `backend/AUTHENTICATION.md` for detailed architecture documentation and `KEYCLOAK_SETUP.md` for local setup instructions.
+The application uses **OAuth2/OpenID Connect (OIDC)** authentication with provider abstraction.
 
-### Key Features
+### Architecture Overview
 
-- **Provider-agnostic**: Switch between Keycloak/WorkOS without code changes
-- **Secure session management**: JWT tokens with in-memory caching
-- **Token cache**: >95% cache hit rate target, 10-minute token TTL
-- **Error handling**: Automatic retry with user-friendly error messages
-- **Environment indicator**: "DEV" badge visible in development mode
+For detailed authentication architecture, see **[backend/AUTHENTICATION.md](backend/AUTHENTICATION.md)**
+
+**Key Features:**
+- Provider-agnostic design (Keycloak, WorkOS, or Mock)
+- Google Sign-In integration
+- User approval workflow with email notifications
+- Secure session management with token caching
+- Role-based access control (Admin/User)
+
+### Setup Guides
+
+| Environment | Guide | Description |
+|-------------|-------|-------------|
+| **Development** | [KEYCLOAK_SETUP.md](KEYCLOAK_SETUP.md) | Local Keycloak configuration with Docker |
+| **Production** | [WORKOS_SETUP.md](WORKOS_SETUP.md) | WorkOS managed authentication setup |
+| **Google OAuth** | [docs/GOOGLE_OAUTH_SETUP.md](docs/GOOGLE_OAUTH_SETUP.md) | Google Sign-In credential setup (shared) |
+| **Email** | [docs/EMAIL_SETUP.md](docs/EMAIL_SETUP.md) | SMTP configuration for notifications |
+
+### User Roles
+
+| Role | Permissions |
+|------|-------------|
+| **Pending** | New users awaiting admin approval (limited access) |
+| **User** | Browse entries, add ratings, create entries |
+| **Admin** | All user permissions + approve users + manage tags/platforms |
 
 ## Contributing
 

@@ -10,7 +10,8 @@ export class PostgresUserRepository implements IUserRepository {
 
   async findById(id: string): Promise<User | null> {
     const result = await this.pool.query(
-      `SELECT id, oauth_subject, email, name, is_admin, last_login, created_at
+      `SELECT id, oauth_subject, email, name, is_admin, last_login, created_at,
+              approval_status, approval_requested_at, approved_by, rejected_by, approved_at
        FROM users WHERE id = $1`,
       [id],
     );
@@ -24,7 +25,8 @@ export class PostgresUserRepository implements IUserRepository {
 
   async findByOAuthSubject(oauthSubject: string): Promise<User | null> {
     const result = await this.pool.query(
-      `SELECT id, oauth_subject, email, name, is_admin, last_login, created_at
+      `SELECT id, oauth_subject, email, name, is_admin, last_login, created_at,
+              approval_status, approval_requested_at, approved_by, rejected_by, approved_at
        FROM users WHERE oauth_subject = $1`,
       [oauthSubject],
     );
@@ -38,7 +40,8 @@ export class PostgresUserRepository implements IUserRepository {
 
   async findByEmail(email: string): Promise<User | null> {
     const result = await this.pool.query(
-      `SELECT id, oauth_subject, email, name, is_admin, last_login, created_at
+      `SELECT id, oauth_subject, email, name, is_admin, last_login, created_at,
+              approval_status, approval_requested_at, approved_by, rejected_by, approved_at
        FROM users WHERE email = $1`,
       [email],
     );
@@ -51,7 +54,8 @@ export class PostgresUserRepository implements IUserRepository {
   }
 
   async findAll(isAdmin?: boolean): Promise<User[]> {
-    let query = `SELECT id, oauth_subject, email, name, is_admin, last_login, created_at
+    let query = `SELECT id, oauth_subject, email, name, is_admin, last_login, created_at,
+                        approval_status, approval_requested_at, approved_by, rejected_by, approved_at
                  FROM users`;
     const params: any[] = [];
 
@@ -77,8 +81,9 @@ export class PostgresUserRepository implements IUserRepository {
       if (existing.rows.length === 0) {
         // Insert new user
         await client.query(
-          `INSERT INTO users (id, oauth_subject, email, name, is_admin, last_login, created_at)
-           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+          `INSERT INTO users (id, oauth_subject, email, name, is_admin, last_login, created_at,
+                              approval_status, approval_requested_at, approved_by, rejected_by, approved_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
           [
             user.id,
             user.oauthSubject,
@@ -87,15 +92,33 @@ export class PostgresUserRepository implements IUserRepository {
             user.isAdmin,
             user.lastLogin,
             user.createdAt,
+            user.approvalStatus,
+            user.approvalRequestedAt,
+            user.approvedBy,
+            user.rejectedBy,
+            user.approvedAt,
           ],
         );
       } else {
         // Update existing user
         await client.query(
           `UPDATE users 
-           SET oauth_subject = $2, email = $3, name = $4, is_admin = $5, last_login = $6
+           SET oauth_subject = $2, email = $3, name = $4, is_admin = $5, last_login = $6,
+               approval_status = $7, approval_requested_at = $8, approved_by = $9, rejected_by = $10, approved_at = $11
            WHERE id = $1`,
-          [user.id, user.oauthSubject, user.email, user.name, user.isAdmin, user.lastLogin],
+          [
+            user.id,
+            user.oauthSubject,
+            user.email,
+            user.name,
+            user.isAdmin,
+            user.lastLogin,
+            user.approvalStatus,
+            user.approvalRequestedAt,
+            user.approvedBy,
+            user.rejectedBy,
+            user.approvedAt,
+          ],
         );
       }
 
@@ -137,6 +160,38 @@ export class PostgresUserRepository implements IUserRepository {
     return result.rowCount !== null && result.rowCount > 0;
   }
 
+  async findPendingUsers(): Promise<User[]> {
+    const result = await this.pool.query(
+      `SELECT id, oauth_subject, email, name, is_admin, last_login, created_at,
+              approval_status, approval_requested_at, approved_by, rejected_by, approved_at
+       FROM users
+       WHERE approval_status = 'pending'
+       ORDER BY approval_requested_at DESC`,
+    );
+    return result.rows.map((row) => this.mapToEntity(row));
+  }
+
+  async findByApprovalStatus(status: 'pending' | 'approved' | 'rejected'): Promise<User[]> {
+    const result = await this.pool.query(
+      `SELECT id, oauth_subject, email, name, is_admin, last_login, created_at,
+              approval_status, approval_requested_at, approved_by, rejected_by, approved_at
+       FROM users
+       WHERE approval_status = $1
+       ORDER BY name ASC`,
+      [status],
+    );
+    return result.rows.map((row) => this.mapToEntity(row));
+  }
+
+  async countPendingUsers(): Promise<number> {
+    const result = await this.pool.query(
+      `SELECT COUNT(*) as count
+       FROM users
+       WHERE approval_status = 'pending'`,
+    );
+    return parseInt(result.rows[0].count, 10);
+  }
+
   private mapToEntity(row: any): User {
     return new User({
       id: row.id,
@@ -146,6 +201,11 @@ export class PostgresUserRepository implements IUserRepository {
       isAdmin: row.is_admin,
       lastLogin: row.last_login ? new Date(row.last_login) : null,
       createdAt: new Date(row.created_at),
+      approvalStatus: row.approval_status,
+      approvalRequestedAt: row.approval_requested_at ? new Date(row.approval_requested_at) : null,
+      approvedBy: row.approved_by,
+      rejectedBy: row.rejected_by,
+      approvedAt: row.approved_at ? new Date(row.approved_at) : null,
     });
   }
 }

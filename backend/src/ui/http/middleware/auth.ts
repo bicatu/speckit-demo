@@ -33,14 +33,24 @@ export async function authMiddleware(ctx: Context, next: Next): Promise<void> {
     const authProvider = AuthProviderFactory.getInstance();
     const authUser = await authProvider.verifyAccessToken(token);
 
-    // If provider doesn't give us admin status, check database
-    let isAdmin = authUser.isAdmin;
-    if (isAdmin === undefined) {
-      const container = Container.getInstance();
-      const userRepository = container.getUserRepository();
-      const user = await userRepository.findByOAuthSubject(authUser.sub);
-      isAdmin = user?.isAdmin ?? false;
+    // Get user from database to check approval status and admin status
+    const container = Container.getInstance();
+    const userRepository = container.getUserRepository();
+    const user = await userRepository.findByOAuthSubject(authUser.sub);
+
+    // Check approval status (FR-017: pending/rejected users get 403)
+    if (user && !user.isApproved()) {
+      ctx.status = 403;
+      if (user.isPending()) {
+        ctx.body = { error: 'Account pending approval. Please wait for administrator approval.' };
+      } else if (user.isRejected()) {
+        ctx.body = { error: 'Account access has been rejected.' };
+      }
+      return;
     }
+
+    // Use admin status from database if provider doesn't provide it
+    const isAdmin = authUser.isAdmin ?? user?.isAdmin ?? false;
 
     // Add authenticated user to context state
     ctx.state.user = {
