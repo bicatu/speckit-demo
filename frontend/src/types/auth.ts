@@ -6,6 +6,7 @@ export interface AuthenticatedUser {
   email: string;
   displayName: string;
   isAdmin: boolean;
+  approvalStatus: 'pending' | 'approved' | 'rejected';
 }
 
 /**

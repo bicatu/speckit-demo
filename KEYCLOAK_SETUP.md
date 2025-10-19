@@ -100,6 +100,45 @@ This guide explains how to set up Keycloak for local OAuth2/OpenID Connect authe
 6. Go back to **Clients** → `movietrack-app` → **Client scopes** tab
 7. Add `movietrack-roles` to **Assigned default client scopes**
 
+### 5. Configure Google Identity Provider (Optional - for Google Sign-In)
+
+To enable Google Sign-In, you need to:
+
+1. **Create Google OAuth Credentials** (one-time setup)
+   - Follow **[docs/GOOGLE_OAUTH_SETUP.md](docs/GOOGLE_OAUTH_SETUP.md)** - Steps 1-4 "Creating Google OAuth Credentials"
+   - You'll need: Client ID and Client Secret
+
+2. **Configure Keycloak to use Google**:
+   - In Keycloak Admin Console, go to **Identity Providers**
+   - Click **Add provider** → Select **Google**
+   - Configure:
+     - **Alias**: `google`
+     - **Display Name**: `Google`
+     - **Enabled**: ON
+     - **Trust Email**: ON
+     - **Client ID**: Paste your Google OAuth Client ID
+     - **Client Secret**: Paste your Google OAuth Client Secret
+     - **Default Scopes**: `openid profile email`
+   - Click **Save**
+   - Copy the **Redirect URI** shown: `http://localhost:8080/realms/movietrack/broker/google/endpoint`
+
+3. **Add Redirect URI to Google Console**:
+   - Go back to Google Cloud Console → Credentials
+   - Edit your OAuth client
+   - Add the Keycloak redirect URI to **Authorized redirect URIs**
+   - Save
+
+4. **Test Google Sign-In**:
+   - Open your app: <http://localhost:5173>
+   - Click **Log In**
+   - You should see a **Google** button on the Keycloak login page
+   - Click it to authenticate with Google
+
+**Need detailed help?** See the complete guide: **[docs/GOOGLE_OAUTH_SETUP.md](docs/GOOGLE_OAUTH_SETUP.md)**
+- Includes OAuth consent screen setup
+- Email mapper configuration
+- Troubleshooting common issues
+
 ## Backend Configuration
 
 Create a `.env` file in the `backend/` directory (copy from `.env.example`):

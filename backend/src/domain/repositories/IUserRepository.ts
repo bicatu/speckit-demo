@@ -66,4 +66,23 @@ export interface IUserRepository {
    * @returns True if updated, false if not found
    */
   updateLastLogin(id: string, lastLogin: Date): Promise<boolean>;
+
+  /**
+   * Find all pending users (approval_status = 'pending')
+   * @returns Array of pending users ordered by approval_requested_at DESC
+   */
+  findPendingUsers(): Promise<User[]>;
+
+  /**
+   * Find all users with specific approval status
+   * @param status Approval status to filter by
+   * @returns Array of users with the specified status
+   */
+  findByApprovalStatus(status: 'pending' | 'approved' | 'rejected'): Promise<User[]>;
+
+  /**
+   * Count number of pending users
+   * @returns Number of users with pending approval status
+   */
+  countPendingUsers(): Promise<number>;
 }

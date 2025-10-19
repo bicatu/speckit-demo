@@ -37,6 +37,7 @@ export default async function callback(ctx: Context): Promise<void> {
     const authProvider = AuthProviderFactory.getInstance();
     const tokenCache = container.getTokenCache();
     const userRepository = container.getUserRepository();
+    const emailService = container.getEmailService();
 
     // Validate OAuth state
     const oauthState = oauthStateManager.validate(state);
@@ -64,7 +65,7 @@ export default async function callback(ctx: Context): Promise<void> {
     let user = await userRepository.findByOAuthSubject(oauthSubject);
 
     if (!user) {
-      // Create new user
+      // Create new user with pending status
       const email = authResult.user.email || `${oauthSubject}@oauth.local`;
       const displayName = authResult.user.firstName && authResult.user.lastName
         ? `${authResult.user.firstName} ${authResult.user.lastName}`
@@ -78,9 +79,34 @@ export default async function callback(ctx: Context): Promise<void> {
         isAdmin: authResult.user.isAdmin || false,
         lastLogin: new Date(),
         createdAt: new Date(),
+        approvalStatus: 'pending', // New users require approval
+        approvalRequestedAt: null,
+        approvedBy: null,
+        rejectedBy: null,
+        approvedAt: null,
       });
 
+      // Request approval (sets approval_requested_at timestamp)
+      user.requestApproval();
+
       await userRepository.save(user);
+
+      // Send email notification to admin (non-blocking)
+      try {
+        const adminEmail = process.env.ADMIN_EMAIL;
+        if (adminEmail) {
+          await emailService.sendNewUserNotification(
+            user.email,
+            user.name,
+            user.approvalRequestedAt || new Date()
+          );
+        } else {
+          console.warn('ADMIN_EMAIL not configured - skipping new user notification');
+        }
+      } catch (emailError) {
+        // Log error but don't block authentication flow per FR-006
+        console.error('Failed to send new user notification email:', emailError);
+      }
     } else {
       // Update last login timestamp
       await userRepository.updateLastLogin(user.id, new Date());
@@ -108,6 +134,7 @@ export default async function callback(ctx: Context): Promise<void> {
         email: user.email,
         displayName: user.name,
         isAdmin: user.isAdmin,
+        approvalStatus: user.approvalStatus,
       },
       returnUrl: oauthState.returnUrl,
     };

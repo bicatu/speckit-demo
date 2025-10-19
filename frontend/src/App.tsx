@@ -3,18 +3,19 @@ import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './services/queryClient';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { HomePage } from './pages/HomePage';
+import { LoginPage } from './pages/LoginPage';
 import { BrowseEntriesPage } from './pages/BrowseEntriesPage';
 import { AddEntryPage } from './pages/AddEntryPage';
 import { AdminPage } from './pages/AdminPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { PendingUsersPage } from './pages/PendingUsersPage';
+import { ManageResourcesPage } from './pages/ManageResourcesPage';
 import { CallbackPage } from './pages/CallbackPage';
 import LoginErrorPage from './pages/LoginErrorPage';
 import { LoginButton } from './components/LoginButton';
 import { UserProfile } from './components/UserProfile';
 import { LogoutButton } from './components/LogoutButton';
-
-// Placeholder components (will be implemented in subsequent phases)
-const HomePage: React.FC = () => <div>Home Page - Coming Soon</div>;
 
 /**
  * Header component with authentication-aware navigation
@@ -38,6 +39,8 @@ const Header: React.FC = () => {
         <Link to="/entries" style={{ marginRight: '15px' }}>Browse</Link>
         {isAuthenticated && <Link to="/entries/add" style={{ marginRight: '15px' }}>Add Entry</Link>}
         {isAdmin && <Link to="/admin" style={{ marginRight: '15px' }}>Admin</Link>}
+        {isAdmin && <Link to="/admin/pending-users" style={{ marginRight: '15px' }}>Pending Users</Link>}
+        {isAdmin && <Link to="/admin/manage-resources" style={{ marginRight: '15px' }}>Manage Resources</Link>}
         {isAuthenticated && <Link to="/settings" style={{ marginRight: '15px' }}>Settings</Link>}
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -63,12 +66,15 @@ function AppRoutes() {
       <Header />
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/auth/callback" element={<CallbackPage />} />
         <Route path="/login-error" element={<LoginErrorPage />} />
         <Route path="/entries" element={<BrowseEntriesPage />} />
         <Route path="/entries/add" element={isAuthenticated ? <AddEntryPage /> : <Navigate to="/" replace />} />
         <Route path="/settings" element={isAuthenticated ? <SettingsPage /> : <Navigate to="/" replace />} />
         {isAdmin && <Route path="/admin" element={<AdminPage />} />}
+        {isAdmin && <Route path="/admin/pending-users" element={<PendingUsersPage />} />}
+        {isAdmin && <Route path="/admin/manage-resources" element={<ManageResourcesPage />} />}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

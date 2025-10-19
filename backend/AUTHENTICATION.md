@@ -4,10 +4,27 @@ This document explains the authentication abstraction layer that allows switchin
 
 ## Overview
 
+This document explains the authentication architecture and provider abstraction layer that allows switching between different OAuth2/OIDC providers.
+
+### Supported Providers
+
 The application supports three authentication providers:
-1. **Mock** - For development and testing (no real OAuth)
-2. **Keycloak** - Self-hosted open-source OAuth2/OIDC provider
-3. **WorkOS** - Managed authentication service
+
+| Provider | Use Case | Setup Guide |
+|----------|----------|-------------|
+| **Mock** | Development/Testing | No setup required (built-in) |
+| **Keycloak** | Local Development | [KEYCLOAK_SETUP.md](../KEYCLOAK_SETUP.md) |
+| **WorkOS** | Production | [WORKOS_SETUP.md](../WORKOS_SETUP.md) |
+
+### Authentication Features
+
+- **Provider Abstraction**: Switch providers via environment variable (no code changes)
+- **OAuth2/OIDC Flow**: Standard authorization code flow
+- **Google Sign-In**: Optional social login (configured per provider)
+- **User Approval Workflow**: New users require admin approval
+- **Email Notifications**: Admins notified of new user requests
+- **Session Management**: JWT token caching with automatic refresh
+- **Role-Based Access**: Admin and regular user permissions
 
 ## Architecture
 
@@ -359,6 +376,168 @@ To add custom user attributes from tokens:
 2. Extract claims in provider's `verifyAccessToken()`
 3. Add to `AuthenticatedUser` in middleware
 
+## User Approval Workflow
+
+### New User Registration
+
+When a new user signs in via OAuth for the first time:
+
+1. **User authenticates** via OAuth provider (Keycloak/WorkOS/Google)
+2. **Backend receives** OAuth callback with user profile
+3. **User is created** in database with `approval_status = 'pending'`
+4. **Email notification** sent to admin (via `ADMIN_EMAIL` env variable)
+5. **User sees** "Pending Approval" message in the frontend
+
+### Admin Approval Process
+
+Admins can manage pending users:
+
+1. **View pending users**: `GET /api/users/pending` (admin-only)
+2. **Approve user**: `POST /api/users/:id/approve` (admin-only)
+   - Sets `approval_status = 'approved'`
+   - Records `approved_by` and `approved_at`
+3. **Reject user**: `POST /api/users/:id/reject` (admin-only)
+   - Sets `approval_status = 'rejected'`
+   - User cannot access the application
+
+### User States
+
+- **Pending**: New user awaiting approval, can log in but sees "Pending Approval" message
+- **Approved**: Full access to the application
+- **Rejected**: Cannot access the application, sees rejection message
+
+### First Admin User
+
+The first user in the system should be manually set as admin:
+
+```sql
+-- Set user as admin in database
+UPDATE users SET is_admin = true, approval_status = 'approved' 
+WHERE email = 'admin@yourdomain.com';
+```
+
+## Session Management & Token Refresh
+
+### Token Caching
+
+The application implements in-memory token caching to reduce provider API calls:
+
+- **Cache Duration**: 10 minutes (configurable)
+- **Cache Key**: JWT token hash
+- **Cache Hit Rate Target**: >95%
+- **Benefits**: Reduced latency, lower API costs, better performance
+
+### Token Refresh (FR-026)
+
+The frontend automatically refreshes access tokens before expiration:
+
+**Frontend Implementation** (`frontend/src/contexts/AuthContext.tsx`):
+
+```typescript
+useEffect(() => {
+  // Refresh token 5 minutes before expiration
+  const refreshInterval = setInterval(async () => {
+    if (user && authService.isTokenExpiringSoon()) {
+      await authService.refreshSession();
+    }
+  }, 60000); // Check every minute
+
+  return () => clearInterval(refreshInterval);
+}, [user]);
+```
+
+**Token Expiration Check**:
+- Checks if token expires within 5 minutes
+- Automatically calls refresh endpoint
+- Updates local storage with new tokens
+- Maintains user session seamlessly
+
+**Refresh Flow**:
+1. Frontend detects token expiring soon
+2. Calls `POST /api/auth/refresh` with refresh token
+3. Backend exchanges refresh token for new access token
+4. Frontend updates local storage and context
+5. User continues working uninterrupted
+
+## Email Notifications
+
+The application sends email notifications for user registration events.
+
+### Configuration
+
+Required environment variables in `backend/.env`:
+
+```bash
+# SMTP Configuration
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+SMTP_FROM_NAME=MovieTrack App
+SMTP_FROM_EMAIL=noreply@yourdomain.com
+
+# Admin Email
+ADMIN_EMAIL=admin@yourdomain.com
+```
+
+### Email Service Architecture
+
+- **Interface**: `IEmailService` abstraction
+- **Implementation**: `NodemailerEmailService` using Nodemailer
+- **Error Handling**: Non-blocking (failures logged but don't prevent user creation)
+- **Templates**: HTML and plain text versions
+
+### Email Events
+
+1. **New User Registration**: Sent to `ADMIN_EMAIL` when user requests access
+   - Subject: "New User Registration - Approval Required"
+   - Contains: User name, email, timestamp
+   - Link to pending users page
+
+For detailed email setup instructions, see: **`docs/EMAIL_SETUP.md`**
+
+## Google Sign-In Integration
+
+The application supports Google OAuth for seamless authentication (optional).
+
+### Setup Overview
+
+1. **Create Google OAuth credentials** (one-time)
+   - See: [docs/GOOGLE_OAUTH_SETUP.md](../docs/GOOGLE_OAUTH_SETUP.md)
+   - Creates Client ID and Client Secret
+
+2. **Configure your provider**:
+   - **Keycloak**: [KEYCLOAK_SETUP.md](../KEYCLOAK_SETUP.md) - Step 5
+   - **WorkOS**: [WORKOS_SETUP.md](../WORKOS_SETUP.md) - Step 4
+
+3. **Test authentication flow**
+   - Click "Log In" → Google button appears
+   - Sign in with Google account
+   - Redirected back to app
+
+**Note:** Google configuration is done in the OAuth provider (Keycloak/WorkOS), not in application code.
+
+## API Endpoints
+
+### Authentication Endpoints
+
+- `GET /api/auth/login` - Initiate OAuth flow, redirect to provider
+- `GET /api/auth/callback` - OAuth callback handler, exchange code for tokens
+- `POST /api/auth/logout` - Terminate user session
+- `POST /api/auth/refresh` - Refresh access token (requires refresh token)
+- `GET /api/auth/profile` - Get current user profile (requires authentication)
+
+### User Management Endpoints (Admin Only)
+
+- `GET /api/users/pending` - List users awaiting approval
+- `POST /api/users/:id/approve` - Approve pending user
+- `POST /api/users/:id/reject` - Reject pending user
+
+### Admin Endpoints
+
+See main README.md for complete list of admin endpoints.
+
 ## References
 
 - [Keycloak Documentation](https://www.keycloak.org/documentation)
@@ -366,3 +545,13 @@ To add custom user attributes from tokens:
 - [OAuth 2.0 RFC](https://datatracker.ietf.org/doc/html/rfc6749)
 - [OpenID Connect Spec](https://openid.net/specs/openid-connect-core-1_0.html)
 - [JWT RFC](https://datatracker.ietf.org/doc/html/rfc7519)
+
+## Additional Documentation
+
+| Document | Purpose |
+|----------|---------|
+| [KEYCLOAK_SETUP.md](../KEYCLOAK_SETUP.md) | Local development with Keycloak |
+| [WORKOS_SETUP.md](../WORKOS_SETUP.md) | Production setup with WorkOS |
+| [docs/GOOGLE_OAUTH_SETUP.md](../docs/GOOGLE_OAUTH_SETUP.md) | Google Sign-In credentials (shared) |
+| [docs/EMAIL_SETUP.md](../docs/EMAIL_SETUP.md) | Email notification configuration |
+| [README.md](../README.md) | Project overview and quick start |

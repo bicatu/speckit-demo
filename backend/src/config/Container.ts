@@ -2,6 +2,8 @@ import { Pool } from 'pg';
 import DatabaseConnection from '../infrastructure/persistence/DatabaseConnection';
 import { TokenCache } from '../infrastructure/external/TokenCache';
 import { OAuthStateManager } from '../infrastructure/external/OAuthStateManager';
+import { IEmailService } from '../infrastructure/external/IEmailService';
+import { NodemailerEmailService } from '../infrastructure/external/NodemailerEmailService';
 
 // Repositories
 import { PostgresUserRepository } from '../infrastructure/domain/PostgresUserRepository';
@@ -15,6 +17,7 @@ import { GetEntriesQueryHandler } from '../application/queries/entries/GetEntrie
 import { GetEntryByIdQueryHandler } from '../application/queries/entries/GetEntryByIdQueryHandler';
 import { GetGenreTagsQueryHandler } from '../application/queries/tags/GetGenreTagsQueryHandler';
 import { GetStreamingPlatformsQueryHandler } from '../application/queries/platforms/GetStreamingPlatformsQueryHandler';
+import { GetPendingUsersQueryHandler } from '../application/queries/users/GetPendingUsersQueryHandler';
 
 // Command Handlers
 import { AddRatingCommandHandler } from '../application/commands/ratings/AddRatingCommandHandler';
@@ -26,6 +29,8 @@ import { DeleteStreamingPlatformCommandHandler } from '../application/commands/p
 import { CreateGenreTagCommandHandler } from '../application/commands/tags/CreateGenreTagCommandHandler';
 import { DeleteGenreTagCommandHandler } from '../application/commands/tags/DeleteGenreTagCommandHandler';
 import { DeleteUserCommandHandler } from '../application/commands/users/DeleteUserCommandHandler';
+import { ApproveUserCommandHandler } from '../application/commands/users/ApproveUserCommandHandler';
+import { RejectUserCommandHandler } from '../application/commands/users/RejectUserCommandHandler';
 
 // Handler Registry
 import { HandlerRegistry } from '../application/HandlerRegistry';
@@ -41,6 +46,7 @@ export class Container {
   // Authentication services
   private tokenCache: TokenCache;
   private oauthStateManager: OAuthStateManager;
+  private emailService: IEmailService;
 
   // Repository instances
   private userRepository: PostgresUserRepository;
@@ -56,6 +62,7 @@ export class Container {
     // Initialize authentication services
     this.tokenCache = new TokenCache(10000); // Max 10,000 entries
     this.oauthStateManager = new OAuthStateManager(600000, 1000); // 10 min TTL, max 1,000 entries
+    this.emailService = new NodemailerEmailService();
 
     // Initialize repositories
     this.userRepository = new PostgresUserRepository(this.pool);
@@ -110,6 +117,12 @@ export class Container {
       'GetStreamingPlatformsQuery',
       getStreamingPlatformsHandler,
     );
+
+    // Register GetPendingUsersQueryHandler
+    const getPendingUsersHandler = new GetPendingUsersQueryHandler(
+      this.userRepository,
+    );
+    HandlerRegistry.registerQuery('GetPendingUsersQuery', getPendingUsersHandler);
   }
 
   private registerCommandHandlers(): void {
@@ -174,6 +187,18 @@ export class Container {
       this.entryRepository,
     );
     HandlerRegistry.registerCommand('DeleteUserCommand', deleteUserHandler);
+
+    // Register ApproveUserCommandHandler
+    const approveUserHandler = new ApproveUserCommandHandler(
+      this.userRepository,
+    );
+    HandlerRegistry.registerCommand('ApproveUserCommand', approveUserHandler);
+
+    // Register RejectUserCommandHandler
+    const rejectUserHandler = new RejectUserCommandHandler(
+      this.userRepository,
+    );
+    HandlerRegistry.registerCommand('RejectUserCommand', rejectUserHandler);
   }
 
   // Getters for repositories (if needed elsewhere)
@@ -204,5 +229,9 @@ export class Container {
 
   public getOAuthStateManager(): OAuthStateManager {
     return this.oauthStateManager;
+  }
+
+  public getEmailService(): IEmailService {
+    return this.emailService;
   }
 }

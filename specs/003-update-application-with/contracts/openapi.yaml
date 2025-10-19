@@ -1,0 +1,294 @@
+openapi: 3.0.3
+info:
+  title: Home Page Authentication & Admin Management API
+  description: |
+    API endpoints for user approval workflow and admin management.
+    
+    **Note**: OAuth authentication (including Google Sign-In) is handled by Keycloak/WorkOS,
+    not by application endpoints. Existing `/api/auth/login` and `/api/auth/callback` endpoints
+    remain unchanged and work with any OAuth provider configured in Keycloak/WorkOS.
+  version: 1.0.0
+  contact:
+    name: Movie Series Tracker API
+servers:
+  - url: http://localhost:3001
+    description: Local development server
+
+security:
+  - BearerAuth: []
+
+paths:
+  /api/auth/me:
+    get:
+      summary: Get current user information
+      description: Returns information about the currently authenticated user
+      tags:
+        - Authentication
+      responses:
+        '200':
+          description: Current user information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/users/pending:
+    get:
+      summary: Get pending user requests
+      description: Returns list of users awaiting approval (admin only)
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of pending users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PendingUser'
+                  count:
+                    type: integer
+                    description: Total number of pending users
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Not authorized (admin only)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/users/{userId}/approve:
+    post:
+      summary: Approve user access request
+      description: Approves a pending user (admin only)
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID of the user to approve
+      responses:
+        '200':
+          description: User approved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User approved successfully
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid request or user already approved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Not authorized (admin only)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/users/{userId}/reject:
+    post:
+      summary: Reject user access request
+      description: Rejects a pending user (admin only)
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID of the user to reject
+      responses:
+        '200':
+          description: User rejected successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User rejected successfully
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid request or user already rejected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Not authorized (admin only)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from OAuth flow
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique user identifier
+        email:
+          type: string
+          format: email
+          description: User email address
+        name:
+          type: string
+          description: User full name
+        isAdmin:
+          type: boolean
+          description: Whether user has admin privileges
+        approvalStatus:
+          type: string
+          enum: [pending, approved, rejected]
+          description: User approval status
+        approvalRequestedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: When user first requested access
+        approvedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: When user was approved/rejected
+        lastLogin:
+          type: string
+          format: date-time
+          nullable: true
+          description: Last login timestamp
+        createdAt:
+          type: string
+          format: date-time
+          description: Account creation timestamp
+      required:
+        - id
+        - email
+        - name
+        - isAdmin
+        - approvalStatus
+        - createdAt
+
+    PendingUser:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique user identifier
+        email:
+          type: string
+          format: email
+          description: User email address
+        name:
+          type: string
+          description: User full name
+        oauthSubject:
+          type: string
+          description: OAuth provider subject identifier
+        approvalRequestedAt:
+          type: string
+          format: date-time
+          description: When user requested access
+      required:
+        - id
+        - email
+        - name
+        - oauthSubject
+        - approvalRequestedAt
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                description: Field that caused the error
+              message:
+                type: string
+                description: Error message for the field
+      required:
+        - message
+
+tags:
+  - name: Authentication
+    description: OAuth authentication endpoints
+  - name: Users
+    description: User management endpoints

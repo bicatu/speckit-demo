@@ -82,6 +82,7 @@ export default async function me(ctx: Context): Promise<void> {
         email: user.email,
         displayName: user.name,
         isAdmin: user.isAdmin,
+        approvalStatus: user.approvalStatus,
       },
     };
   } catch (error) {

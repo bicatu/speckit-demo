@@ -9,6 +9,11 @@ export class User {
   private _isAdmin: boolean;
   private _lastLogin: Date | null;
   private _createdAt: Date;
+  private _approvalStatus: 'pending' | 'approved' | 'rejected';
+  private _approvalRequestedAt: Date | null;
+  private _approvedBy: string | null;
+  private _rejectedBy: string | null;
+  private _approvedAt: Date | null;
 
   constructor(props: {
     id: string;
@@ -18,6 +23,11 @@ export class User {
     isAdmin: boolean;
     lastLogin: Date | null;
     createdAt: Date;
+    approvalStatus: 'pending' | 'approved' | 'rejected';
+    approvalRequestedAt: Date | null;
+    approvedBy: string | null;
+    rejectedBy: string | null;
+    approvedAt: Date | null;
   }) {
     this.validateEmail(props.email);
     this.validateName(props.name);
@@ -30,6 +40,11 @@ export class User {
     this._isAdmin = props.isAdmin;
     this._lastLogin = props.lastLogin;
     this._createdAt = props.createdAt;
+    this._approvalStatus = props.approvalStatus;
+    this._approvalRequestedAt = props.approvalRequestedAt;
+    this._approvedBy = props.approvedBy;
+    this._rejectedBy = props.rejectedBy;
+    this._approvedAt = props.approvedAt;
   }
 
   // Getters
@@ -61,6 +76,26 @@ export class User {
     return this._createdAt;
   }
 
+  get approvalStatus(): 'pending' | 'approved' | 'rejected' {
+    return this._approvalStatus;
+  }
+
+  get approvalRequestedAt(): Date | null {
+    return this._approvalRequestedAt;
+  }
+
+  get approvedBy(): string | null {
+    return this._approvedBy;
+  }
+
+  get rejectedBy(): string | null {
+    return this._rejectedBy;
+  }
+
+  get approvedAt(): Date | null {
+    return this._approvedAt;
+  }
+
   // Business methods
   public updateName(newName: string): void {
     this.validateName(newName);
@@ -82,6 +117,51 @@ export class User {
 
   public revokeAdminPrivileges(): void {
     this._isAdmin = false;
+  }
+
+  // Approval workflow methods
+  public isPending(): boolean {
+    return this._approvalStatus === 'pending';
+  }
+
+  public isApproved(): boolean {
+    return this._approvalStatus === 'approved';
+  }
+
+  public isRejected(): boolean {
+    return this._approvalStatus === 'rejected';
+  }
+
+  public approve(adminUserId: string): void {
+    if (this._approvalStatus === 'approved') {
+      throw new Error('User is already approved');
+    }
+    if (!adminUserId || adminUserId.trim().length === 0) {
+      throw new Error('Admin user ID is required for approval');
+    }
+    this._approvalStatus = 'approved';
+    this._approvedBy = adminUserId;
+    this._rejectedBy = null;
+    this._approvedAt = new Date();
+  }
+
+  public reject(adminUserId: string): void {
+    if (this._approvalStatus === 'rejected') {
+      throw new Error('User is already rejected');
+    }
+    if (!adminUserId || adminUserId.trim().length === 0) {
+      throw new Error('Admin user ID is required for rejection');
+    }
+    this._approvalStatus = 'rejected';
+    this._rejectedBy = adminUserId;
+    this._approvedBy = null;
+    this._approvedAt = new Date();
+  }
+
+  public requestApproval(): void {
+    if (this._approvalRequestedAt === null) {
+      this._approvalRequestedAt = new Date();
+    }
   }
 
   // Validation methods

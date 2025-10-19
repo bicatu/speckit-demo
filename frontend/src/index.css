@@ -155,3 +155,53 @@ code {
   border-radius: 4px;
   color: #c62828;
 }
+
+/* Pending Approval Message */
+.pending-approval-container {
+  padding: 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.pending-approval-card {
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pending-approval-card h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #856404;
+  font-size: 1.5rem;
+}
+
+.pending-approval-card p {
+  margin-bottom: 1rem;
+  color: #856404;
+  line-height: 1.6;
+}
+
+.pending-approval-info {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+}
+
+.pending-approval-info strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #856404;
+}
+
+.pending-approval-info ul {
+  margin-left: 1.5rem;
+  color: #856404;
+}
+
+.pending-approval-info li {
+  margin-bottom: 0.5rem;
+}

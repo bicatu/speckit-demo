@@ -20,6 +20,9 @@ import { deletePlatform } from './actions/platforms/deletePlatform';
 import { createTag } from './actions/tags/createTag';
 import { deleteTag } from './actions/tags/deleteTag';
 import { deleteUser } from './actions/users/deleteUser';
+import { getPendingUsers } from './actions/users/getPendingUsers';
+import { approveUser } from './actions/users/approveUser';
+import { rejectUser } from './actions/users/rejectUser';
 import login from './actions/auth/login';
 import callback from './actions/auth/callback';
 import me from './actions/auth/me';
@@ -125,6 +128,11 @@ export function createServer(): Koa {
 
   // User account routes
   router.delete('/api/users/me', authMiddleware, deleteUser);
+
+  // Admin routes for user approval workflow
+  router.get('/api/users/pending', authMiddleware, adminMiddleware, getPendingUsers);
+  router.post('/api/users/:id/approve', authMiddleware, adminMiddleware, approveUser);
+  router.post('/api/users/:id/reject', authMiddleware, adminMiddleware, rejectUser);
 
   // Register routes
   app.use(router.routes()).use(router.allowedMethods());
