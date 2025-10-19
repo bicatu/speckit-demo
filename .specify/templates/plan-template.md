@@ -111,16 +111,21 @@
 - [ ] Health checks configured for service readiness
 - [ ] No manual installation of databases or message brokers required
 
-**OAuth2 Authentication Check** (if user authentication required):
+**OpenID Connect Authentication Check** (if user authentication required):
 
-- [ ] OAuth2 standard used for user authentication (no custom auth mechanisms)
+- [ ] OpenID Connect (OAuth2 + identity layer) used for user authentication (no custom auth mechanisms)
 - [ ] Application does NOT store user passwords directly
-- [ ] Appropriate OAuth2 grant type implemented (Authorization Code, Client Credentials)
+- [ ] Appropriate authorization grant type implemented (Authorization Code flow with PKCE recommended)
+- [ ] Authentication flow handles login, authentication, and logout operations
+- [ ] Login redirects to identity provider and exchanges authorization code for tokens
+- [ ] Logout invalidates session and redirects to identity provider logout endpoint when available
 - [ ] Token validation occurs at UI layer (middleware/API gateway)
 - [ ] Access tokens validated on every authenticated request
+- [ ] Validated JWT tokens cached in-memory to minimize round-trips to OAuth2/OIDC server
+- [ ] Token cache respects token TTL and invalidates on expiration or logout
 - [ ] Authentication concerns isolated from Domain layer
 - [ ] User identity passed as Command/Query context (not authentication logic in handlers)
-- [ ] OAuth2 client implementation provided in Infrastructure layer for external services
+- [ ] OpenID Connect client implementation provided in Infrastructure layer for external services
 
 ## Project Structure
 

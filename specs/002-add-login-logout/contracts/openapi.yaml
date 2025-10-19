@@ -1,0 +1,379 @@
+openapi: 3.0.3
+info:
+  title: Authentication API
+  description: |
+    OpenID Connect authentication endpoints for multi-user movie tracking application.
+    
+    **Authentication Flow:**
+    1. Client calls GET /api/auth/login to get OAuth provider URL
+    2. Client redirects user to OAuth provider
+    3. OAuth provider redirects back to /auth/callback with code
+    4. Client calls POST /api/auth/callback with code to get access token
+    5. Client includes access token in Authorization header for protected endpoints
+    6. Client calls POST /api/auth/logout to invalidate session
+    
+    **Security:**
+    - All endpoints use HTTPS in production
+    - CSRF protection via OAuth state parameter
+    - Tokens stored in memory only (never localStorage)
+    - In-memory token caching to reduce auth provider API calls
+  version: 1.0.0
+  contact:
+    name: SpecKit Demo API
+    url: https://github.com/speckit-demo
+
+servers:
+  - url: http://localhost:3000
+    description: Local development (Keycloak)
+  - url: https://api.speckit-demo.com
+    description: Production (WorkOS)
+
+tags:
+  - name: Authentication
+    description: OpenID Connect authentication lifecycle endpoints
+
+paths:
+  /api/auth/login:
+    get:
+      summary: Initiate OAuth login flow
+      description: |
+        Generates OAuth authorization URL with PKCE challenge and CSRF state.
+        Client should redirect user to returned URL.
+        
+        **Flow:**
+        1. Backend creates OAuth state with random 64-char hex string
+        2. Backend stores state in memory with 10-minute TTL
+        3. Backend calls IAuthProvider.getAuthorizationUrl()
+        4. Returns URL with state parameter
+        
+        **Security:**
+        - State parameter prevents CSRF attacks
+        - Return URL validated to prevent open redirect
+        - State expires after 10 minutes
+      tags:
+        - Authentication
+      parameters:
+        - name: returnUrl
+          in: query
+          description: URL to redirect user after successful authentication (must be same-origin)
+          required: false
+          schema:
+            type: string
+            format: uri
+            example: /entries
+            default: /
+      responses:
+        '200':
+          description: OAuth authorization URL generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - authUrl
+                properties:
+                  authUrl:
+                    type: string
+                    format: uri
+                    description: Full OAuth provider authorization URL with state parameter
+                    example: https://accounts.keycloak.com/oauth/authorize?client_id=xxx&redirect_uri=http://localhost:3000/auth/callback&response_type=code&scope=openid+profile+email&state=a1b2c3d4e5f6...
+        '400':
+          description: Invalid return URL (not same-origin)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error (auth provider unavailable)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/callback:
+    post:
+      summary: Handle OAuth callback
+      description: |
+        Exchanges authorization code for access token and creates user session.
+        
+        **Flow:**
+        1. Validate state exists and not expired (CSRF protection)
+        2. Call IAuthProvider.authenticateWithCode(code)
+        3. Validate access token
+        4. Lookup or create User in database (by oauth_subject)
+        5. Update User.last_login_at
+        6. Store token in cache (TokenCache)
+        7. Return access token and user info
+        
+        **Token Caching:**
+        - Token hashed with SHA-256 before caching
+        - Cache entry includes user info, expiration, validation timestamp
+        - TTL matches token expiration from auth provider
+        - Max 10,000 cached tokens (LRU eviction)
+        
+        **Security:**
+        - State validated to prevent CSRF
+        - Token validated before caching
+        - User created if doesn't exist (automatic provisioning)
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - code
+                - state
+              properties:
+                code:
+                  type: string
+                  description: Authorization code from OAuth provider
+                  example: SplxlOBeZQQYbYS6WxSbIA
+                state:
+                  type: string
+                  description: CSRF state token from login initiation
+                  pattern: ^[a-f0-9]{64}$
+                  example: a1b2c3d4e5f6789...
+      responses:
+        '200':
+          description: Authentication successful, token issued
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - accessToken
+                  - user
+                properties:
+                  accessToken:
+                    type: string
+                    description: JWT access token for API requests
+                    example: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+                  user:
+                    $ref: '#/components/schemas/AuthenticatedUser'
+        '400':
+          description: Invalid request (missing code/state, invalid state format)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missing_code:
+                  value:
+                    error: VALIDATION_ERROR
+                    message: Missing required field 'code'
+                invalid_state:
+                  value:
+                    error: VALIDATION_ERROR
+                    message: Invalid state format (expected 64-char hex)
+        '401':
+          description: Authentication failed (invalid code, expired state)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_code:
+                  value:
+                    error: AUTH_FAILED
+                    message: Invalid authorization code
+                expired_state:
+                  value:
+                    error: AUTH_FAILED
+                    message: OAuth state expired (10 minute limit)
+                state_not_found:
+                  value:
+                    error: AUTH_FAILED
+                    message: OAuth state not found (possible CSRF attack)
+        '500':
+          description: Internal server error (auth provider unavailable, database error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/logout:
+    post:
+      summary: Terminate user session
+      description: |
+        Invalidates access token and optionally redirects to OAuth provider logout.
+        
+        **Flow:**
+        1. Extract token from Authorization header
+        2. Hash token with SHA-256
+        3. Delete from TokenCache (cache invalidation)
+        4. Get logout URL from IAuthProvider (if supported)
+        5. Return logout URL (or null if not supported)
+        
+        **Security:**
+        - Token removed from cache immediately
+        - Token still valid at OAuth provider (revocation optional)
+        - Client must clear in-memory token storage
+        
+        **Multi-Device:**
+        - Only invalidates token on this server's cache
+        - Other devices' sessions remain active (per requirements)
+        - Full logout requires OAuth provider logout URL redirect
+      tags:
+        - Authentication
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Logout successful, token invalidated
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  logoutUrl:
+                    type: string
+                    format: uri
+                    nullable: true
+                    description: OAuth provider logout URL (if supported)
+                    example: https://accounts.keycloak.com/logout?redirect_uri=http://localhost:3000
+        '401':
+          description: Unauthorized (missing or invalid token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/me:
+    get:
+      summary: Get current authenticated user
+      description: |
+        Returns current user information from validated access token.
+        
+        **Flow:**
+        1. Extract token from Authorization header
+        2. Check TokenCache (hash token, lookup)
+        3. If cached and not expired: return cached user (FAST PATH)
+        4. If not cached: validate with IAuthProvider.verifyAccessToken()
+        5. Store validated token in cache
+        6. Return user info
+        
+        **Performance:**
+        - Cache hit: <1ms (no network call)
+        - Cache miss: ~100-500ms (auth provider API call)
+        - Cache hit rate: expected >95% for active users
+        
+        **Use Cases:**
+        - Frontend app initialization (check if user logged in)
+        - Session validation before sensitive operations
+        - Refresh user info after profile updates
+      tags:
+        - Authentication
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User authenticated, info returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticatedUser'
+        '401':
+          description: Unauthorized (missing, invalid, or expired token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missing_token:
+                  value:
+                    error: UNAUTHORIZED
+                    message: Missing Authorization header
+                invalid_token:
+                  value:
+                    error: UNAUTHORIZED
+                    message: Invalid access token
+                expired_token:
+                  value:
+                    error: TOKEN_EXPIRED
+                    message: Access token expired
+        '500':
+          description: Internal server error (auth provider unavailable)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT access token obtained from POST /api/auth/callback.
+        Include in Authorization header as: `Authorization: Bearer {token}`
+
+  schemas:
+    AuthenticatedUser:
+      type: object
+      required:
+        - id
+        - email
+        - displayName
+        - isAdmin
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: User's unique identifier (matches User.id in database)
+          example: 550e8400-e29b-41d4-a716-446655440000
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: user@example.com
+        displayName:
+          type: string
+          description: User's display name
+          example: John Doe
+        isAdmin:
+          type: boolean
+          description: Whether user has admin privileges
+          example: false
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Machine-readable error code
+          enum:
+            - VALIDATION_ERROR
+            - AUTH_FAILED
+            - UNAUTHORIZED
+            - TOKEN_EXPIRED
+            - INTERNAL_ERROR
+          example: AUTH_FAILED
+        message:
+          type: string
+          description: Human-readable error message
+          example: Invalid authorization code
+        details:
+          type: object
+          description: Additional error context (optional)
+          additionalProperties: true
+
+security:
+  - BearerAuth: []

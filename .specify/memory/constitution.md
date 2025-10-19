@@ -1,15 +1,18 @@
 <!--
 Sync Impact Report:
-Version change: 1.3.0 → 1.4.0
-Modified principles: None
-Added sections:
-- IX. Local Development with Docker (Docker Compose for services, dependency management)
-- X. OAuth2 Authentication (authentication standard, implementation requirements)
+Version change: 1.4.0 → 1.5.0
+Modified principles:
+- X. OAuth2 Authentication → renamed to "OpenID Connect Authentication"
+  - Added login/logout flow requirements
+  - Added in-memory JWT token caching requirement
+  - Clarified token lifecycle management
+Added sections: None
+Removed sections: None
 Templates requiring updates:
-- ✅ Updated .specify/templates/plan-template.md - added Docker and OAuth2 checks
+- ✅ Updated .specify/templates/plan-template.md - OAuth2 check renamed to OpenID Connect, added caching requirement
 - ⚠ .specify/templates/spec-template.md - no updates required (technology-agnostic by design)
-- ✅ Updated .specify/templates/tasks-template.md - added Docker setup and OAuth2 integration task examples
-- ✅ No command-specific files requiring updates (no agent-specific names found)
+- ✅ Updated .specify/templates/tasks-template.md - OAuth2 task examples updated to OpenID Connect with caching
+- ✅ No command-specific files requiring updates (no command files exist in .specify/templates/commands/)
 - ✅ No runtime guidance docs requiring updates (none found)
 Follow-up TODOs: None
 -->
@@ -78,13 +81,17 @@ Each service definition MUST include: image with specific version tag, exposed p
 
 **Rationale**: Enables consistent local development environments across all team members, eliminates manual service installation and configuration, ensures version consistency between development and production environments, and simplifies onboarding for new developers.
 
-### X. OAuth2 Authentication
+### X. OpenID Connect Authentication
 
-User authentication MUST use OAuth2 standard for authorization flows. Applications MUST NOT implement custom authentication mechanisms or store user passwords directly. OAuth2 implementation MUST support standard authorization grant types (Authorization Code, Client Credentials) appropriate to the application type. Access tokens MUST be validated on every authenticated request.
+User authentication MUST use OpenID Connect (OAuth2 + identity layer) for authorization and authentication flows. Applications MUST NOT implement custom authentication mechanisms or store user passwords directly. OpenID Connect implementation MUST support standard authorization grant types (Authorization Code flow with PKCE recommended) appropriate to the application type.
 
-Token validation MUST occur at the UI layer (HTTP middleware, API gateway) before requests reach the Application layer. Authentication concerns MUST NOT leak into Domain layer. Application layer handlers MAY receive user identity as part of Command/Query context but MUST NOT perform authentication. Infrastructure layer MUST provide OAuth2 client implementation for external service authentication.
+The authentication flow MUST handle three lifecycle operations: (1) **Login** - redirect to identity provider and exchange authorization code for tokens, (2) **Authentication** - validate access tokens on every protected request, (3) **Logout** - invalidate user session and redirect to identity provider logout endpoint when available.
 
-**Rationale**: Ensures secure authentication using industry-standard protocols, delegates password management and user credential storage to specialized identity providers, provides consistent authentication patterns across services, and maintains separation of security concerns from business logic.
+Access tokens MUST be validated on every authenticated request. Token validation MUST occur at the UI layer (HTTP middleware, API gateway) before requests reach the Application layer. To minimize round-trip calls to the OAuth2/OIDC server, validated JWT tokens MUST be cached in-memory with appropriate expiration (respecting token TTL). Cache entries MUST be invalidated when tokens expire or during logout operations.
+
+Authentication concerns MUST NOT leak into Domain layer. Application layer handlers MAY receive user identity as part of Command/Query context but MUST NOT perform authentication or token validation. Infrastructure layer MUST provide OpenID Connect client implementation for external service authentication.
+
+**Rationale**: Ensures secure authentication using industry-standard protocols (OpenID Connect provides identity verification on top of OAuth2 authorization), delegates password management and user credential storage to specialized identity providers, minimizes performance overhead through intelligent token caching while maintaining security, provides consistent authentication patterns across services with complete lifecycle management (login, authentication, logout), and maintains separation of security concerns from business logic.
 
 ## Architecture Constraints
 
@@ -157,4 +164,4 @@ This constitution supersedes all other development practices. All code reviews M
 
 Use project-specific guidance files for runtime development details while maintaining these core architectural principles.
 
-**Version**: 1.4.0 | **Ratified**: 2025-10-14 | **Last Amended**: 2025-10-15
+**Version**: 1.5.0 | **Ratified**: 2025-10-14 | **Last Amended**: 2025-10-19

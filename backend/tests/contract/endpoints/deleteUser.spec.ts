@@ -3,7 +3,7 @@ import { Container } from '../../../src/config/Container';
 import { createServer } from '../../../src/ui/http/server';
 import { setupTestDatabase, cleanupTestDatabase, getTestUserConfig, getTestDatabasePool } from '../../helpers/database';
 
-describe('DELETE /api/v1/users/me', () => {
+describe('DELETE /api/users/me', () => {
   let app: any;
   let regularUserToken: string;
   let adminUserToken: string;
@@ -31,7 +31,7 @@ describe('DELETE /api/v1/users/me', () => {
   describe('authentication', () => {
     it('should return 401 when no auth token provided', async () => {
       const response = await request(app.callback())
-        .delete('/api/v1/users/me')
+        .delete('/api/users/me')
         .expect(401);
 
       expect(response.body).toHaveProperty('error');
@@ -39,7 +39,7 @@ describe('DELETE /api/v1/users/me', () => {
 
     it('should return 401 when invalid auth token provided', async () => {
       const response = await request(app.callback())
-        .delete('/api/v1/users/me')
+        .delete('/api/users/me')
         .set('Authorization', 'Bearer invalid-token')
         .expect(401);
 
@@ -50,7 +50,7 @@ describe('DELETE /api/v1/users/me', () => {
   describe('successful deletion', () => {
     it('should return 204 on successful account deletion', async () => {
       await request(app.callback())
-        .delete('/api/v1/users/me')
+        .delete('/api/users/me')
         .set('Authorization', `Bearer ${regularUserToken}`)
         .expect(204);
       
@@ -69,7 +69,7 @@ describe('DELETE /api/v1/users/me', () => {
 
     it('should not return any body content on success', async () => {
       const response = await request(app.callback())
-        .delete('/api/v1/users/me')
+        .delete('/api/users/me')
         .set('Authorization', `Bearer ${regularUserToken}`)
         .expect(204);
 
@@ -88,7 +88,7 @@ describe('DELETE /api/v1/users/me', () => {
   describe('admin protection', () => {
     it('should return 403 when attempting to delete last admin account', async () => {
       const response = await request(app.callback())
-        .delete('/api/v1/users/me')
+        .delete('/api/users/me')
         .set('Authorization', `Bearer ${adminUserToken}`)
         .expect(403);
 
@@ -103,7 +103,7 @@ describe('DELETE /api/v1/users/me', () => {
       const nonExistentToken = '999e8400-e29b-41d4-a716-446655440999';
       
       const response = await request(app.callback())
-        .delete('/api/v1/users/me')
+        .delete('/api/users/me')
         .set('Authorization', `Bearer ${nonExistentToken}`)
         .expect(404);
 
@@ -115,7 +115,7 @@ describe('DELETE /api/v1/users/me', () => {
       // This test verifies error handling - using non-existent user returns 404
       const nonExistentToken = '888e8400-e29b-41d4-a716-446655440888';
       const response = await request(app.callback())
-        .delete('/api/v1/users/me')
+        .delete('/api/users/me')
         .set('Authorization', `Bearer ${nonExistentToken}`);
 
       // Should handle gracefully with either 404 (user not found) or 500 (DB error)
@@ -148,7 +148,7 @@ describe('DELETE /api/v1/users/me', () => {
       
       // Delete the user
       await request(app.callback())
-        .delete('/api/v1/users/me')
+        .delete('/api/users/me')
         .set('Authorization', `Bearer ${regularUserToken}`)
         .expect(204);
       
@@ -197,7 +197,7 @@ describe('DELETE /api/v1/users/me', () => {
       
       // Delete the user
       await request(app.callback())
-        .delete('/api/v1/users/me')
+        .delete('/api/users/me')
         .set('Authorization', `Bearer ${regularUserToken}`)
         .expect(204);
       
@@ -223,7 +223,7 @@ describe('DELETE /api/v1/users/me', () => {
   describe('OpenAPI specification compliance', () => {
     it('should match OpenAPI response schema for 204', async () => {
       const response = await request(app.callback())
-        .delete('/api/v1/users/me')
+        .delete('/api/users/me')
         .set('Authorization', `Bearer ${regularUserToken}`)
         .expect(204);
 
@@ -240,7 +240,7 @@ describe('DELETE /api/v1/users/me', () => {
 
     it('should match OpenAPI error schema for 401', async () => {
       const response = await request(app.callback())
-        .delete('/api/v1/users/me')
+        .delete('/api/users/me')
         .expect(401);
 
       expect(response.body).toMatchObject({

@@ -4,7 +4,7 @@ import { DeleteUserCommandHandler } from '../../../../application/commands/users
 import { HandlerRegistry } from '../../../../application/HandlerRegistry';
 
 /**
- * DELETE /api/v1/users/me - Delete user account
+ * DELETE /api/users/me - Delete user account
  * Implements FR-019: Anonymize user data when account is deleted
  * 
  * Authentication: Required

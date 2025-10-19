@@ -1,16 +1,18 @@
 import { IAuthProvider, AuthUser } from './IAuthProvider';
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import * as jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 
 /**
  * Keycloak OAuth2/OpenID Connect authentication provider
+ * With 5-second timeout and 1 retry for resilience
  */
 export class KeycloakAuthProvider implements IAuthProvider {
   private readonly issuerUrl: string;
   private readonly clientId: string;
   private readonly clientSecret: string;
   private readonly jwksClient: jwksClient.JwksClient;
+  private readonly httpClient: AxiosInstance;
 
   constructor(
     issuerUrl: string,
@@ -27,6 +29,31 @@ export class KeycloakAuthProvider implements IAuthProvider {
       cache: true,
       cacheMaxAge: 600000, // 10 minutes
     });
+
+    // Configure axios with timeout and retry
+    this.httpClient = axios.create({
+      timeout: 5000, // 5-second timeout
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
+
+    // Add retry interceptor (1 retry on timeout/network error)
+    this.httpClient.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const config = error.config;
+        
+        // Retry once on timeout or network errors
+        if (!config._retry && (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT' || !error.response)) {
+          config._retry = true;
+          console.log('[KeycloakAuthProvider] Retrying request after timeout/network error');
+          return this.httpClient.request(config);
+        }
+        
+        return Promise.reject(error);
+      }
+    );
   }
 
   /**
@@ -131,8 +158,8 @@ export class KeycloakAuthProvider implements IAuthProvider {
     user: AuthUser;
   }> {
     try {
-      // Exchange code for tokens
-      const tokenResponse = await axios.post(
+      // Exchange code for tokens using httpClient with timeout/retry
+      const tokenResponse = await this.httpClient.post(
         `${this.issuerUrl}/protocol/openid-connect/token`,
         new URLSearchParams({
           grant_type: 'authorization_code',
@@ -141,11 +168,6 @@ export class KeycloakAuthProvider implements IAuthProvider {
           code,
           redirect_uri: redirectUri,
         }),
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-        },
       );
 
       const {
@@ -182,7 +204,7 @@ export class KeycloakAuthProvider implements IAuthProvider {
     expiresIn?: number;
   }> {
     try {
-      const tokenResponse = await axios.post(
+      const tokenResponse = await this.httpClient.post(
         `${this.issuerUrl}/protocol/openid-connect/token`,
         new URLSearchParams({
           grant_type: 'refresh_token',
@@ -190,11 +212,6 @@ export class KeycloakAuthProvider implements IAuthProvider {
           client_secret: this.clientSecret,
           refresh_token: refreshToken,
         }),
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-        },
       );
 
       const {

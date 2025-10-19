@@ -58,4 +58,12 @@ export interface IUserRepository {
    * @returns Number of admin users
    */
   countAdmins(): Promise<number>;
+
+  /**
+   * Update user's last login timestamp
+   * @param id User UUID
+   * @param lastLogin Timestamp of last login
+   * @returns True if updated, false if not found
+   */
+  updateLastLogin(id: string, lastLogin: Date): Promise<boolean>;
 }

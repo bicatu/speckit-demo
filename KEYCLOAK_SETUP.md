@@ -47,8 +47,7 @@ This guide explains how to set up Keycloak for local OAuth2/OpenID Connect authe
    - **Root URL**: `http://localhost:5173`
    - **Home URL**: `http://localhost:5173`
    - **Valid redirect URIs**: 
-     - `http://localhost:5173/*`
-     - `http://localhost:3000/*` (for backend OAuth callback)
+     - `http://localhost:5173/auth/callback` (Keycloak redirects here after authentication)
    - **Valid post logout redirect URIs**: `http://localhost:5173/*`
    - **Web origins**: `http://localhost:5173`, `http://localhost:3000`
    - Click "Save"
@@ -103,31 +102,53 @@ This guide explains how to set up Keycloak for local OAuth2/OpenID Connect authe
 
 ## Backend Configuration
 
-Update your backend `.env` file:
+Create a `.env` file in the `backend/` directory (copy from `.env.example`):
 
 ```bash
-# Keycloak OAuth2 Configuration
-OAUTH_ISSUER_URL=http://localhost:8080/realms/movietrack
-OAUTH_CLIENT_ID=movietrack-app
-OAUTH_CLIENT_SECRET=<your-client-secret-from-step-2>
-OAUTH_REDIRECT_URI=http://localhost:3000/auth/callback
-OAUTH_JWKS_URI=http://localhost:8080/realms/movietrack/protocol/openid-connect/certs
-
-# Application
+# Application Configuration
 PORT=3000
-DATABASE_URL=postgresql://movietrack:movietrack_dev_password@localhost:5432/movietrack_db
+NODE_ENV=development
+
+# Database Configuration
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USER=movietrack
+DATABASE_PASSWORD=movietrack_dev_password
+DATABASE_NAME=movietrack_db
+
+# CORS Configuration
+CORS_ORIGIN=http://localhost:5173
+
+# Authentication Provider Selection
+AUTH_PROVIDER=keycloak
+
+# Keycloak Configuration
+KEYCLOAK_SERVER_URL=http://localhost:8080
+KEYCLOAK_REALM=movietrack
+KEYCLOAK_ISSUER_URL=http://localhost:8080/realms/movietrack
+KEYCLOAK_CLIENT_ID=movietrack-app
+KEYCLOAK_CLIENT_SECRET=<your-client-secret-from-step-2>
+
+# OAuth Configuration (shared)
+# This is where Keycloak will redirect after authentication (frontend callback page)
+OAUTH_REDIRECT_URI=http://localhost:5173/auth/callback
 ```
+
+**Important:** Replace `<your-client-secret-from-step-2>` with the actual client secret from the Keycloak client credentials tab.
 
 ## Frontend Configuration
 
-Update your frontend `.env` file:
+Create a `.env` file in the `frontend/` directory (copy from `.env.example`):
 
 ```bash
-VITE_API_URL=http://localhost:3000
-VITE_OAUTH_AUTHORITY=http://localhost:8080/realms/movietrack
-VITE_OAUTH_CLIENT_ID=movietrack-app
+# API Configuration
+VITE_API_BASE_URL=http://localhost:3000
+
+# OAuth2 Configuration
 VITE_OAUTH_REDIRECT_URI=http://localhost:5173/auth/callback
 ```
+
+**Note:** The frontend makes API calls to the backend, which handles all Keycloak communication. The frontend only needs to know the API base URL and its own OAuth redirect URI.
 
 ## Testing the OAuth Flow
 
@@ -135,7 +156,7 @@ VITE_OAUTH_REDIRECT_URI=http://localhost:5173/auth/callback
 
 ```bash
 # 1. Get authorization code (browser)
-http://localhost:8080/realms/movietrack/protocol/openid-connect/auth?client_id=movietrack-app&redirect_uri=http://localhost:3000/auth/callback&response_type=code&scope=openid%20profile%20email
+http://localhost:8080/realms/movietrack/protocol/openid-connect/auth?client_id=movietrack-app&redirect_uri=http://localhost:5173/auth/callback&response_type=code&scope=openid%20profile%20email
 
 # 2. Exchange code for tokens (backend)
 curl -X POST http://localhost:8080/realms/movietrack/protocol/openid-connect/token \
@@ -144,7 +165,7 @@ curl -X POST http://localhost:8080/realms/movietrack/protocol/openid-connect/tok
   -d "client_id=movietrack-app" \
   -d "client_secret=<your-client-secret>" \
   -d "code=<authorization-code-from-step-1>" \
-  -d "redirect_uri=http://localhost:3000/auth/callback"
+  -d "redirect_uri=http://localhost:5173/auth/callback"
 ```
 
 ### 2. Direct Access (Testing Only)
@@ -245,10 +266,37 @@ After successful authentication, you'll receive an access token with this struct
 
 ## Next Steps
 
-1. Update `backend/src/infrastructure/external/WorkOSClient.ts` to use Keycloak instead of WorkOS
-2. Update `backend/src/ui/http/middleware/auth.ts` to validate Keycloak JWT tokens
-3. Implement OAuth2 flow in the frontend with redirect to Keycloak
-4. Test the complete authentication flow end-to-end
+Once Keycloak is configured:
+
+1. **Copy the environment files:**
+   ```bash
+   cp backend/.env.example backend/.env
+   cp frontend/.env.example frontend/.env
+   ```
+
+2. **Update `backend/.env`** with your Keycloak client secret
+
+3. **Start the application:**
+   ```bash
+   # Terminal 1: Start backend
+   cd backend && npm run dev
+
+   # Terminal 2: Start frontend
+   cd frontend && npm run dev
+   ```
+
+4. **Test the authentication flow:**
+   - Navigate to http://localhost:5173
+   - Click the "Login" button
+   - You'll be redirected to Keycloak
+   - Login with one of the test users (admin@test.com / admin123 or user@test.com / user123)
+   - You'll be redirected back to the app with an authenticated session
+   - You should see your user profile displayed with a "Logout" button
+
+5. **Verify admin privileges:**
+   - Login as admin@test.com
+   - You should see an "ADMIN" badge next to your profile
+   - The admin user can access `/admin` routes
 
 ## References
 
