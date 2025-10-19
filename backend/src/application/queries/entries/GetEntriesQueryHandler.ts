@@ -40,14 +40,8 @@ export class GetEntriesQueryHandler
       };
 
       // Get entries based on sorting preference
-      let entries;
-      if (query.sortBy === 'topRated') {
-        entries = await this.entryRepository.findTopRated(limit);
-      } else if (query.sortBy === 'recent') {
-        entries = await this.entryRepository.findRecent(limit);
-      } else {
-        entries = await this.entryRepository.findAll(filters, limit, offset);
-      }
+      // Always use findAll with filters, but adjust ordering based on sortBy
+      const entries = await this.entryRepository.findAll(filters, limit, offset, query.sortBy);
 
       // Get total count for pagination
       const total = await this.entryRepository.count(filters);

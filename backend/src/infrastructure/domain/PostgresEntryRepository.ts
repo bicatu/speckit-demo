@@ -47,6 +47,7 @@ export class PostgresEntryRepository implements IEntryRepository {
     },
     limit: number = 20,
     offset: number = 0,
+    sortBy: 'recent' | 'topRated' | 'title' = 'title',
   ): Promise<Entry[]> {
     let query = `
       SELECT DISTINCT e.id, e.title, e.media_type, e.creator_id, e.platform_id, 
@@ -90,8 +91,14 @@ export class PostgresEntryRepository implements IEntryRepository {
       query += ` WHERE ${conditions.join(' AND ')}`;
     }
 
-    // Add ordering by title
-    query += ` ORDER BY e.title ASC`;
+    // Add ordering based on sortBy parameter
+    if (sortBy === 'topRated') {
+      query += ` ORDER BY e.average_rating DESC NULLS LAST, e.title ASC`;
+    } else if (sortBy === 'recent') {
+      query += ` ORDER BY e.created_at DESC, e.title ASC`;
+    } else {
+      query += ` ORDER BY e.title ASC`;
+    }
 
     // Add pagination
     query += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;

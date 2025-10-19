@@ -45,6 +45,15 @@ export function BrowseEntriesPage() {
     offset: (currentPage - 1) * itemsPerPage,
   });
 
+  // Debug logging
+  console.log('BrowseEntriesPage render:', {
+    entriesData,
+    entriesLoading,
+    entriesError,
+    tagsData,
+    platformsData,
+  });
+
   const {
     data: entryDetails,
     isLoading: detailsLoading,

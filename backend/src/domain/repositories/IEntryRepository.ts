@@ -24,6 +24,7 @@ export interface IEntryRepository {
    * @param filters Optional filters for mediaType, platformId, tagIds, newToMe, userLastLogin
    * @param limit Maximum number of results
    * @param offset Pagination offset
+   * @param sortBy Sorting option: 'title', 'recent', or 'topRated'
    * @returns Array of entries matching criteria
    */
   findAll(filters?: {
@@ -32,7 +33,7 @@ export interface IEntryRepository {
     tagIds?: string[];
     newToMe?: boolean;
     userLastLogin?: Date;
-  }, limit?: number, offset?: number): Promise<Entry[]>;
+  }, limit?: number, offset?: number, sortBy?: 'recent' | 'topRated' | 'title'): Promise<Entry[]>;
 
   /**
    * Save new entry or update existing one

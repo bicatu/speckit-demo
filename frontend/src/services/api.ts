@@ -46,3 +46,4 @@ apiClient.interceptors.response.use(
 );
 
 export default apiClient;
+export { apiClient as api };
