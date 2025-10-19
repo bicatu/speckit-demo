@@ -82,8 +82,8 @@ Update your production `backend/.env`:
 AUTH_PROVIDER=workos
 
 # WorkOS Configuration
-WORKOS_API_KEY=sk_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-WORKOS_CLIENT_ID=client_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+WORKOS_API_KEY=sk_something
+WORKOS_CLIENT_ID=client_something
 
 # OAuth Configuration
 OAUTH_REDIRECT_URI=https://yourdomain.com/auth/callback
