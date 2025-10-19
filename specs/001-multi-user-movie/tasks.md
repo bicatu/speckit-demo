@@ -435,14 +435,14 @@ This is a web application with backend (DDD layers) and frontend (React SPA):
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T189 [P] Add comprehensive API documentation (Swagger UI) to backend/src/ui/http/server.ts
+- [X] T189 [P] Add comprehensive API documentation (Swagger UI) to backend/src/ui/http/server.ts
 - [ ] T190 [P] Add loading states and error handling to all frontend components
 - [ ] T191 [P] Add input validation error messages to all frontend forms
 - [ ] T192 [P] Implement proper CORS configuration for production in backend/src/ui/http/server.ts
 - [ ] T193 [P] Add database connection pooling optimization in backend/src/infrastructure/persistence/DatabaseConnection.ts
 - [ ] T194 [P] Add comprehensive logging throughout backend application
 - [ ] T195 [P] Create production build scripts for backend and frontend
-- [ ] T197 [P] Add health check endpoint at /health in backend/src/ui/http/server.ts
+- [X] T197 [P] Add health check endpoint at /health in backend/src/ui/http/server.ts
 - [ ] T198 [P] Create frontend production environment configuration
 - [ ] T199 [P] Add accessibility improvements (ARIA labels, keyboard navigation) to frontend components
 - [ ] T200 [P] Add responsive design improvements for mobile devices

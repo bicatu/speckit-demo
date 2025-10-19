@@ -2,6 +2,10 @@ import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
 import Router from '@koa/router';
+import { koaSwagger } from 'koa2-swagger-ui';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as yaml from 'js-yaml';
 import DatabaseConnection from '../../infrastructure/persistence/DatabaseConnection';
 import { authMiddleware, adminMiddleware } from './middleware/auth';
 import { listEntries } from './actions/entries/listEntries';
@@ -55,7 +59,7 @@ export function createServer(): Koa {
   );
 
   // Health check endpoint
-  router.get('/api/health', async (ctx: Koa.Context) => {
+  router.get('/health', async (ctx: Koa.Context) => {
     try {
       const db = DatabaseConnection.getInstance();
       await db.query('SELECT 1');
@@ -66,6 +70,25 @@ export function createServer(): Koa {
       ctx.body = { status: 'unhealthy', error: 'Database connection failed' };
     }
   });
+
+  // Serve OpenAPI specification (YAML converted to JSON for Swagger UI)
+  router.get('/api/openapi.json', async (ctx: Koa.Context) => {
+    // Path to the existing openapi.yaml in specs directory
+    const openapiPath = path.join(__dirname, '../../../../../specs/001-multi-user-movie/contracts/openapi.yaml');
+    const openapiYaml = fs.readFileSync(openapiPath, 'utf-8');
+    const openapiSpec = yaml.load(openapiYaml);
+    ctx.body = openapiSpec;
+  });
+
+  // Swagger UI
+  app.use(
+    koaSwagger({
+      routePrefix: '/api/docs',
+      swaggerOptions: {
+        url: '/api/openapi.json',
+      },
+    }),
+  );
 
   // Entry routes
   router.get('/api/entries', listEntries);
