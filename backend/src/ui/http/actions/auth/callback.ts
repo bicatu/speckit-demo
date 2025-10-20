@@ -28,7 +28,7 @@ export default async function callback(ctx: Context): Promise<void> {
     return;
   }
 
-  const { code, state } = validation.data;
+  const { code, state, code_verifier } = validation.data;
 
   try {
     // Get services from container
@@ -38,6 +38,15 @@ export default async function callback(ctx: Context): Promise<void> {
     const tokenCache = container.getTokenCache();
     const userRepository = container.getUserRepository();
     const emailService = container.getEmailService();
+
+    // Log PKCE usage for monitoring
+    if (code_verifier) {
+      console.log('[PKCE] Token exchange with PKCE verification', {
+        timestamp: new Date().toISOString(),
+        provider: process.env.AUTH_PROVIDER || 'unknown',
+        hasVerifier: true,
+      });
+    }
 
     // Validate OAuth state
     const oauthState = oauthStateManager.validate(state);
@@ -57,8 +66,8 @@ export default async function callback(ctx: Context): Promise<void> {
     // Get OAuth redirect URI from environment
     const redirectUri = process.env.OAUTH_REDIRECT_URI || 'http://localhost:3000/auth/callback';
 
-    // Exchange authorization code for access token
-    const authResult = await authProvider.authenticateWithCode(code, redirectUri);
+    // Exchange authorization code for access token with optional PKCE verifier
+    const authResult = await authProvider.authenticateWithCode(code, redirectUri, code_verifier);
 
     // Lookup or create user by OAuth subject
     const oauthSubject = authResult.user.sub;
@@ -144,6 +153,7 @@ export default async function callback(ctx: Context): Promise<void> {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     
     // Determine error type
+    const isPKCEError = errorMessage.includes('PKCE') || errorMessage.includes('code_verifier') || errorMessage.includes('code_challenge');
     const isInvalidCode = errorMessage.includes('invalid') || errorMessage.includes('code');
     const isTimeout = errorMessage.includes('timeout') || errorMessage.includes('ECONNABORTED');
     const isProviderError = errorMessage.includes('Token exchange failed');
@@ -152,7 +162,20 @@ export default async function callback(ctx: Context): Promise<void> {
     let errorCode = AuthErrorCode.INTERNAL_ERROR;
     let message = 'Authentication failed';
     
-    if (isInvalidCode) {
+    if (isPKCEError) {
+      status = 400;
+      errorCode = 'PKCE_VALIDATION_FAILED' as AuthErrorCode;
+      message = 'Security verification failed. Please try logging in again.';
+      
+      // Log PKCE security event
+      console.error('[PKCE] Validation failed', {
+        timestamp: new Date().toISOString(),
+        provider: process.env.AUTH_PROVIDER || 'unknown',
+        error: errorMessage,
+        hasVerifier: !!validation.data.code_verifier,
+        severity: 'WARNING',
+      });
+    } else if (isInvalidCode) {
       status = 401;
       errorCode = AuthErrorCode.AUTH_FAILED;
       message = 'Invalid authorization code';

@@ -36,10 +36,11 @@ export class OAuthStateManager {
   /**
    * Create a new OAuth state parameter
    * @param returnUrl - URL to redirect user after successful auth
-   * @returns Generated state string (64 hex characters)
+   * @param customState - Optional custom state value (for PKCE flows where frontend generates state)
+   * @returns Generated or provided state string
    * @throws Error if returnUrl is not same-origin
    */
-  create(returnUrl: string): string {
+  create(returnUrl: string, customState?: string): string {
     // Validate return URL is same-origin to prevent open redirect
     if (!this.isSameOrigin(returnUrl)) {
       throw new Error('Return URL must be same-origin');
@@ -50,7 +51,7 @@ export class OAuthStateManager {
       this.evictOldest();
     }
 
-    const state = randomBytes(32).toString('hex');
+    const state = customState || randomBytes(32).toString('hex');
     const now = Date.now();
 
     const oauthState: OAuthState = {

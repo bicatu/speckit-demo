@@ -7,10 +7,12 @@ A web application for tracking movies and series with community ratings, built w
 - 🎬 Browse and discover movies and series
 - ⭐ Rate content (1-10 stars) and view community ratings
 - 🏷️ Filter by genre tags and streaming platforms
-- 🔐 OAuth2/OIDC authentication with Google Sign-In (Keycloak for dev, WorkOS for production)
+- 🔐 OAuth2/OIDC authentication with PKCE (RFC 7636) and Google Sign-In
+- 🛡️ PKCE security - prevents authorization code interception attacks
+- 🔑 Secure code verifier storage with automatic expiration and cleanup
 - 👥 User approval workflow - new users require admin approval
-- � Email notifications for new user requests
-- �👨‍💼 Admin management: platforms, tags, and user approvals
+- 📧 Email notifications for new user requests
+- 👨‍💼 Admin management: platforms, tags, and user approvals
 - 📄 Pagination (10 items per page)
 - 🔍 "New to me" filter for recent additions
 - 🔒 Secure session management with in-memory token caching
@@ -308,10 +310,29 @@ For detailed authentication architecture, see **[backend/AUTHENTICATION.md](back
 
 **Key Features:**
 - Provider-agnostic design (Keycloak, WorkOS, or Mock)
+- **PKCE (RFC 7636)** - Prevents authorization code interception attacks
+- **Secure storage** - SessionStorage with 5-minute expiration and automatic cleanup
 - Google Sign-In integration
 - User approval workflow with email notifications
 - Secure session management with token caching
 - Role-based access control (Admin/User)
+
+### Security Features
+
+**PKCE Implementation** (v1.6.0):
+- ✅ Cryptographically secure code verifier generation (256-bit entropy)
+- ✅ SHA256 code challenge derivation
+- ✅ One-time use with automatic cleanup
+- ✅ 5-minute expiration on stored verifiers
+- ✅ User-friendly error messages for storage issues
+- ✅ Full backward compatibility (PKCE is optional)
+
+**What PKCE Protects Against:**
+- Authorization code interception attacks
+- Man-in-the-middle attacks during OAuth flow
+- Malicious apps intercepting authorization codes
+
+See [backend/AUTHENTICATION.md](backend/AUTHENTICATION.md) for complete PKCE documentation.
 
 ### Setup Guides
 

@@ -46,19 +46,29 @@ export interface IAuthProvider {
    * Generate authorization URL for OAuth flow
    * @param redirectUri URI to redirect after authentication
    * @param state Optional state parameter for CSRF protection
+   * @param pkceParams Optional PKCE parameters for enhanced security
    * @returns Authorization URL for user redirect
    */
-  getAuthorizationUrl(redirectUri: string, state?: string): string;
+  getAuthorizationUrl(
+    redirectUri: string,
+    state?: string,
+    pkceParams?: {
+      codeChallenge: string;
+      codeChallengeMethod: 'S256';
+    },
+  ): string;
 
   /**
    * Exchange authorization code for access token and user info
    * @param code Authorization code from OAuth callback
    * @param redirectUri Original redirect URI used in authorization request
+   * @param codeVerifier Optional PKCE code verifier for enhanced security
    * @returns Access token and user information
    */
   authenticateWithCode(
     code: string,
     redirectUri: string,
+    codeVerifier?: string,
   ): Promise<{
     accessToken: string;
     refreshToken?: string;

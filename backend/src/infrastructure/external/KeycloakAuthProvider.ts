@@ -133,13 +133,24 @@ export class KeycloakAuthProvider implements IAuthProvider {
   /**
    * Generate Keycloak authorization URL
    */
-  getAuthorizationUrl(redirectUri: string, state?: string): string {
+  getAuthorizationUrl(
+    redirectUri: string,
+    state?: string,
+    pkceParams?: {
+      codeChallenge: string;
+      codeChallengeMethod: 'S256';
+    },
+  ): string {
     const params = new URLSearchParams({
       client_id: this.clientId,
       redirect_uri: redirectUri,
       response_type: 'code',
       scope: 'openid profile email',
       ...(state && { state }),
+      ...(pkceParams && {
+        code_challenge: pkceParams.codeChallenge,
+        code_challenge_method: pkceParams.codeChallengeMethod,
+      }),
     });
 
     return `${this.issuerUrl}/protocol/openid-connect/auth?${params.toString()}`;
@@ -151,6 +162,7 @@ export class KeycloakAuthProvider implements IAuthProvider {
   async authenticateWithCode(
     code: string,
     redirectUri: string,
+    codeVerifier?: string,
   ): Promise<{
     accessToken: string;
     refreshToken?: string;
@@ -167,6 +179,7 @@ export class KeycloakAuthProvider implements IAuthProvider {
           client_secret: this.clientSecret,
           code,
           redirect_uri: redirectUri,
+          ...(codeVerifier && { code_verifier: codeVerifier }),
         }),
       );
 

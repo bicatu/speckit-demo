@@ -44,6 +44,39 @@ This guide covers how to create and configure Google OAuth credentials for Googl
 
 ### Step 3: Configure OAuth Consent Screen
 
+**⚠️ Important: You MUST complete this step before creating OAuth credentials in Step 4.**
+
+**Note:** Google has two interfaces - the newer **Google Auth Platform** and the classic **Google Cloud Console**. Instructions for both are provided below.
+
+#### Option A: Google Auth Platform (Newer Interface)
+
+If you see a sidebar with "Branding", "Audience", "Clients":
+
+1. **Configure Branding** (left sidebar → **Branding**):
+   - **App name**: `MovieTrack App`
+   - **User support email**: Your email address
+   - **App logo**: (Optional) Upload your app logo
+   - **Application home page**: Leave blank for development (Google doesn't allow localhost URLs here)
+   - **Application privacy policy**: Leave blank (optional)
+   - **Application terms of service**: Leave blank (optional)
+   - Click **Save**
+
+2. **Configure Audience** (left sidebar → **Audience**):
+   - Select **User Type**:
+     - **Internal**: Only users in your Google Workspace organization
+     - **External**: Any Google account user (select this for development/testing)
+   - **Scopes**: Ensure these are selected:
+     - `openid`
+     - `email`
+     - `profile`
+   - **Test users** (if External):
+     - Add email addresses for testing (e.g., your Gmail address)
+   - Click **Save**
+
+#### Option B: Google Cloud Console (Classic Interface)
+
+If you see "APIs & Services" → "OAuth consent screen":
+
 1. Go to **APIs & Services** > **OAuth consent screen**
 2. Select **User Type**:
    - **Internal**: Only users in your Google Workspace organization (recommended for private apps)
@@ -72,20 +105,44 @@ This guide covers how to create and configure Google OAuth credentials for Googl
 
 ### Step 4: Create OAuth 2.0 Credentials
 
+**Note:** Instructions differ based on which Google interface you're using.
+
+#### Option A: Google Auth Platform (Newer Interface)
+
+If you see "Clients" in the left sidebar:
+
+1. Click **Clients** in the left sidebar
+2. Click **+ Create client** button at the top
+3. Select **Application type**: `Web application`
+4. Enter **Name**: `MovieTrack Web Client`
+5. Add **Authorized JavaScript origins**:
+   - Click **+ Add URI**
+   - For **Development/Keycloak**: `http://localhost:8080`
+   - (For production, you'll create a separate client with your production domain)
+6. Add **Authorized redirect URIs**:
+   - Click **+ Add URI**
+   - For **Development/Keycloak**: `http://localhost:8080/realms/movietrack/broker/google/endpoint`
+   - (For production/WorkOS, you'll create a separate client)
+7. Click **Create**
+8. **Save your credentials** (shown in a popup):
+   - **Client ID**: `xxxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com`
+   - **Client Secret**: `GOCSPX-xxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+   - ⚠️ **Important**: Copy these now - keep them secure and never commit to version control
+
+#### Option B: Google Cloud Console (Classic Interface)
+
+If you see "APIs & Services" in the main navigation:
+
 1. Go to **APIs & Services** > **Credentials**
 2. Click **+ Create Credentials** > **OAuth client ID**
 3. Select **Application type**: `Web application`
 4. Enter **Name**: `MovieTrack Web Client`
 5. Add **Authorized JavaScript origins**:
-   - For **Development/Keycloak**:
-     - `http://localhost:8080`
-   - For **Production/WorkOS**:
-     - `https://yourdomain.com`
+   - For **Development/Keycloak**: `http://localhost:8080`
+   - For **Production/WorkOS**: `https://yourdomain.com`
 6. Add **Authorized redirect URIs**:
-   - For **Development/Keycloak**:
-     - `http://localhost:8080/realms/movietrack/broker/google/endpoint`
-   - For **Production/WorkOS**:
-     - `https://api.workos.com/sso/oauth/google/{your-connection-id}/callback`
+   - For **Development/Keycloak**: `http://localhost:8080/realms/movietrack/broker/google/endpoint`
+   - For **Production/WorkOS**: `https://api.workos.com/sso/oauth/google/{your-connection-id}/callback`
      - (WorkOS will provide the exact URI)
 7. Click **Create**
 8. **Save your credentials**:
@@ -106,25 +163,24 @@ After creating your Google OAuth credentials, configure them in your authenticat
 1. Access Keycloak Admin Console (<http://localhost:8080>)
 2. Select `movietrack` realm
 3. Go to **Identity Providers** → **Add provider** → **Google**
-4. Configure:
-   - **Client ID**: Paste your Google OAuth Client ID
-   - **Client Secret**: Paste your Google OAuth Client Secret
-   - **Default Scopes**: `openid profile email`
-   - **Trust Email**: ON
-5. Click **Save**
-6. Copy the **Redirect URI**: `http://localhost:8080/realms/movietrack/broker/google/endpoint`
-7. Add this redirect URI to Google Console
+4. Configure the required fields:
+   - **Redirect URI**: Copy this - you'll need to add it to Google Console (shown at top of form)
+   - **Client ID**: Paste your Google OAuth Client ID from Google Console
+   - **Client Secret**: Paste your Google OAuth Client Secret from Google Console
+5. Leave optional fields as default:
+   - **Display order**: Leave empty
+   - **Hosted Domain**: Leave empty (unless restricting to specific Google Workspace domain)
+   - **Use userIp param**: OFF
+   - **Request refresh token**: OFF
+6. Click **Add** to save the provider
+7. Go back to Google Console and add the redirect URI:
+   - Google Auth Platform → **Clients** → Click your client
+   - Under **Authorized redirect URIs**, click **+ Add URI**
+   - Paste: `http://localhost:8080/realms/movietrack/broker/google/endpoint`
+   - Click **Save**
 8. Test by logging into your app and clicking Google Sign-In
 
-**Advanced Configuration:**
-
-- **Email Mapper** (recommended): Ensures email sync from Google
-  - Identity Providers → Google → Mappers → Add mapper
-  - Type: Attribute Importer
-  - Social Profile JSON Field: `email`
-  - User Attribute Name: `email`
-
-- **Hosted Domain** (optional): Restrict to specific Google Workspace domain
+**Note:** Modern versions of Keycloak automatically handle scopes (`openid profile email`) and email trust settings. You don't need to configure these manually unless you have specific requirements.
 
 ### WorkOS Configuration (Production)
 

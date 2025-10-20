@@ -25,7 +25,7 @@ export default async function login(ctx: Context): Promise<void> {
     return;
   }
 
-  const { returnUrl } = validation.data;
+  const { returnUrl, code_challenge, code_challenge_method, state: clientState } = validation.data;
 
   try {
     // Get services from container
@@ -33,14 +33,24 @@ export default async function login(ctx: Context): Promise<void> {
     const oauthStateManager = container.getOAuthStateManager();
     const authProvider = AuthProviderFactory.getInstance();
 
-    // Generate OAuth state for CSRF protection
-    const state = oauthStateManager.create(returnUrl);
+    // Use client-provided state if available, otherwise generate one
+    const state = clientState || oauthStateManager.create(returnUrl);
+    
+    // If client provided state, we still need to register it
+    if (clientState) {
+      oauthStateManager.create(returnUrl, clientState);
+    }
 
     // Get OAuth redirect URI from environment
     const redirectUri = process.env.OAUTH_REDIRECT_URI || 'http://localhost:3000/auth/callback';
 
-    // Generate authorization URL
-    const authUrl = authProvider.getAuthorizationUrl(redirectUri, state);
+    // Prepare PKCE parameters if provided
+    const pkceParams = code_challenge && code_challenge_method === 'S256'
+      ? { codeChallenge: code_challenge, codeChallengeMethod: 'S256' as const }
+      : undefined;
+
+    // Generate authorization URL with optional PKCE parameters
+    const authUrl = authProvider.getAuthorizationUrl(redirectUri, state, pkceParams);
 
     // Return authorization URL
     ctx.status = 200;

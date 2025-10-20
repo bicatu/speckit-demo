@@ -1,19 +1,21 @@
 <!--
 Sync Impact Report:
-Version change: 1.4.0 → 1.5.0
+Version change: 1.5.0 → 1.6.0
 Modified principles:
-- X. OAuth2 Authentication → renamed to "OpenID Connect Authentication"
-  - Added login/logout flow requirements
-  - Added in-memory JWT token caching requirement
-  - Clarified token lifecycle management
+- X. OpenID Connect Authentication
+  - Added MANDATORY PKCE (Proof Key for Code Exchange) requirement for Authorization Code flow
+  - Strengthened security requirements for public clients (SPAs, mobile apps)
+  - Clarified that PKCE MUST be used for both frontend and backend implementations
 Added sections: None
 Removed sections: None
 Templates requiring updates:
-- ✅ Updated .specify/templates/plan-template.md - OAuth2 check renamed to OpenID Connect, added caching requirement
+- ✅ Updated .specify/templates/plan-template.md - Added PKCE requirement to OpenID Connect check
 - ⚠ .specify/templates/spec-template.md - no updates required (technology-agnostic by design)
-- ✅ Updated .specify/templates/tasks-template.md - OAuth2 task examples updated to OpenID Connect with caching
+- ✅ Updated .specify/templates/tasks-template.md - Added PKCE implementation task examples
 - ✅ No command-specific files requiring updates (no command files exist in .specify/templates/commands/)
-- ✅ No runtime guidance docs requiring updates (none found)
+Runtime guidance docs updated:
+- ✅ Updated backend/AUTHENTICATION.md - Added PKCE security feature to authentication features list
+- ✅ Updated README.md - Added PKCE mention to features list
 Follow-up TODOs: None
 -->
 
@@ -83,15 +85,17 @@ Each service definition MUST include: image with specific version tag, exposed p
 
 ### X. OpenID Connect Authentication
 
-User authentication MUST use OpenID Connect (OAuth2 + identity layer) for authorization and authentication flows. Applications MUST NOT implement custom authentication mechanisms or store user passwords directly. OpenID Connect implementation MUST support standard authorization grant types (Authorization Code flow with PKCE recommended) appropriate to the application type.
+User authentication MUST use OpenID Connect (OAuth2 + identity layer) for authorization and authentication flows. Applications MUST NOT implement custom authentication mechanisms or store user passwords directly. OpenID Connect implementation MUST use PKCE (Proof Key for Code Exchange, RFC 7636) with the Authorization Code flow for ALL client types, including public clients (single-page applications, mobile apps) and confidential clients (backend services).
 
-The authentication flow MUST handle three lifecycle operations: (1) **Login** - redirect to identity provider and exchange authorization code for tokens, (2) **Authentication** - validate access tokens on every protected request, (3) **Logout** - invalidate user session and redirect to identity provider logout endpoint when available.
+**PKCE Requirement**: The Authorization Code flow MUST implement PKCE by generating a cryptographically random `code_verifier` (43-128 characters) and deriving a `code_challenge` using SHA256 hash. The `code_challenge` MUST be sent with the authorization request, and the `code_verifier` MUST be sent with the token exchange request. Both frontend and backend implementations MUST support PKCE to prevent authorization code interception attacks.
+
+The authentication flow MUST handle three lifecycle operations: (1) **Login** - redirect to identity provider with PKCE parameters and exchange authorization code for tokens using code_verifier, (2) **Authentication** - validate access tokens on every protected request, (3) **Logout** - invalidate user session and redirect to identity provider logout endpoint when available.
 
 Access tokens MUST be validated on every authenticated request. Token validation MUST occur at the UI layer (HTTP middleware, API gateway) before requests reach the Application layer. To minimize round-trip calls to the OAuth2/OIDC server, validated JWT tokens MUST be cached in-memory with appropriate expiration (respecting token TTL). Cache entries MUST be invalidated when tokens expire or during logout operations.
 
-Authentication concerns MUST NOT leak into Domain layer. Application layer handlers MAY receive user identity as part of Command/Query context but MUST NOT perform authentication or token validation. Infrastructure layer MUST provide OpenID Connect client implementation for external service authentication.
+Authentication concerns MUST NOT leak into Domain layer. Application layer handlers MAY receive user identity as part of Command/Query context but MUST NOT perform authentication or token validation. Infrastructure layer MUST provide OpenID Connect client implementation with PKCE support for external service authentication.
 
-**Rationale**: Ensures secure authentication using industry-standard protocols (OpenID Connect provides identity verification on top of OAuth2 authorization), delegates password management and user credential storage to specialized identity providers, minimizes performance overhead through intelligent token caching while maintaining security, provides consistent authentication patterns across services with complete lifecycle management (login, authentication, logout), and maintains separation of security concerns from business logic.
+**Rationale**: Ensures secure authentication using industry-standard protocols (OpenID Connect provides identity verification on top of OAuth2 authorization), delegates password management and user credential storage to specialized identity providers, minimizes performance overhead through intelligent token caching while maintaining security, provides consistent authentication patterns across services with complete lifecycle management (login, authentication, logout), maintains separation of security concerns from business logic, and prevents authorization code interception attacks through mandatory PKCE implementation for all client types (addressing security vulnerabilities in public clients and enhancing security for confidential clients).
 
 ## Architecture Constraints
 
@@ -164,4 +168,4 @@ This constitution supersedes all other development practices. All code reviews M
 
 Use project-specific guidance files for runtime development details while maintaining these core architectural principles.
 
-**Version**: 1.5.0 | **Ratified**: 2025-10-14 | **Last Amended**: 2025-10-19
+**Version**: 1.6.0 | **Ratified**: 2025-10-14 | **Last Amended**: 2025-10-20

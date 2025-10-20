@@ -59,7 +59,7 @@ description: "Task list template for feature implementation"
 - [ ] T002 Initialize [language] project with [framework] dependencies
 - [ ] T003 [P] Configure linting and formatting tools
 - [ ] T004 [P] Setup Docker Compose for local development services (databases, message queues, caches)
-- [ ] T005 [P] Configure OpenID Connect authentication provider integration with in-memory token caching
+- [ ] T005 [P] Configure OpenID Connect authentication provider integration with PKCE and in-memory token caching
 
 ---
 
@@ -82,8 +82,10 @@ Examples of DDD foundational tasks (adjust based on your project):
 - [ ] T012 Setup environment configuration management
 - [ ] T013 [P] Configure Docker services (database, message queue, cache) with health checks and volume mappings
 - [ ] T014 [P] Setup OpenID Connect middleware for token validation at UI layer with in-memory caching
-- [ ] T015 [P] Implement OpenID Connect client in Infrastructure layer for external service authentication
-- [ ] T016 [P] Implement login, authentication, and logout flows with proper token lifecycle management
+- [ ] T015 [P] Implement OpenID Connect client with PKCE support in Infrastructure layer for external service authentication
+- [ ] T016 [P] Implement PKCE code_verifier generation (43-128 random characters) and code_challenge derivation (SHA256)
+- [ ] T017 [P] Implement login flow with PKCE parameters (code_challenge in authorization request, code_verifier in token exchange)
+- [ ] T018 [P] Implement authentication and logout flows with proper token lifecycle management
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 

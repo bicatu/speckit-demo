@@ -45,8 +45,15 @@ export const CallbackPage: React.FC = () => {
         let errorCode = 'AUTH_FAILED';
         let errorMessage = message;
         
-        // Try to parse error response
-        if (err && typeof err === 'object' && 'response' in err) {
+        // Check for PKCE-specific errors
+        if (message.includes('PKCE verifier not found') || message.includes('verifier') || message.includes('expired')) {
+          errorCode = 'PKCE_VERIFIER_MISSING';
+          errorMessage = 'Authentication session expired or cookies disabled. Please enable cookies and try logging in again.';
+        } else if (message.includes('sessionStorage') || message.includes('storage')) {
+          errorCode = 'STORAGE_ERROR';
+          errorMessage = 'Unable to access browser storage. Please enable cookies and site data, then try again.';
+        } else if (err && typeof err === 'object' && 'response' in err) {
+          // Try to parse error response
           const response = (err as any).response;
           if (response?.data?.error) {
             errorCode = response.data.error;
