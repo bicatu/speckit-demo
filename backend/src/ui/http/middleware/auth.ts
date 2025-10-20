@@ -49,13 +49,13 @@ export async function authMiddleware(ctx: Context, next: Next): Promise<void> {
       return;
     }
 
-    // Use admin status from database if provider doesn't provide it
-    const isAdmin = authUser.isAdmin ?? user?.isAdmin ?? false;
+    // Prioritize database admin status over token claim (database is source of truth)
+    const isAdmin = user?.isAdmin ?? authUser.isAdmin ?? false;
 
     // Add authenticated user to context state
     ctx.state.user = {
-      id: authUser.sub,
-      userId: authUser.sub,
+      id: user?.id || authUser.sub,
+      userId: user?.id || authUser.sub,
       oauthSubject: authUser.sub,
       isAdmin,
     } as AuthenticatedUser;
