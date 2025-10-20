@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './services/queryClient';
@@ -82,6 +82,38 @@ function AppRoutes() {
 }
 
 function App() {
+  useEffect(() => {
+    // Clean up expired PKCE verifiers on app load
+    const cleanupExpiredPKCE = () => {
+      const prefix = 'pkce_verifier_';
+      const keysToRemove: string[] = [];
+
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        if (key?.startsWith(prefix)) {
+          try {
+            const data = JSON.parse(sessionStorage.getItem(key)!);
+            if (Date.now() > data.expiresAt) {
+              keysToRemove.push(key);
+            }
+          } catch (error) {
+            // Invalid data, remove it
+            keysToRemove.push(key);
+          }
+        }
+      }
+
+      // Remove expired entries
+      keysToRemove.forEach(key => sessionStorage.removeItem(key));
+
+      if (keysToRemove.length > 0) {
+        console.log(`Cleaned up ${keysToRemove.length} expired PKCE verifier(s)`);
+      }
+    };
+
+    cleanupExpiredPKCE();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>

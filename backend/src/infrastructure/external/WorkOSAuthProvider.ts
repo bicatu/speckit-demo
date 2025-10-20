@@ -37,7 +37,14 @@ export class WorkOSAuthProvider implements IAuthProvider {
   /**
    * Generate WorkOS authorization URL
    */
-  getAuthorizationUrl(_redirectUri: string, _state?: string): string {
+  getAuthorizationUrl(
+    _redirectUri: string,
+    _state?: string,
+    _pkceParams?: {
+      codeChallenge: string;
+      codeChallengeMethod: 'S256';
+    },
+  ): string {
     throw new Error('Not implemented');
   }
 
@@ -47,6 +54,7 @@ export class WorkOSAuthProvider implements IAuthProvider {
   async authenticateWithCode(
     _code: string,
     _redirectUri: string,
+    _codeVerifier?: string,
   ): Promise<{
     accessToken: string;
     refreshToken?: string;

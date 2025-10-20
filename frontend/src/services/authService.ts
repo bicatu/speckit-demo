@@ -5,6 +5,13 @@ import {
   MeResponse,
   LogoutResponse,
 } from '../types/auth';
+import {
+  generateCodeVerifier,
+  generateCodeChallenge,
+  storePKCEVerifier,
+  retrievePKCEVerifier,
+  cleanupPKCEVerifier,
+} from '../utils/pkce';
 
 /**
  * Authentication service for frontend
@@ -14,20 +21,36 @@ import {
  * the backend is using Keycloak, WorkOS, or another OAuth provider.
  * The backend's AuthProviderFactory handles provider-specific logic,
  * allowing the frontend to work with any OAuth2/OIDC provider without changes.
+ * 
+ * PKCE Implementation: Uses Web Crypto API for secure random generation
+ * and SHA256 hashing to prevent authorization code interception attacks.
  */
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 /**
  * Get authorization URL from backend to initiate login flow
+ * Generates PKCE parameters for enhanced security
  * @param returnUrl - URL to redirect to after successful login
  * @returns Authorization URL and state for CSRF protection
  */
 export async function login(returnUrl: string = '/'): Promise<LoginResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/auth/login?returnUrl=${encodeURIComponent(returnUrl)}`, {
-    method: 'GET',
-    credentials: 'include',
-  });
+  // Generate PKCE parameters
+  const codeVerifier = generateCodeVerifier();
+  const codeChallenge = await generateCodeChallenge(codeVerifier);
+  const state = crypto.randomUUID();
+
+  // Store verifier linked to state
+  storePKCEVerifier(state, codeVerifier);
+
+  // Request authorization URL with PKCE parameters
+  const response = await fetch(
+    `${API_BASE_URL}/api/auth/login?returnUrl=${encodeURIComponent(returnUrl)}&code_challenge=${encodeURIComponent(codeChallenge)}&code_challenge_method=S256&state=${state}`,
+    {
+      method: 'GET',
+      credentials: 'include',
+    }
+  );
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({ error: 'Login failed' }));
@@ -44,31 +67,45 @@ export async function login(returnUrl: string = '/'): Promise<LoginResponse> {
 
 /**
  * Handle OAuth callback - exchange authorization code for access token
+ * Retrieves and includes PKCE code_verifier for validation
  * @param code - Authorization code from OAuth provider
  * @param state - State parameter for CSRF protection
  * @returns Access token, user info, and return URL
  */
 export async function handleCallback(code: string, state: string): Promise<CallbackResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/auth/callback`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-    body: JSON.stringify({ code, state }),
-  });
+  // Retrieve code_verifier from storage
+  const codeVerifier = retrievePKCEVerifier(state);
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ error: 'Authentication failed' }));
-    throw new Error(errorData.error || 'Authentication failed');
+  if (!codeVerifier) {
+    throw new Error('PKCE verifier not found or expired. Please try logging in again.');
   }
 
-  const data: CallbackResponse = await response.json();
-  
-  // Store access token in memory (will be managed by AuthContext)
-  sessionStorage.setItem('accessToken', data.accessToken);
-  
-  return data;
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/callback`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ code, state, code_verifier: codeVerifier }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: 'Authentication failed' }));
+      throw new Error(errorData.error || 'Authentication failed');
+    }
+
+    const data: CallbackResponse = await response.json();
+    
+    // Store access token in memory (will be managed by AuthContext)
+    sessionStorage.setItem('accessToken', data.accessToken);
+    
+    return data;
+  } catch (error) {
+    // Clean up verifier on error
+    cleanupPKCEVerifier(state);
+    throw error;
+  }
 }
 
 /**
