@@ -19,7 +19,8 @@ The application supports three authentication providers:
 ### Authentication Features
 
 - **Provider Abstraction**: Switch providers via environment variable (no code changes)
-- **OAuth2/OIDC Flow**: Standard authorization code flow
+- **OAuth2/OIDC Flow**: Authorization code flow with PKCE (Proof Key for Code Exchange)
+- **PKCE Security**: Prevents authorization code interception attacks for all client types
 - **Google Sign-In**: Optional social login (configured per provider)
 - **User Approval Workflow**: New users require admin approval
 - **Email Notifications**: Admins notified of new user requests

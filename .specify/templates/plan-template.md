@@ -115,9 +115,12 @@
 
 - [ ] OpenID Connect (OAuth2 + identity layer) used for user authentication (no custom auth mechanisms)
 - [ ] Application does NOT store user passwords directly
-- [ ] Appropriate authorization grant type implemented (Authorization Code flow with PKCE recommended)
+- [ ] Authorization Code flow with PKCE (Proof Key for Code Exchange) implemented for ALL client types
+- [ ] PKCE implementation generates cryptographically random code_verifier (43-128 characters)
+- [ ] PKCE implementation derives code_challenge using SHA256 hash
+- [ ] Both frontend and backend support PKCE for authorization code flow
 - [ ] Authentication flow handles login, authentication, and logout operations
-- [ ] Login redirects to identity provider and exchanges authorization code for tokens
+- [ ] Login redirects to identity provider with PKCE parameters and exchanges authorization code using code_verifier
 - [ ] Logout invalidates session and redirects to identity provider logout endpoint when available
 - [ ] Token validation occurs at UI layer (middleware/API gateway)
 - [ ] Access tokens validated on every authenticated request
@@ -125,7 +128,7 @@
 - [ ] Token cache respects token TTL and invalidates on expiration or logout
 - [ ] Authentication concerns isolated from Domain layer
 - [ ] User identity passed as Command/Query context (not authentication logic in handlers)
-- [ ] OpenID Connect client implementation provided in Infrastructure layer for external services
+- [ ] OpenID Connect client implementation with PKCE support provided in Infrastructure layer for external services
 
 ## Project Structure
 

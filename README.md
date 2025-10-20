@@ -7,7 +7,7 @@ A web application for tracking movies and series with community ratings, built w
 - 🎬 Browse and discover movies and series
 - ⭐ Rate content (1-10 stars) and view community ratings
 - 🏷️ Filter by genre tags and streaming platforms
-- 🔐 OAuth2/OIDC authentication with Google Sign-In (Keycloak for dev, WorkOS for production)
+- 🔐 OAuth2/OIDC authentication with PKCE and Google Sign-In (Keycloak for dev, WorkOS for production)
 - 👥 User approval workflow - new users require admin approval
 - � Email notifications for new user requests
 - �👨‍💼 Admin management: platforms, tags, and user approvals
