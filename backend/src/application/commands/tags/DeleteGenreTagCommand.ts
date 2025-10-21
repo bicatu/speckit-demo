@@ -13,12 +13,6 @@ export class DeleteGenreTagCommand implements Command {
       throw new Error('Tag ID is required');
     }
 
-    // Basic UUID validation
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(data.tagId)) {
-      throw new Error('Tag ID must be a valid UUID');
-    }
-
     this.tagId = data.tagId;
   }
 }

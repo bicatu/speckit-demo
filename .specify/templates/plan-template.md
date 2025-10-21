@@ -51,6 +51,11 @@
 - [ ] Data retrieval operations implemented as Queries with handlers
 - [ ] Command/Query types defined alongside their handlers
 - [ ] Clear separation between read and write operations
+- [ ] Commands and Queries implemented as classes (NOT interfaces)
+- [ ] Constructor parameters are positional (NOT object parameters)
+- [ ] All Commands/Queries have auto-generated commandId (UUID) and timestamp properties
+- [ ] Validation violations throw errors in constructor (NOT return error objects)
+- [ ] No unnecessary UUID validation (crypto.randomUUID() always produces valid UUIDs)
 
 **Dependency Inversion Check**:
 

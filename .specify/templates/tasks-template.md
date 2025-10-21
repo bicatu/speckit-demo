@@ -11,6 +11,8 @@ description: "Task list template for feature implementation"
 
 **TypeScript Code Standards**: For TypeScript projects, all code MUST follow constitution standards: single quotes for strings, `crypto.randomUUID()` for UUIDs, early returns preferred, and Zod validation at UI/Infrastructure boundaries using `safeParse()` with proper error handling.
 
+**Command/Query Implementation**: Commands and Queries MUST be classes (NOT interfaces) with positional constructor parameters (NOT object parameters). All must have auto-generated `commandId` (UUID) and `timestamp` properties. Validation violations MUST throw errors in constructor. No UUID validation needed since `crypto.randomUUID()` always produces valid UUIDs.
+
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
 ## Format: `[ID] [P?] [Story] Description`

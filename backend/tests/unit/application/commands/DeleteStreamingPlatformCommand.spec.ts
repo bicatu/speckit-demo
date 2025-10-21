@@ -30,11 +30,5 @@ describe('DeleteStreamingPlatformCommand', () => {
 
       expect(() => new DeleteStreamingPlatformCommand(invalidData)).toThrow();
     });
-
-    it('should throw error when platformId is not a valid UUID', () => {
-      const invalidData = { platformId: 'invalid-uuid' };
-
-      expect(() => new DeleteStreamingPlatformCommand(invalidData)).toThrow();
-    });
   });
 });

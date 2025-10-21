@@ -1,6 +1,8 @@
 import { Context } from 'koa';
 import { z } from 'zod';
 import { HandlerRegistry } from '../../../../application/HandlerRegistry';
+import { AddRatingCommand } from '../../../../application/commands/ratings/AddRatingCommand';
+import { UpdateRatingCommand } from '../../../../application/commands/ratings/UpdateRatingCommand';
 import { AddRatingCommandHandler } from '../../../../application/commands/ratings/AddRatingCommandHandler';
 import { UpdateRatingCommandHandler } from '../../../../application/commands/ratings/UpdateRatingCommandHandler';
 
@@ -50,13 +52,8 @@ export async function addRating(ctx: Context): Promise<void> {
     // Check if user has existing rating
     // We need the rating repository to check for existing rating
     // For now, we'll attempt to add and catch the error if it exists
-    const addResult = await addHandler.handle({
-      commandId: `add-rating-${userId}-${entryId}-${Date.now()}`,
-      timestamp: new Date(),
-      userId,
-      entryId,
-      stars,
-    });
+    const addCommand = new AddRatingCommand(userId, entryId, stars);
+    const addResult = await addHandler.handle(addCommand);
 
     if (addResult.success) {
       ctx.status = 201;
@@ -73,13 +70,8 @@ export async function addRating(ctx: Context): Promise<void> {
 
     // If add failed because rating exists, try update
     if (addResult.error?.includes('already rated')) {
-      const updateResult = await updateHandler.handle({
-        commandId: `update-rating-${userId}-${entryId}-${Date.now()}`,
-        timestamp: new Date(),
-        userId,
-        entryId,
-        stars,
-      });
+      const updateCommand = new UpdateRatingCommand(userId, entryId, stars);
+      const updateResult = await updateHandler.handle(updateCommand);
 
       if (updateResult.success) {
         ctx.status = 200;

@@ -17,14 +17,6 @@ export class AddRatingCommandHandler implements CommandHandler<AddRatingCommand>
 
   async handle(command: AddRatingCommand): Promise<CommandResult> {
     try {
-      // Validate stars range (1-10)
-      if (command.stars < 1 || command.stars > 10 || !Number.isInteger(command.stars)) {
-        return {
-          success: false,
-          error: 'Rating must be a whole number between 1 and 10',
-        };
-      }
-
       // Check if entry exists
       const entry = await this.entryRepository.findById(command.entryId);
       if (!entry) {

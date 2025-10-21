@@ -1,21 +1,22 @@
 <!--
 Sync Impact Report:
-Version change: 1.5.0 → 1.6.0
+Version change: 1.6.0 → 1.7.0
 Modified principles:
-- X. OpenID Connect Authentication
-  - Added MANDATORY PKCE (Proof Key for Code Exchange) requirement for Authorization Code flow
-  - Strengthened security requirements for public clients (SPAs, mobile apps)
-  - Clarified that PKCE MUST be used for both frontend and backend implementations
+- III. Command/Query Separation
+  - Added MANDATORY requirement: Commands and Queries MUST be classes (not interfaces)
+  - Added MANDATORY requirement: Constructor parameters MUST be positional (not object parameters)
+  - Added MANDATORY requirement: MUST have commandId (auto-generated UUID) and timestamp properties
+  - Added MANDATORY requirement: MUST throw errors for validation violations (not return error objects)
+  - Strengthened consistency requirements for CQRS implementation
 Added sections: None
 Removed sections: None
 Templates requiring updates:
-- ✅ Updated .specify/templates/plan-template.md - Added PKCE requirement to OpenID Connect check
+- ✅ Updated .specify/templates/plan-template.md - Added Command/Query implementation checks
 - ⚠ .specify/templates/spec-template.md - no updates required (technology-agnostic by design)
-- ✅ Updated .specify/templates/tasks-template.md - Added PKCE implementation task examples
+- ✅ Updated .specify/templates/tasks-template.md - Added Command/Query implementation guidance
 - ✅ No command-specific files requiring updates (no command files exist in .specify/templates/commands/)
 Runtime guidance docs updated:
-- ✅ Updated backend/AUTHENTICATION.md - Added PKCE security feature to authentication features list
-- ✅ Updated README.md - Added PKCE mention to features list
+- ✅ README.md already mentions CQRS pattern in Tech Stack section
 Follow-up TODOs: None
 -->
 
@@ -37,9 +38,18 @@ Domain Objects MUST be defined as types or classes within `src/domain` folder, f
 
 ### III. Command/Query Separation
 
-Application layer MUST implement Command/Query pattern for all business operations. Commands MUST represent state-changing actions (e.g., `CreateUserCommand`) with dedicated handlers. Queries MUST represent data retrieval requests (e.g., `GetWalletQuery`) with dedicated handlers. Command and Query types MUST be defined alongside their handlers.
+Application layer MUST implement Command/Query pattern for all business operations. Commands MUST represent state-changing actions (e.g., `CreateUserCommand`) with dedicated handlers. Queries MUST represent data retrieval requests (e.g., `GetWalletQuery`) with dedicated handlers.
 
-**Rationale**: Provides clear separation between read and write operations, enabling different optimization strategies and clearer intent in the codebase.
+**Implementation Requirements**:
+
+- Commands and Queries MUST be implemented as **classes**, NOT interfaces
+- Constructor parameters MUST be **positional**, NOT object parameters (e.g., `constructor(userId: string, title: string)` not `constructor(data: { userId: string, title: string })`)
+- All Commands and Queries MUST have auto-generated `commandId: string` (using `crypto.randomUUID()`) and `timestamp: Date` properties
+- Validation violations MUST **throw errors** in the constructor, NOT return error objects
+- Command and Query types MUST be defined alongside their handlers
+- No UUID validation is needed for IDs since `crypto.randomUUID()` always produces valid UUIDs
+
+**Rationale**: Provides clear separation between read and write operations, enables different optimization strategies and clearer intent in the codebase. Positional parameters improve type safety and prevent accidental field omissions. Throwing errors on validation failures follows fail-fast principles and keeps error handling consistent. Auto-generated identifiers ensure traceability without external dependencies.
 
 ### IV. Dependency Inversion
 
@@ -168,4 +178,4 @@ This constitution supersedes all other development practices. All code reviews M
 
 Use project-specific guidance files for runtime development details while maintaining these core architectural principles.
 
-**Version**: 1.6.0 | **Ratified**: 2025-10-14 | **Last Amended**: 2025-10-20
+**Version**: 1.7.0 | **Ratified**: 2025-10-14 | **Last Amended**: 2025-10-21

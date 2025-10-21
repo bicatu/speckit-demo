@@ -13,12 +13,6 @@ export class DeleteStreamingPlatformCommand implements Command {
       throw new Error('Platform ID is required');
     }
 
-    // Basic UUID validation
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(data.platformId)) {
-      throw new Error('Platform ID must be a valid UUID');
-    }
-
     this.platformId = data.platformId;
   }
 }

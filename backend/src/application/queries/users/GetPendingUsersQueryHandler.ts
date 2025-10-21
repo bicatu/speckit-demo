@@ -24,7 +24,7 @@ export class GetPendingUsersQueryHandler
 {
   constructor(private readonly userRepository: IUserRepository) {}
 
-  async handle(query: GetPendingUsersQuery): Promise<QueryResult<PendingUserDto[]>> {
+  async handle(_query: GetPendingUsersQuery): Promise<QueryResult<PendingUserDto[]>> {
     try {
       const pendingUsers = await this.userRepository.findPendingUsers();
 

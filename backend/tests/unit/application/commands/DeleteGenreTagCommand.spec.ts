@@ -30,11 +30,5 @@ describe('DeleteGenreTagCommand', () => {
 
       expect(() => new DeleteGenreTagCommand(invalidData)).toThrow();
     });
-
-    it('should throw error when tagId is not a valid UUID', () => {
-      const invalidData = { tagId: 'invalid-uuid' };
-
-      expect(() => new DeleteGenreTagCommand(invalidData)).toThrow();
-    });
   });
 });

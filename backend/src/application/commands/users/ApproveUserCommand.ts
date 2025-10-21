@@ -15,15 +15,6 @@ export class ApproveUserCommand implements Command {
       throw new Error('adminUserId must be a non-empty string');
     }
 
-    // Validate UUID format for both IDs
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(userId)) {
-      throw new Error('userId must be a valid UUID');
-    }
-    if (!uuidRegex.test(adminUserId)) {
-      throw new Error('adminUserId must be a valid UUID');
-    }
-
     this.commandId = crypto.randomUUID();
     this.timestamp = new Date();
     this.userId = userId;

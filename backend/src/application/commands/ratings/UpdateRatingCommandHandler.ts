@@ -16,14 +16,6 @@ export class UpdateRatingCommandHandler implements CommandHandler<UpdateRatingCo
 
   async handle(command: UpdateRatingCommand): Promise<CommandResult> {
     try {
-      // Validate stars is a whole number between 1 and 10
-      if (!Number.isInteger(command.stars) || command.stars < 1 || command.stars > 10) {
-        return {
-          success: false,
-          error: 'Stars must be a whole number between 1 and 10',
-        };
-      }
-
       // Check if entry exists
       const entry = await this.entryRepository.findById(command.entryId);
       if (!entry) {
