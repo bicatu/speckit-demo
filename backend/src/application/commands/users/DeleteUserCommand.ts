@@ -6,7 +6,7 @@ export class DeleteUserCommand implements Command {
   public readonly userId: string;
 
   constructor(userId: string) {
-    if (!userId || typeof userId !== 'string') {
+    if (!userId || typeof userId !== 'string' || userId.trim().length === 0) {
       throw new Error('userId must be a non-empty string');
     }
 

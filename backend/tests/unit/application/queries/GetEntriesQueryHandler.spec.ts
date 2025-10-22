@@ -61,6 +61,10 @@ describe('GetEntriesQueryHandler', () => {
       delete: jest.fn(),
       existsByOAuthSubject: jest.fn(),
       countAdmins: jest.fn(),
+      updateLastLogin: jest.fn(),
+      findPendingUsers: jest.fn(),
+      findByApprovalStatus: jest.fn(),
+      countPendingUsers: jest.fn(),
     } as jest.Mocked<IUserRepository>;
 
     handler = new GetEntriesQueryHandler(
@@ -130,7 +134,7 @@ describe('GetEntriesQueryHandler', () => {
         }),
       ];
 
-      mockEntryRepository.findTopRated.mockResolvedValue(mockEntries);
+      mockEntryRepository.findAll.mockResolvedValue(mockEntries);
       mockEntryRepository.count.mockResolvedValue(1);
       mockTagRepository.findByEntryId.mockResolvedValue([]);
 
@@ -143,7 +147,7 @@ describe('GetEntriesQueryHandler', () => {
       const result = await handler.handle(query);
 
       expect(result.success).toBe(true);
-      expect(mockEntryRepository.findTopRated).toHaveBeenCalledWith(20);
+      expect(mockEntryRepository.findAll).toHaveBeenCalledWith({userLastLogin: undefined}, 20, 0, 'topRated');
       expect(result.data!.entries[0].title).toBe('Top Rated Movie');
     });
 
@@ -161,7 +165,7 @@ describe('GetEntriesQueryHandler', () => {
         }),
       ];
 
-      mockEntryRepository.findRecent.mockResolvedValue(mockEntries);
+      mockEntryRepository.findAll.mockResolvedValue(mockEntries);
       mockEntryRepository.count.mockResolvedValue(1);
       mockTagRepository.findByEntryId.mockResolvedValue([]);
 
@@ -174,7 +178,7 @@ describe('GetEntriesQueryHandler', () => {
       const result = await handler.handle(query);
 
       expect(result.success).toBe(true);
-      expect(mockEntryRepository.findRecent).toHaveBeenCalledWith(20);
+      expect(mockEntryRepository.findAll).toHaveBeenCalledWith({userLastLogin: undefined}, 20, 0, 'recent');
       expect(result.data!.entries[0].title).toBe('Recent Movie');
     });
 
@@ -196,8 +200,8 @@ describe('GetEntriesQueryHandler', () => {
 
       await handler.handle(query);
 
-      expect(mockEntryRepository.findAll).toHaveBeenCalledWith(filters, 20, 0);
-      expect(mockEntryRepository.count).toHaveBeenCalledWith(filters);
+      expect(mockEntryRepository.findAll).toHaveBeenCalledWith({...filters, userLastLogin: undefined}, 20, 0, undefined);
+      expect(mockEntryRepository.count).toHaveBeenCalledWith({...filters, userLastLogin: undefined});
     });
 
     it('should handle custom pagination', async () => {
@@ -218,7 +222,7 @@ describe('GetEntriesQueryHandler', () => {
       expect(result.success).toBe(true);
       expect(result.data!.limit).toBe(10);
       expect(result.data!.offset).toBe(20);
-      expect(mockEntryRepository.findAll).toHaveBeenCalledWith({userLastLogin: undefined}, 10, 20);
+      expect(mockEntryRepository.findAll).toHaveBeenCalledWith({userLastLogin: undefined}, 10, 20, undefined);
     });
   });
 
@@ -248,6 +252,11 @@ describe('GetEntriesQueryHandler', () => {
         isAdmin: false,
         lastLogin: userLastLogin,
         createdAt: new Date(),
+        approvalStatus: 'approved',
+        approvalRequestedAt: null,
+        approvedBy: null,
+        rejectedBy: null,
+        approvedAt: null,
       });
 
       mockUserRepository.findById.mockResolvedValue(mockUser);
@@ -273,7 +282,8 @@ describe('GetEntriesQueryHandler', () => {
           userLastLogin,
         }),
         20,
-        0
+        0,
+        undefined
       );
       expect(result.data!.entries).toHaveLength(1);
       expect(result.data!.entries[0].title).toBe('New Movie');
@@ -304,6 +314,11 @@ describe('GetEntriesQueryHandler', () => {
         isAdmin: false,
         lastLogin: userLastLogin,
         createdAt: new Date(),
+        approvalStatus: 'approved',
+        approvalRequestedAt: null,
+        approvedBy: null,
+        rejectedBy: null,
+        approvedAt: null,
       });
 
       mockUserRepository.findById.mockResolvedValue(mockUser);
@@ -346,7 +361,8 @@ describe('GetEntriesQueryHandler', () => {
           newToMe: false,
         }),
         20,
-        0
+        0,
+        undefined
       );
     });
 
@@ -375,6 +391,11 @@ describe('GetEntriesQueryHandler', () => {
         isAdmin: false,
         lastLogin: userLastLogin,
         createdAt: new Date(),
+        approvalStatus: 'approved',
+        approvalRequestedAt: null,
+        approvedBy: null,
+        rejectedBy: null,
+        approvedAt: null,
       });
 
       mockUserRepository.findById.mockResolvedValue(mockUser);
@@ -403,7 +424,8 @@ describe('GetEntriesQueryHandler', () => {
           userLastLogin,
         }),
         20,
-        0
+        0,
+        undefined
       );
     });
   });

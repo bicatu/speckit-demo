@@ -40,7 +40,6 @@ export class GetEntriesQueryHandler
       };
 
       // Get entries based on sorting preference
-      // Always use findAll with filters, but adjust ordering based on sortBy
       const entries = await this.entryRepository.findAll(filters, limit, offset, query.sortBy);
 
       // Get total count for pagination
