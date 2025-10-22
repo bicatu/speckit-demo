@@ -12,12 +12,12 @@ module.exports = {
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
   maxWorkers: 1, // Run tests serially to avoid database conflicts
-  globals: {
-    'ts-jest': {
+  transform: {
+    '^.+\\.ts$': ['ts-jest', {
       tsconfig: {
         esModuleInterop: true
       }
-    }
+    }]
   },
   // Setup test environment to use test database
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts']
