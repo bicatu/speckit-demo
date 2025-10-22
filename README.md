@@ -84,11 +84,11 @@ cp .env.example .env
 The application uses OAuth2/OIDC authentication. Choose your environment:
 
 **For Local Development:**
-- Follow **[KEYCLOAK_SETUP.md](KEYCLOAK_SETUP.md)** for complete Keycloak configuration
+- Follow **[KEYCLOAK_SETUP.md](docs/KEYCLOAK_SETUP.md)** for complete Keycloak configuration
 - Includes Keycloak realm setup, client configuration, and Google Sign-In integration
 
 **For Production:**
-- Follow **[WORKOS_SETUP.md](WORKOS_SETUP.md)** for WorkOS configuration
+- Follow **[WORKOS_SETUP.md](docs/WORKOS_SETUP.md)** for WorkOS configuration
 - Includes WorkOS organization setup, Google SSO connection, and deployment guide
 
 **Quick Start (Development):**
@@ -96,7 +96,7 @@ The application uses OAuth2/OIDC authentication. Choose your environment:
 # 1. Start Keycloak
 docker-compose up -d
 
-# 2. Follow KEYCLOAK_SETUP.md to configure realm and client
+# 2. Follow docs/KEYCLOAK_SETUP.md to configure realm and client
 
 # 3. Copy client secret to backend/.env
 KEYCLOAK_CLIENT_SECRET=<your-client-secret-here>
@@ -306,7 +306,7 @@ The application uses **OAuth2/OpenID Connect (OIDC)** authentication with provid
 
 ### Architecture Overview
 
-For detailed authentication architecture, see **[backend/AUTHENTICATION.md](backend/AUTHENTICATION.md)**
+For detailed authentication architecture, see **[docs/AUTHENTICATION.md](docs/AUTHENTICATION.md)**
 
 **Key Features:**
 - Provider-agnostic design (Keycloak, WorkOS, or Mock)
@@ -332,14 +332,14 @@ For detailed authentication architecture, see **[backend/AUTHENTICATION.md](back
 - Man-in-the-middle attacks during OAuth flow
 - Malicious apps intercepting authorization codes
 
-See [backend/AUTHENTICATION.md](backend/AUTHENTICATION.md) for complete PKCE documentation.
+See [docs/AUTHENTICATION.md](docs/AUTHENTICATION.md) for complete PKCE documentation.
 
 ### Setup Guides
 
 | Environment | Guide | Description |
 |-------------|-------|-------------|
-| **Development** | [KEYCLOAK_SETUP.md](KEYCLOAK_SETUP.md) | Local Keycloak configuration with Docker |
-| **Production** | [WORKOS_SETUP.md](WORKOS_SETUP.md) | WorkOS managed authentication setup |
+| **Development** | [KEYCLOAK_SETUP.md](docs/KEYCLOAK_SETUP.md) | Local Keycloak configuration with Docker |
+| **Production** | [WORKOS_SETUP.md](docs/WORKOS_SETUP.md) | WorkOS managed authentication setup |
 | **Google OAuth** | [docs/GOOGLE_OAUTH_SETUP.md](docs/GOOGLE_OAUTH_SETUP.md) | Google Sign-In credential setup (shared) |
 | **Email** | [docs/EMAIL_SETUP.md](docs/EMAIL_SETUP.md) | SMTP configuration for notifications |
 

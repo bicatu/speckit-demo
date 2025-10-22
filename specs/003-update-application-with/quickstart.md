@@ -26,7 +26,7 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/moviedb
 TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/moviedb_test
 
 # Authentication - Use existing Keycloak or WorkOS configuration
-# See AUTHENTICATION.md and KEYCLOAK_SETUP.md for details
+# See docs/AUTHENTICATION.md and docs/KEYCLOAK_SETUP.md for details
 AUTH_PROVIDER=keycloak  # or workos or mock
 JWT_SECRET=your-secret-key-here
 
@@ -84,7 +84,7 @@ If using Keycloak (recommended for development):
    ```
 
 2. **Configure Google Identity Provider**:
-   - See [KEYCLOAK_SETUP.md](/KEYCLOAK_SETUP.md) for detailed Keycloak setup
+   - See [KEYCLOAK_SETUP.md](/docs/KEYCLOAK_SETUP.md) for detailed Keycloak setup
    - In Keycloak admin console: Realm Settings → Identity Providers → Add Google
    - Obtain Google OAuth credentials from [Google Cloud Console](https://console.cloud.google.com/)
    - Enter credentials in Keycloak
@@ -110,7 +110,7 @@ For quick local development without OAuth setup:
 AUTH_PROVIDER=mock
 ```
 
-See [AUTHENTICATION.md](/backend/AUTHENTICATION.md) for mock provider usage.
+See [AUTHENTICATION.md](/docs/AUTHENTICATION.md) for mock provider usage.
 
 ### Step 4: Email Service Setup (Admin Notifications)
 
@@ -415,4 +415,4 @@ For issues or questions:
 
 - Check the [spec.md](./spec.md) for functional requirements
 - Review the [research.md](./research.md) for technical decisions
-- Consult the backend [AUTHENTICATION.md](/backend/AUTHENTICATION.md) for auth patterns
+- Consult the [AUTHENTICATION.md](/docs/AUTHENTICATION.md) for auth patterns

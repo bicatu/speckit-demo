@@ -725,7 +725,7 @@ npm run dev
 **Test with Keycloak**:
 
 ```bash
-# Start Keycloak (see KEYCLOAK_SETUP.md)
+# Start Keycloak (see docs/KEYCLOAK_SETUP.md)
 docker-compose up -d keycloak
 
 # Start backend
@@ -882,7 +882,7 @@ After completing this implementation:
 2. **Test with all providers**: Mock, Keycloak, WorkOS
 3. **Verify security logs**: Check PKCE events are logged
 4. **Monitor performance**: Ensure <20ms PKCE overhead
-5. **Update documentation**: Add PKCE notes to AUTHENTICATION.md
+5. **Update documentation**: Add PKCE notes to docs/AUTHENTICATION.md
 6. **Deploy to staging**: Test end-to-end in staging environment
 7. **Monitor adoption**: Track PKCE usage in production logs
 

@@ -313,7 +313,7 @@ If migrating from local Keycloak setup:
 Once WorkOS is configured:
 
 1. **Complete email setup**: [docs/EMAIL_SETUP.md](docs/EMAIL_SETUP.md)
-2. **Review authentication architecture**: [backend/AUTHENTICATION.md](backend/AUTHENTICATION.md)
+2. **Review authentication architecture**: [AUTHENTICATION.md](AUTHENTICATION.md)
 3. **Set up monitoring** and alerts
 4. **Create admin user** in production database
 5. **Test complete user approval workflow**
@@ -321,7 +321,7 @@ Once WorkOS is configured:
 
 ## Additional Documentation
 
-- **Authentication Architecture**: [backend/AUTHENTICATION.md](backend/AUTHENTICATION.md)
+- **Authentication Architecture**: [AUTHENTICATION.md](AUTHENTICATION.md)
 - **Google OAuth Setup**: [docs/GOOGLE_OAUTH_SETUP.md](docs/GOOGLE_OAUTH_SETUP.md)
 - **Email Setup**: [docs/EMAIL_SETUP.md](docs/EMAIL_SETUP.md)
 - **Main README**: [README.md](README.md)

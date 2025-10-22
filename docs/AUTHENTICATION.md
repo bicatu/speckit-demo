@@ -13,8 +13,8 @@ The application supports three authentication providers:
 | Provider | Use Case | Setup Guide |
 |----------|----------|-------------|
 | **Mock** | Development/Testing | No setup required (built-in) |
-| **Keycloak** | Local Development | [KEYCLOAK_SETUP.md](../KEYCLOAK_SETUP.md) |
-| **WorkOS** | Production | [WORKOS_SETUP.md](../WORKOS_SETUP.md) |
+| **Keycloak** | Local Development | [KEYCLOAK_SETUP.md](KEYCLOAK_SETUP.md) |
+| **WorkOS** | Production | [WORKOS_SETUP.md](WORKOS_SETUP.md) |
 
 ### Authentication Features
 
@@ -338,7 +338,7 @@ KEYCLOAK_CLIENT_SECRET=your-client-secret
   - Client role `admin`
 - Supports token refresh
 
-**Setup:** See `KEYCLOAK_SETUP.md` for complete configuration guide.
+**Setup:** See [KEYCLOAK_SETUP.md](KEYCLOAK_SETUP.md) for complete configuration guide.
 
 #### WorkOS Provider
 
@@ -551,7 +551,7 @@ node -e "console.log(process.env.KEYCLOAK_ISSUER_URL)"
 ### From Mock to Keycloak
 
 ```bash
-# 1. Set up Keycloak (see KEYCLOAK_SETUP.md)
+# 1. Set up Keycloak (see docs/KEYCLOAK_SETUP.md)
 docker-compose up -d keycloak
 
 # 2. Update .env
@@ -736,8 +736,8 @@ The application supports Google OAuth for seamless authentication (optional).
    - Creates Client ID and Client Secret
 
 2. **Configure your provider**:
-   - **Keycloak**: [KEYCLOAK_SETUP.md](../KEYCLOAK_SETUP.md) - Step 5
-   - **WorkOS**: [WORKOS_SETUP.md](../WORKOS_SETUP.md) - Step 4
+   - **Keycloak**: [KEYCLOAK_SETUP.md](KEYCLOAK_SETUP.md) - Step 5
+   - **WorkOS**: [WORKOS_SETUP.md](WORKOS_SETUP.md) - Step 4
 
 3. **Test authentication flow**
    - Click "Log In" → Google button appears
@@ -778,8 +778,8 @@ See main README.md for complete list of admin endpoints.
 
 | Document | Purpose |
 |----------|---------|
-| [KEYCLOAK_SETUP.md](../KEYCLOAK_SETUP.md) | Local development with Keycloak |
-| [WORKOS_SETUP.md](../WORKOS_SETUP.md) | Production setup with WorkOS |
+| [KEYCLOAK_SETUP.md](KEYCLOAK_SETUP.md) | Local development with Keycloak |
+| [WORKOS_SETUP.md](WORKOS_SETUP.md) | Production setup with WorkOS |
 | [docs/GOOGLE_OAUTH_SETUP.md](../docs/GOOGLE_OAUTH_SETUP.md) | Google Sign-In credentials (shared) |
 | [docs/EMAIL_SETUP.md](../docs/EMAIL_SETUP.md) | Email notification configuration |
 | [README.md](../README.md) | Project overview and quick start |

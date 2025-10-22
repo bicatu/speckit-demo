@@ -416,7 +416,7 @@ After completing quickstart:
    ```
 
 4. **Configure WorkOS (Production)**:
-   - Follow `KEYCLOAK_SETUP.md` for WorkOS configuration
+   - Follow `docs/KEYCLOAK_SETUP.md` for WorkOS configuration
    - Set `AUTH_PROVIDER=workos` in production environment
 
 ---
