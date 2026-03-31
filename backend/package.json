@@ -35,7 +35,6 @@
     "@types/js-yaml": "^4.0.9",
     "@types/nodemailer": "^7.0.2",
     "@workos-inc/node": "^7.0.0",
-    "axios": "^1.12.2",
     "dotenv": "^16.4.5",
     "js-yaml": "^4.1.0",
     "jsonwebtoken": "^9.0.2",

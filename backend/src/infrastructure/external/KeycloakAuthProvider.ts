@@ -1,7 +1,72 @@
 import { IAuthProvider, AuthUser } from './IAuthProvider';
-import axios, { AxiosInstance } from 'axios';
 import * as jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
+
+const TIMEOUT_MS = 5000;
+const MAX_RETRIES = 1;
+
+/**
+ * HTTP error from a non-2xx response carrying the parsed response body.
+ */
+class HttpResponseError extends Error {
+  readonly status: number;
+  readonly responseData: Record<string, unknown>;
+
+  constructor(status: number, responseData: Record<string, unknown>) {
+    super((responseData.error_description as string | undefined) ?? `HTTP error ${status}`);
+    this.name = 'HttpResponseError';
+    this.status = status;
+    this.responseData = responseData;
+  }
+}
+
+/**
+ * POST application/x-www-form-urlencoded with a 5-second timeout and 1 retry
+ * on network/timeout errors (not on HTTP error responses).
+ */
+async function postForm(url: string, body: URLSearchParams): Promise<Record<string, unknown>> {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    if (attempt > 0) {
+      console.log('[KeycloakAuthProvider] Retrying request after timeout/network error');
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body.toString(),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      const data = (await response.json()) as Record<string, unknown>;
+
+      if (!response.ok) {
+        throw new HttpResponseError(response.status, data);
+      }
+
+      return data;
+    } catch (error) {
+      clearTimeout(timeoutId);
+
+      // Do not retry on HTTP-level errors — propagate immediately
+      if (error instanceof HttpResponseError) {
+        throw error;
+      }
+
+      lastError = error;
+      // Continue loop to retry on network / timeout errors
+    }
+  }
+
+  throw lastError;
+}
 
 /**
  * Keycloak OAuth2/OpenID Connect authentication provider
@@ -12,13 +77,8 @@ export class KeycloakAuthProvider implements IAuthProvider {
   private readonly clientId: string;
   private readonly clientSecret: string;
   private readonly jwksClient: jwksClient.JwksClient;
-  private readonly httpClient: AxiosInstance;
 
-  constructor(
-    issuerUrl: string,
-    clientId: string,
-    clientSecret: string,
-  ) {
+  constructor(issuerUrl: string, clientId: string, clientSecret: string) {
     this.issuerUrl = issuerUrl.replace(/\/$/, ''); // Remove trailing slash
     this.clientId = clientId;
     this.clientSecret = clientSecret;
@@ -29,31 +89,6 @@ export class KeycloakAuthProvider implements IAuthProvider {
       cache: true,
       cacheMaxAge: 600000, // 10 minutes
     });
-
-    // Configure axios with timeout and retry
-    this.httpClient = axios.create({
-      timeout: 5000, // 5-second timeout
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    });
-
-    // Add retry interceptor (1 retry on timeout/network error)
-    this.httpClient.interceptors.response.use(
-      (response) => response,
-      async (error) => {
-        const config = error.config;
-        
-        // Retry once on timeout or network errors
-        if (!config._retry && (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT' || !error.response)) {
-          config._retry = true;
-          console.log('[KeycloakAuthProvider] Retrying request after timeout/network error');
-          return this.httpClient.request(config);
-        }
-        
-        return Promise.reject(error);
-      }
-    );
   }
 
   /**
@@ -120,9 +155,7 @@ export class KeycloakAuthProvider implements IAuthProvider {
     }
 
     // Check client roles
-    const clientRoles = payload.resource_access?.[this.clientId]?.roles as
-      | string[]
-      | undefined;
+    const clientRoles = payload.resource_access?.[this.clientId]?.roles as string[] | undefined;
     if (clientRoles?.includes('admin')) {
       return true;
     }
@@ -139,7 +172,7 @@ export class KeycloakAuthProvider implements IAuthProvider {
     pkceParams?: {
       codeChallenge: string;
       codeChallengeMethod: 'S256';
-    },
+    }
   ): string {
     const params = new URLSearchParams({
       client_id: this.clientId,
@@ -162,7 +195,7 @@ export class KeycloakAuthProvider implements IAuthProvider {
   async authenticateWithCode(
     code: string,
     redirectUri: string,
-    codeVerifier?: string,
+    codeVerifier?: string
   ): Promise<{
     accessToken: string;
     refreshToken?: string;
@@ -170,8 +203,7 @@ export class KeycloakAuthProvider implements IAuthProvider {
     user: AuthUser;
   }> {
     try {
-      // Exchange code for tokens using httpClient with timeout/retry
-      const tokenResponse = await this.httpClient.post(
+      const tokenData = await postForm(
         `${this.issuerUrl}/protocol/openid-connect/token`,
         new URLSearchParams({
           grant_type: 'authorization_code',
@@ -180,14 +212,12 @@ export class KeycloakAuthProvider implements IAuthProvider {
           code,
           redirect_uri: redirectUri,
           ...(codeVerifier && { code_verifier: codeVerifier }),
-        }),
+        })
       );
 
-      const {
-        access_token,
-        refresh_token,
-        expires_in,
-      } = tokenResponse.data;
+      const access_token = tokenData.access_token as string;
+      const refresh_token = tokenData.refresh_token as string | undefined;
+      const expires_in = tokenData.expires_in as number | undefined;
 
       // Verify and decode access token to get user info
       const user = await this.verifyAccessToken(access_token);
@@ -199,10 +229,8 @@ export class KeycloakAuthProvider implements IAuthProvider {
         user,
       };
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        throw new Error(
-          `Token exchange failed: ${error.response?.data?.error_description || error.message}`,
-        );
+      if (error instanceof HttpResponseError) {
+        throw new Error(`Token exchange failed: ${error.message}`);
       }
       throw error;
     }
@@ -217,21 +245,19 @@ export class KeycloakAuthProvider implements IAuthProvider {
     expiresIn?: number;
   }> {
     try {
-      const tokenResponse = await this.httpClient.post(
+      const tokenData = await postForm(
         `${this.issuerUrl}/protocol/openid-connect/token`,
         new URLSearchParams({
           grant_type: 'refresh_token',
           client_id: this.clientId,
           client_secret: this.clientSecret,
           refresh_token: refreshToken,
-        }),
+        })
       );
 
-      const {
-        access_token,
-        refresh_token,
-        expires_in,
-      } = tokenResponse.data;
+      const access_token = tokenData.access_token as string;
+      const refresh_token = tokenData.refresh_token as string | undefined;
+      const expires_in = tokenData.expires_in as number | undefined;
 
       return {
         accessToken: access_token,
@@ -239,10 +265,8 @@ export class KeycloakAuthProvider implements IAuthProvider {
         expiresIn: expires_in,
       };
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        throw new Error(
-          `Token refresh failed: ${error.response?.data?.error_description || error.message}`,
-        );
+      if (error instanceof HttpResponseError) {
+        throw new Error(`Token refresh failed: ${error.message}`);
       }
       throw error;
     }
